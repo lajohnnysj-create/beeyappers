@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { signIn, signUp } from "@/app/auth/actions";
 import { Wordmark } from "@/app/wordmark";
+import type { ActionState } from "@/lib/types";
 
 function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -21,9 +22,7 @@ function SubmitButton({ label }: { label: string }) {
 export default function LoginPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const action = mode === "signin" ? signIn : signUp;
-  const [state, formAction] = useFormState(action, null as
-    | { error?: string; ok?: string }
-    | null);
+  const [state, formAction] = useFormState<ActionState, FormData>(action, null);
 
   return (
     <main className="grid min-h-screen place-items-center bg-slate-50 px-4">

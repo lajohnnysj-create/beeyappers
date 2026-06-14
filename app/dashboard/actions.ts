@@ -2,8 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import type { ActionState } from "@/lib/types";
 
-export async function createSite(_prev: unknown, formData: FormData) {
+export async function createSite(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
   const name = String(formData.get("name") || "").trim();
   const domain = String(formData.get("domain") || "").trim();
 

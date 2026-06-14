@@ -2,6 +2,7 @@
 
 import { useFormState, useFormStatus } from "react-dom";
 import { createSite } from "./actions";
+import type { ActionState } from "@/lib/types";
 
 function AddButton() {
   const { pending } = useFormStatus();
@@ -17,9 +18,7 @@ function AddButton() {
 }
 
 export function NewSiteForm() {
-  const [state, formAction] = useFormState(createSite, null as
-    | { error?: string; ok?: string }
-    | null);
+  const [state, formAction] = useFormState<ActionState, FormData>(createSite, null);
 
   return (
     <form

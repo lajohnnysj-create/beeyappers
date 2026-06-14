@@ -3,8 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import type { ActionState } from "@/lib/types";
 
-export async function signIn(_prev: unknown, formData: FormData) {
+export async function signIn(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
 
@@ -17,7 +21,10 @@ export async function signIn(_prev: unknown, formData: FormData) {
   redirect("/dashboard");
 }
 
-export async function signUp(_prev: unknown, formData: FormData) {
+export async function signUp(
+  _prev: ActionState,
+  formData: FormData
+): Promise<ActionState> {
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
 
