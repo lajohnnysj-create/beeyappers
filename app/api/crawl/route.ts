@@ -10,9 +10,9 @@ import { embedTexts, toVectorLiteral } from "@/lib/embed/openai";
 export const runtime = "nodejs";
 export const maxDuration = 60; // raise to 300 on Pro for larger sites
 
-const MAX_PAGES = 20;
+const MAX_PAGES = 40;
 const MAX_CHUNKS = 1000;
-const FETCH_CONCURRENCY = 5;
+const FETCH_CONCURRENCY = 8;
 const INSERT_BATCH = 200;
 
 type PageWork = { url: string; title: string; text: string };
