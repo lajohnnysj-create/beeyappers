@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/auth/actions";
 import { Wordmark } from "@/app/wordmark";
 import { NewSiteForm } from "./new-site-form";
+import { CrawlButton } from "./crawl-button";
 
 type Site = {
   id: string;
@@ -80,9 +81,12 @@ export default async function DashboardPage() {
                     {site.widget_key}
                   </p>
                 </div>
-                <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
-                  {site.crawl_status}
-                </span>
+                <div className="flex flex-col items-end gap-2">
+                  <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
+                    {site.crawl_status}
+                  </span>
+                  <CrawlButton siteId={site.id} />
+                </div>
               </div>
             ))
           )}
