@@ -12,7 +12,7 @@ export const maxDuration = 30;
 const MAX_QUESTION_CHARS = 1000;
 const RATE_LIMIT = 20; // requests
 const RATE_WINDOW = 60; // seconds, per IP per site
-const TOP_K = 5;
+const TOP_K = 8;
 
 type SiteRow = {
   id: string;
