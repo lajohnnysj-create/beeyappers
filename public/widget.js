@@ -21,17 +21,32 @@
   }
 
   var Z = "2147483000"; // sit above almost everything
+  var bubbleColor = "#2563eb"; // default until config loads
 
   // Launcher button
   var btn = document.createElement("button");
   btn.type = "button";
   btn.setAttribute("aria-label", "Open chat");
   btn.textContent = "\uD83D\uDCAC"; // speech balloon
-  btn.style.cssText =
-    "position:fixed;bottom:20px;right:20px;width:56px;height:56px;" +
-    "border-radius:50%;background:#2563eb;color:#fff;border:none;" +
-    "cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);font-size:24px;" +
-    "line-height:56px;text-align:center;padding:0;z-index:" + Z + ";";
+  function paintBtn() {
+    btn.style.cssText =
+      "position:fixed;bottom:20px;right:20px;width:56px;height:56px;" +
+      "border-radius:50%;background:" + bubbleColor + ";color:#fff;border:none;" +
+      "cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);font-size:24px;" +
+      "line-height:56px;text-align:center;padding:0;z-index:" + Z + ";";
+  }
+  paintBtn();
+
+  // Pull the branded bubble color (best effort).
+  fetch(origin + "/api/widget-config?key=" + encodeURIComponent(key))
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      if (d && d.config && d.config.bubbleColor) {
+        bubbleColor = d.config.bubbleColor;
+        paintBtn();
+      }
+    })
+    .catch(function () {});
 
   // Chat panel iframe (hidden until opened)
   var frame = document.createElement("iframe");
