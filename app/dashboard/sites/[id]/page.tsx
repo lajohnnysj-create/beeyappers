@@ -3,9 +3,9 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { mergeConfig } from "@/lib/widget-config";
 import { Wordmark } from "@/app/wordmark";
-import { BrandingForm } from "./branding-form";
+import { Workspace } from "./workspace";
 
-export default async function CustomizePage({
+export default async function SiteWorkspacePage({
   params,
 }: {
   params: { id: string };
@@ -15,43 +15,56 @@ export default async function CustomizePage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // RLS scopes this to the owner; a missing row means not yours / not found.
   const { data: site } = await supabase
     .from("sites")
-    .select("id, name, widget_key, widget_config")
+    .select("id, name, domain, widget_key, widget_config, crawl_status, last_crawled_at")
     .eq("id", params.id)
     .single();
 
   if (!site || !user) notFound();
 
-  const config = mergeConfig(site.widget_config);
+  const [{ count: pageCount }, { count: chunkCount }] = await Promise.all([
+    supabase.from("pages").select("*", { count: "exact", head: true }).eq("site_id", site.id),
+    supabase.from("chunks").select("*", { count: "exact", head: true }).eq("site_id", site.id),
+  ]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <Wordmark />
+          <Link href="/dashboard">
+            <Wordmark />
+          </Link>
           <Link
             href="/dashboard"
-            className="text-sm font-medium text-slate-600 hover:text-slate-900"
+            className="text-sm font-medium text-slate-500 hover:text-slate-900"
           >
-            Back to dashboard
+            All sites
           </Link>
         </div>
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          Customize {site.name}
-        </h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Brand the chat widget. Changes preview live, then save.
-        </p>
+        <div className="mb-6">
+          <p className="text-xs font-medium uppercase tracking-wide text-brand-600">
+            Site
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+            {site.name}
+          </h1>
+        </div>
 
-        <BrandingForm
+        <Workspace
           siteId={site.id}
           userId={user.id}
-          initialConfig={config}
+          siteName={site.name}
+          domain={site.domain}
+          widgetKey={site.widget_key}
+          crawlStatus={site.crawl_status}
+          lastCrawledAt={site.last_crawled_at}
+          pageCount={pageCount || 0}
+          chunkCount={chunkCount || 0}
+          config={mergeConfig(site.widget_config)}
         />
       </main>
     </div>
