@@ -93,7 +93,7 @@ export function BrandingForm({
     <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
       {/* Editor */}
       <div className="space-y-6">
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
           <h2 className="text-sm font-semibold text-slate-900">Text</h2>
           <div className="mt-3 space-y-3">
             <label className="block">
@@ -115,51 +115,59 @@ export function BrandingForm({
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
           <h2 className="text-sm font-semibold text-slate-900">Images</h2>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <div className="mt-4 grid gap-5 sm:grid-cols-2">
             <div>
-              <span className="text-sm text-slate-700">Logo (header)</span>
-              <div className="mt-1 flex items-center gap-3">
-                {config.logoUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={config.logoUrl} alt="Logo" className="h-8 w-auto" />
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    e.target.files?.[0] && upload(e.target.files[0], "logo")
-                  }
-                  className="text-xs"
-                />
+              <span className="text-sm font-medium text-slate-700">Logo</span>
+              <p className="text-xs text-slate-500">Shown in the chat header.</p>
+              <div className="mt-2 flex items-center gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                  {config.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={config.logoUrl} alt="Logo" className="h-full w-full object-contain" />
+                  ) : (
+                    <span className="text-[10px] text-slate-400">None</span>
+                  )}
+                </span>
+                <label className="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                  Upload logo
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => e.target.files?.[0] && upload(e.target.files[0], "logo")}
+                  />
+                </label>
               </div>
             </div>
             <div>
-              <span className="text-sm text-slate-700">Favicon (message icon)</span>
-              <div className="mt-1 flex items-center gap-3">
-                {config.faviconUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={config.faviconUrl}
-                    alt="Favicon"
-                    className="h-7 w-7 rounded-full object-cover"
+              <span className="text-sm font-medium text-slate-700">Favicon</span>
+              <p className="text-xs text-slate-500">Used as the message icon.</p>
+              <div className="mt-2 flex items-center gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-50">
+                  {config.faviconUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={config.faviconUrl} alt="Favicon" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-[10px] text-slate-400">None</span>
+                  )}
+                </span>
+                <label className="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                  Upload favicon
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => e.target.files?.[0] && upload(e.target.files[0], "favicon")}
                   />
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    e.target.files?.[0] && upload(e.target.files[0], "favicon")
-                  }
-                  className="text-xs"
-                />
+                </label>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
           <h2 className="text-sm font-semibold text-slate-900">Colors</h2>
           <div className="mt-2 sm:grid sm:grid-cols-2 sm:gap-x-6">
             <ColorRow label="Launcher bubble" value={config.bubbleColor} onChange={(v) => set("bubbleColor", v)} />
@@ -171,7 +179,7 @@ export function BrandingForm({
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
           <h2 className="text-sm font-semibold text-slate-900">Font</h2>
           <select
             value={config.fontFamily}
@@ -186,7 +194,7 @@ export function BrandingForm({
           </select>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
           <h2 className="text-sm font-semibold text-slate-900">Launcher bubble</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <label className="block">
@@ -261,7 +269,7 @@ export function BrandingForm({
           <button
             onClick={save}
             disabled={saving}
-            className="rounded-lg bg-brand-600 px-5 py-2.5 font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 active:scale-[.98] disabled:opacity-60"
           >
             {saving ? "Saving..." : "Save changes"}
           </button>
