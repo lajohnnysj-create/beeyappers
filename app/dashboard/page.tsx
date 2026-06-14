@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { signOut } from "@/app/auth/actions";
 import { Wordmark } from "@/app/wordmark";
 import { NewSiteForm } from "./new-site-form";
@@ -88,6 +89,12 @@ export default async function DashboardPage() {
                       {site.crawl_status}
                     </span>
                     <CrawlButton siteId={site.id} />
+                    <Link
+                      href={`/dashboard/sites/${site.id}`}
+                      className="text-sm font-medium text-brand-700 hover:text-brand-600"
+                    >
+                      Customize
+                    </Link>
                   </div>
                 </div>
                 <EmbedSnippet widgetKey={site.widget_key} />
