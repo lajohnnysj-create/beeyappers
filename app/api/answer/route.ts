@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { embedTexts } from "@/lib/embed/openai";
-import { retrieveChunks } from "@/lib/answer/retrieve";
+import { retrieveChunks, type MatchedChunk } from "@/lib/answer/retrieve";
+import { rewriteQuery } from "@/lib/answer/rewrite";
 import { generateAnswer } from "@/lib/answer/generate";
 import { getClientIp, hashIp } from "@/lib/security/ip";
 import { checkRateLimit } from "@/lib/security/rate-limit";
@@ -135,14 +136,27 @@ export async function POST(req: Request) {
   }
 
   try {
-    // 6. Embed the question and retrieve the most relevant chunks.
-    const [queryEmbedding] = await embedTexts([question]);
-    const chunks = await retrieveChunks(
-      admin,
-      site.id,
-      queryEmbedding,
-      TOP_K
-    );
+    // 6. Rewrite the question, then retrieve using BOTH the original and the
+    //    rewritten query, merging results so messy phrasing still finds the
+    //    right content.
+    const rewritten = await rewriteQuery(question);
+    const queries = [question];
+    if (rewritten && rewritten.toLowerCase() !== question.toLowerCase()) {
+      queries.push(rewritten);
+    }
+
+    const embeddings = await embedTexts(queries);
+    const byId = new Map<string, MatchedChunk>();
+    for (const emb of embeddings) {
+      const got = await retrieveChunks(admin, site.id, emb, TOP_K);
+      for (const c of got) {
+        const prev = byId.get(c.id);
+        if (!prev || c.similarity > prev.similarity) byId.set(c.id, c);
+      }
+    }
+    const chunks = [...byId.values()]
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, TOP_K);
 
     if (chunks.length === 0) {
       return json(
