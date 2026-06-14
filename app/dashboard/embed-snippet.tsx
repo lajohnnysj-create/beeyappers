@@ -31,7 +31,7 @@ export function EmbedSnippet({ widgetKey }: { widgetKey: string }) {
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <code className="block overflow-x-auto whitespace-pre px-4 py-3 font-mono text-xs text-slate-100">
+      <code className="block whitespace-pre-wrap break-all px-4 py-3 font-mono text-xs text-slate-100">
         {snippet}
       </code>
     </div>
