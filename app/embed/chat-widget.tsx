@@ -1,17 +1,56 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { type WidgetConfig, resolveFont } from "@/lib/widget-config";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-export function ChatWidget({ widgetKey }: { widgetKey: string }) {
+function Avatar({ config }: { config: WidgetConfig }) {
+  if (config.faviconUrl) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return (
+      <img
+        src={config.faviconUrl}
+        alt=""
+        style={{
+          height: 24,
+          width: 24,
+          borderRadius: "50%",
+          objectFit: "cover",
+          flexShrink: 0,
+        }}
+      />
+    );
+  }
+  return (
+    <span
+      style={{
+        height: 24,
+        width: 24,
+        borderRadius: "50%",
+        background: config.bubbleColor,
+        display: "inline-block",
+        flexShrink: 0,
+      }}
+    />
+  );
+}
+
+export function ChatWidget({
+  widgetKey,
+  config,
+}: {
+  widgetKey: string;
+  config: WidgetConfig;
+}) {
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", content: "Hi! Ask me anything about this site." },
+    { role: "assistant", content: config.greeting },
   ]);
   const [input, setInput] = useState("");
-  const [hp, setHp] = useState(""); // honeypot
+  const [hp, setHp] = useState("");
   const [busy, setBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const font = resolveFont(config.fontFamily);
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
@@ -31,9 +70,7 @@ export function ChatWidget({ widgetKey }: { widgetKey: string }) {
       });
       const data = await res.json();
       const reply =
-        data.answer ||
-        data.error ||
-        "Sorry, something went wrong. Please try again.";
+        data.answer || data.error || "Sorry, something went wrong. Please try again.";
       setMessages((m) => [...m, { role: "assistant", content: reply }]);
     } catch {
       setMessages((m) => [
@@ -53,43 +90,93 @@ export function ChatWidget({ widgetKey }: { widgetKey: string }) {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-white">
-      <header className="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
-        <span className="grid h-6 w-6 place-items-center rounded-md bg-brand-600 text-white">
-          <span className="h-1.5 w-1.5 rounded-full bg-honey" />
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        background: config.backgroundColor,
+        color: config.textColor,
+        fontFamily: font,
+      }}
+    >
+      <header
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "12px 16px",
+          borderBottom: "1px solid rgba(0,0,0,0.06)",
+          background: config.headerColor,
+        }}
+      >
+        {config.logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={config.logoUrl} alt="" style={{ height: 24, width: "auto" }} />
+        ) : null}
+        <span style={{ fontSize: 14, fontWeight: 600, color: config.textColor }}>
+          {config.assistantName}
         </span>
-        <span className="text-sm font-semibold text-slate-900">Assistant</span>
       </header>
 
-      <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-        {messages.map((m, i) => (
-          <div
-            key={i}
-            className={m.role === "user" ? "flex justify-end" : "flex justify-start"}
-          >
-            <div
-              className={
-                "max-w-[80%] rounded-2xl px-3 py-2 text-sm " +
-                (m.role === "user"
-                  ? "bg-brand-600 text-white"
-                  : "bg-slate-100 text-slate-900")
-              }
-            >
-              {m.content}
+      <div
+        ref={scrollRef}
+        style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12 }}
+      >
+        {messages.map((m, i) =>
+          m.role === "user" ? (
+            <div key={i} style={{ display: "flex", justifyContent: "flex-end" }}>
+              <div
+                style={{
+                  maxWidth: "80%",
+                  borderRadius: 16,
+                  padding: "8px 12px",
+                  fontSize: 14,
+                  background: config.userBubbleColor,
+                  color: "#fff",
+                }}
+              >
+                {m.content}
+              </div>
             </div>
-          </div>
-        ))}
+          ) : (
+            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+              <Avatar config={config} />
+              <div
+                style={{
+                  maxWidth: "80%",
+                  borderRadius: 16,
+                  padding: "8px 12px",
+                  fontSize: 14,
+                  background: config.assistantBubbleColor,
+                  color: config.textColor,
+                }}
+              >
+                {m.content}
+              </div>
+            </div>
+          )
+        )}
         {busy && (
-          <div className="flex justify-start">
-            <div className="rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-500">
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Avatar config={config} />
+            <div
+              style={{
+                borderRadius: 16,
+                padding: "8px 12px",
+                fontSize: 14,
+                background: config.assistantBubbleColor,
+                color: config.textColor,
+                opacity: 0.7,
+              }}
+            >
               Thinking...
             </div>
           </div>
         )}
       </div>
 
-      <div className="border-t border-slate-200 p-3">
-        {/* honeypot: hidden from real users, bots tend to fill it */}
+      <div style={{ borderTop: "1px solid rgba(0,0,0,0.06)", padding: 12 }}>
         <input
           type="text"
           value={hp}
@@ -97,20 +184,39 @@ export function ChatWidget({ widgetKey }: { widgetKey: string }) {
           tabIndex={-1}
           autoComplete="off"
           aria-hidden="true"
-          style={{ position: "absolute", left: "-9999px", width: 1, height: 1 }}
+          style={{ position: "absolute", left: -9999, width: 1, height: 1 }}
         />
-        <div className="flex gap-2">
+        <div style={{ display: "flex", gap: 8 }}>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
             placeholder="Type your question..."
-            className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+            style={{
+              flex: 1,
+              borderRadius: 8,
+              border: "1px solid #cbd5e1",
+              padding: "8px 12px",
+              fontSize: 14,
+              color: "#0f172a",
+              outline: "none",
+              fontFamily: font,
+            }}
           />
           <button
             onClick={send}
             disabled={busy}
-            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            style={{
+              borderRadius: 8,
+              border: "none",
+              padding: "8px 16px",
+              fontSize: 14,
+              fontWeight: 500,
+              color: "#fff",
+              background: config.bubbleColor,
+              cursor: busy ? "default" : "pointer",
+              opacity: busy ? 0.6 : 1,
+            }}
           >
             Send
           </button>
