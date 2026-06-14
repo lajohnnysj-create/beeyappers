@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { signOut } from "@/app/auth/actions";
 import { mergeConfig } from "@/lib/widget-config";
 import { Wordmark } from "@/app/wordmark";
 import { Workspace } from "./workspace";
@@ -59,12 +60,18 @@ export default async function SiteWorkspacePage({
           <Link href="/dashboard">
             <Wordmark />
           </Link>
-          <Link
-            href="/dashboard"
-            className="text-sm font-medium text-slate-500 hover:text-slate-900"
-          >
-            All sites
-          </Link>
+          <div className="flex items-center gap-4">
+            {user?.email && (
+              <span className="hidden text-sm text-slate-500 sm:inline">
+                {user.email}
+              </span>
+            )}
+            <form action={signOut}>
+              <button className="text-sm font-medium text-slate-500 hover:text-slate-900">
+                Sign out
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 
