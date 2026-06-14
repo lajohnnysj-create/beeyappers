@@ -186,6 +186,77 @@ export function BrandingForm({
           </select>
         </section>
 
+        <section className="rounded-2xl border border-slate-200 bg-white p-5">
+          <h2 className="text-sm font-semibold text-slate-900">Launcher bubble</h2>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="text-sm text-slate-700">Position</span>
+              <select
+                value={config.launcherPosition}
+                onChange={(e) =>
+                  set("launcherPosition", e.target.value as WidgetConfig["launcherPosition"])
+                }
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+              >
+                <option value="bottom-right">Bottom right</option>
+                <option value="bottom-left">Bottom left</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-sm text-slate-700">Icon</span>
+              <select
+                value={config.launcherIcon}
+                onChange={(e) =>
+                  set("launcherIcon", e.target.value as WidgetConfig["launcherIcon"])
+                }
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+              >
+                <option value="default">Default chat icon</option>
+                <option value="emoji">Emoji</option>
+                <option value="favicon">Favicon image</option>
+              </select>
+            </label>
+            {config.launcherIcon === "emoji" && (
+              <label className="block">
+                <span className="text-sm text-slate-700">Emoji</span>
+                <input
+                  value={config.launcherEmoji}
+                  onChange={(e) => set("launcherEmoji", e.target.value)}
+                  maxLength={4}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+                />
+              </label>
+            )}
+            <label className="block">
+              <span className="text-sm text-slate-700">Label (optional)</span>
+              <input
+                value={config.launcherLabel}
+                onChange={(e) => set("launcherLabel", e.target.value)}
+                placeholder="e.g. Chat with us"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm text-slate-700">Panel width (px)</span>
+              <input
+                type="number"
+                value={config.panelWidth}
+                onChange={(e) => set("panelWidth", Number(e.target.value) || 380)}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm text-slate-700">Panel height (px)</span>
+              <input
+                type="number"
+                value={config.panelHeight}
+                onChange={(e) => set("panelHeight", Number(e.target.value) || 560)}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+              />
+            </label>
+          </div>
+        </section>
+
         <div className="flex items-center gap-3">
           <button
             onClick={save}
@@ -202,8 +273,48 @@ export function BrandingForm({
       {/* Live preview */}
       <div className="lg:sticky lg:top-6 lg:self-start">
         <p className="mb-2 text-xs font-medium text-slate-500">Live preview</p>
+        <LauncherPreview config={config} />
         <Preview config={config} />
       </div>
+    </div>
+  );
+}
+
+function LauncherPreview({ config }: { config: WidgetConfig }) {
+  const left = config.launcherPosition === "bottom-left";
+  return (
+    <div
+      className="mb-4 flex items-center gap-2"
+      style={{
+        justifyContent: left ? "flex-start" : "flex-end",
+        flexDirection: left ? "row-reverse" : "row",
+      }}
+    >
+      {config.launcherLabel ? (
+        <span
+          className="rounded-2xl bg-white px-3 py-2 text-sm text-slate-900 shadow-sm"
+          style={{ whiteSpace: "nowrap" }}
+        >
+          {config.launcherLabel}
+        </span>
+      ) : null}
+      <span
+        className="grid h-14 w-14 place-items-center rounded-full text-2xl text-white shadow"
+        style={{ background: config.bubbleColor }}
+      >
+        {config.launcherIcon === "favicon" && config.faviconUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={config.faviconUrl}
+            alt=""
+            className="h-8 w-8 rounded-full object-cover"
+          />
+        ) : config.launcherIcon === "emoji" ? (
+          <span>{config.launcherEmoji || "\uD83D\uDCAC"}</span>
+        ) : (
+          <span>{"\uD83D\uDCAC"}</span>
+        )}
+      </span>
     </div>
   );
 }
