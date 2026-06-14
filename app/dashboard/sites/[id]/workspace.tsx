@@ -9,6 +9,13 @@ import type { WidgetConfig } from "@/lib/widget-config";
 
 type Tab = "train" | "customize" | "code";
 
+// Free on-demand homepage screenshot (no key, cached by the service).
+function screenshotUrl(domain: string): string {
+  let d = domain.trim();
+  if (!/^https?:\/\//i.test(d)) d = "https://" + d;
+  return "https://s.wordpress.com/mshots/v1/" + encodeURIComponent(d) + "?w=1200&h=900";
+}
+
 type Props = {
   siteId: string;
   userId: string;
@@ -164,11 +171,6 @@ function TrainPanel({
           <StatusBadge status={crawlStatus} />
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-4 sm:max-w-sm">
-          <Stat label="Pages" value={pageCount} />
-          <Stat label="Chunks" value={chunkCount} />
-        </div>
-
         <div className="mt-5 flex items-center gap-3">
           <CrawlButton siteId={siteId} />
           {lastCrawledAt && (
@@ -177,18 +179,23 @@ function TrainPanel({
             </span>
           )}
         </div>
+
+        {crawlStatus === "ready" && domain && (
+          <div className="mt-5">
+            <p className="mb-2 text-xs font-medium text-slate-500">Homepage preview</p>
+            <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={screenshotUrl(domain)}
+                alt="Homepage preview"
+                className="aspect-[4/3] w-full object-cover object-top"
+              />
+            </div>
+          </div>
+        )}
       </section>
 
       <KnowledgePanel siteId={siteId} items={knowledge} />
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-      <div className="text-2xl font-semibold text-slate-900">{value}</div>
-      <div className="text-xs text-slate-500">{label}</div>
     </div>
   );
 }
