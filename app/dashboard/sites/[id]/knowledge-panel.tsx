@@ -18,7 +18,7 @@ export function KnowledgePanel({
   items: KnowledgeItem[];
 }) {
   const router = useRouter();
-  const [mode, setMode] = useState<"none" | "faq" | "doc">("none");
+  const [mode, setMode] = useState<"none" | "faq">("none");
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [busy, setBusy] = useState(false);
@@ -62,10 +62,7 @@ export function KnowledgePanel({
       const res = await fetch("/api/knowledge", { method: "POST", body: form });
       const data = await res.json();
       if (!res.ok) setError(data.error || "Upload failed.");
-      else {
-        setMode("none");
-        router.refresh();
-      }
+      else router.refresh();
     } catch {
       setError("Network error.");
     } finally {
@@ -88,39 +85,60 @@ export function KnowledgePanel({
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-base font-semibold text-slate-900">Knowledge</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Add documents or FAQs. These work right away and survive re-training.
-          </p>
-        </div>
-        {mode === "none" && (
-          <div className="flex gap-2">
-            <button
-              onClick={() => setMode("faq")}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-            >
-              Add FAQ
-            </button>
-            <label className="cursor-pointer rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700">
-              Upload document
-              <input
-                type="file"
-                accept=".pdf,.docx,.txt,.md"
-                className="hidden"
-                disabled={busy}
-                onChange={(e) => e.target.files?.[0] && uploadDoc(e.target.files[0])}
-              />
-            </label>
-          </div>
-        )}
-      </div>
+      <h2 className="text-base font-semibold text-slate-900">Knowledge</h2>
+      <p className="mt-1 text-sm text-slate-600">
+        Add documents or FAQs. These work right away and survive re-training.
+      </p>
 
       {busy && (
         <p className="mt-3 text-sm text-slate-500">Adding to your knowledge base...</p>
       )}
       {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+
+      {mode === "none" && (
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 transition hover:border-brand-300 hover:bg-brand-50/50">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z" />
+                <path d="M12 11v6m-3-3h6" />
+              </svg>
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-slate-900">Upload document</span>
+              <span className="block text-xs text-slate-500">PDF, DOCX, TXT, or MD</span>
+            </span>
+            <input
+              type="file"
+              accept=".pdf,.docx,.txt,.md"
+              className="hidden"
+              disabled={busy}
+              onChange={(e) => e.target.files?.[0] && uploadDoc(e.target.files[0])}
+            />
+          </label>
+
+          <button
+            onClick={() => {
+              setMode("faq");
+              setError(null);
+            }}
+            className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-brand-300 hover:bg-brand-50/50"
+          >
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" />
+                <path d="M9.5 9a2.5 2.5 0 0 1 4.5 1.5c0 1.5-2 2-2 2.5" />
+                <path d="M12 16h.01" />
+              </svg>
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-slate-900">Add FAQ</span>
+              <span className="block text-xs text-slate-500">A question and its answer</span>
+            </span>
+          </button>
+        </div>
+      )}
 
       {mode === "faq" && (
         <div className="mt-4 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -147,7 +165,7 @@ export function KnowledgePanel({
             <button
               onClick={addFaq}
               disabled={busy}
-              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 disabled:opacity-60"
             >
               Add FAQ
             </button>
@@ -181,9 +199,6 @@ export function KnowledgePanel({
                 </span>
                 <span className="truncate text-sm text-slate-800">
                   {it.label || "Untitled"}
-                </span>
-                <span className="shrink-0 text-xs text-slate-400">
-                  {it.count} chunk{it.count === 1 ? "" : "s"}
                 </span>
               </div>
               <button
