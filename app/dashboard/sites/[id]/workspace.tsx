@@ -95,7 +95,7 @@ export function Workspace(props: Props) {
       </nav>
 
       {/* Panel */}
-      <div>
+      <div className="min-w-0">
         {tab === "train" && (
           <TrainPanel
             siteId={props.siteId}
