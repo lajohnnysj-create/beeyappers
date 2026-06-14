@@ -23,10 +23,34 @@ export default async function SiteWorkspacePage({
 
   if (!site || !user) notFound();
 
-  const [{ count: pageCount }, { count: chunkCount }] = await Promise.all([
-    supabase.from("pages").select("*", { count: "exact", head: true }).eq("site_id", site.id),
-    supabase.from("chunks").select("*", { count: "exact", head: true }).eq("site_id", site.id),
-  ]);
+  const [{ count: pageCount }, { count: chunkCount }, { data: kRows }] =
+    await Promise.all([
+      supabase.from("pages").select("*", { count: "exact", head: true }).eq("site_id", site.id),
+      supabase.from("chunks").select("*", { count: "exact", head: true }).eq("site_id", site.id),
+      supabase
+        .from("chunks")
+        .select("source_id, source_type, source_label")
+        .eq("site_id", site.id)
+        .in("source_type", ["document", "faq"]),
+    ]);
+
+  // Group manual knowledge chunks by source_id into single items.
+  const kMap = new Map<
+    string,
+    { sourceId: string; type: string; label: string | null; count: number }
+  >();
+  for (const c of kRows ?? []) {
+    if (!c.source_id) continue;
+    const cur = kMap.get(c.source_id) || {
+      sourceId: c.source_id,
+      type: c.source_type,
+      label: c.source_label,
+      count: 0,
+    };
+    cur.count++;
+    kMap.set(c.source_id, cur);
+  }
+  const knowledge = [...kMap.values()];
 
   return (
     <div className="min-h-screen">
@@ -65,6 +89,7 @@ export default async function SiteWorkspacePage({
           pageCount={pageCount || 0}
           chunkCount={chunkCount || 0}
           config={mergeConfig(site.widget_config)}
+          knowledge={knowledge}
         />
       </main>
     </div>
