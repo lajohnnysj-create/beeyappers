@@ -1,212 +1,192 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { embedTexts } from "@/lib/embed/openai";
-import { retrieveChunks } from "@/lib/answer/retrieve";
-import { generateAnswer } from "@/lib/answer/generate";
-import { getClientIp, hashIp } from "@/lib/security/ip";
-import { checkRateLimit } from "@/lib/security/rate-limit";
+import { toOrigin, discoverUrls } from "@/lib/crawl/sitemap";
+import { fetchPage } from "@/lib/crawl/fetch-page";
+import { extractContent } from "@/lib/crawl/extract";
+import { chunkText } from "@/lib/crawl/chunk";
+import { embedTexts, toVectorLiteral } from "@/lib/embed/openai";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 60; // raise to 300 on Pro for larger sites
 
-const MAX_QUESTION_CHARS = 1000;
-const RATE_LIMIT = 20; // requests
-const RATE_WINDOW = 60; // seconds, per IP per site
-const TOP_K = 5;
+const MAX_PAGES = 20;
+const MAX_CHUNKS = 1000;
+const FETCH_CONCURRENCY = 5;
+const INSERT_BATCH = 200;
 
-type SiteRow = {
-  id: string;
-  user_id: string;
-  is_active: boolean;
-  system_prompt: string;
-  allowed_origins: string[];
-  monthly_token_cap: number;
-  tokens_used_period: number;
-  period_start: string;
-};
+type PageWork = { url: string; title: string; text: string };
 
-// ---- CORS helpers ----------------------------------------------------------
-function corsHeaders(origin: string | null, allowed: string[]): HeadersInit {
-  // Reflect the origin when it is allowed (or when no allowlist is set yet).
-  const ok =
-    !origin || allowed.length === 0 || allowed.includes(origin)
-      ? origin || "*"
-      : "null";
-  return {
-    "Access-Control-Allow-Origin": ok,
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Max-Age": "86400",
-    Vary: "Origin",
-  };
-}
+// Fetch + extract a batch of URLs with limited concurrency.
+async function harvest(urls: string[]): Promise<PageWork[]> {
+  const out: PageWork[] = [];
+  let i = 0;
 
-export async function OPTIONS(req: Request) {
-  // Preflight. We don't know the allowlist without the widgetKey, so reflect.
-  const origin = req.headers.get("origin");
-  return new NextResponse(null, {
-    status: 204,
-    headers: corsHeaders(origin, []),
-  });
-}
+  async function worker() {
+    while (i < urls.length) {
+      const url = urls[i++];
+      const html = await fetchPage(url);
+      if (!html) continue;
+      const { title, text } = extractContent(html);
+      if (text && text.length > 120) out.push({ url, title, text });
+    }
+  }
 
-function json(body: unknown, status: number, headers: HeadersInit) {
-  return NextResponse.json(body, { status, headers });
+  await Promise.all(
+    Array.from({ length: Math.min(FETCH_CONCURRENCY, urls.length) }, worker)
+  );
+  return out;
 }
 
 export async function POST(req: Request) {
-  const origin = req.headers.get("origin");
-  const baseHeaders = corsHeaders(origin, []);
-
-  // 1. Parse and validate input.
-  let widgetKey = "";
-  let question = "";
-  let honeypot = "";
-  try {
-    const body = await req.json();
-    widgetKey = String(body.widgetKey || "");
-    question = String(body.question || "").trim();
-    honeypot = String(body.hp || "");
-  } catch {
-    return json({ error: "Bad request" }, 400, baseHeaders);
+  // 1. Authenticate the caller from the session, never from the body.
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   }
 
-  // Honeypot: a real visitor never fills this hidden field. Drop silently.
-  if (honeypot) return json({ error: "Rejected" }, 400, baseHeaders);
+  // 2. Validate input.
+  let siteId: string;
+  try {
+    const body = await req.json();
+    siteId = String(body.siteId || "");
+  } catch {
+    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  }
+  if (!siteId) {
+    return NextResponse.json({ error: "Missing siteId" }, { status: 400 });
+  }
 
-  if (!widgetKey) return json({ error: "Missing widgetKey" }, 400, baseHeaders);
-  if (!question) return json({ error: "Empty question" }, 400, baseHeaders);
-  if (question.length > MAX_QUESTION_CHARS) {
-    return json({ error: "Question too long" }, 400, baseHeaders);
+  // 3. Ownership check. RLS scopes this select to the signed-in user, so a
+  //    row coming back means they own it.
+  const { data: site } = await supabase
+    .from("sites")
+    .select("id, domain")
+    .eq("id", siteId)
+    .single();
+  if (!site) {
+    return NextResponse.json({ error: "Site not found" }, { status: 404 });
+  }
+
+  const origin = site.domain ? toOrigin(site.domain) : null;
+  if (!origin) {
+    return NextResponse.json(
+      { error: "Set a valid domain on this site first." },
+      { status: 400 }
+    );
   }
 
   const admin = createAdminClient();
 
-  // 2. Resolve the site from the PUBLIC widget key (never a trusted user_id).
-  const { data: site } = await admin
-    .from("sites")
-    .select(
-      "id, user_id, is_active, system_prompt, allowed_origins, " +
-        "monthly_token_cap, tokens_used_period, period_start"
-    )
-    .eq("widget_key", widgetKey)
-    .single<SiteRow>();
-
-  if (!site || !site.is_active) {
-    return json({ error: "Unknown widget" }, 404, baseHeaders);
-  }
-
-  // Recompute CORS now that we have the site's allowlist.
-  const headers = corsHeaders(origin, site.allowed_origins || []);
-
-  // 3. Origin allowlist (enforced only once the owner has configured it).
-  if (
-    site.allowed_origins &&
-    site.allowed_origins.length > 0 &&
-    origin &&
-    !site.allowed_origins.includes(origin)
-  ) {
-    return json({ error: "Origin not allowed" }, 403, headers);
-  }
-
-  // 4. Per-IP rate limit.
-  const ip = getClientIp(req);
-  const ipHash = hashIp(ip);
-  const allowed = await checkRateLimit(
-    admin,
-    `answer:${site.id}:${ipHash}`,
-    RATE_LIMIT,
-    RATE_WINDOW
-  );
-  if (!allowed) {
-    return json({ error: "Too many requests. Slow down." }, 429, headers);
-  }
-
-  // 5. Monthly token cap (the hard spend backstop).
-  const thisMonth = new Date().toISOString().slice(0, 7);
-  const periodMonth = (site.period_start || "").slice(0, 7);
-  const usedThisPeriod = periodMonth < thisMonth ? 0 : site.tokens_used_period;
-  if (usedThisPeriod >= site.monthly_token_cap) {
-    return json(
-      { error: "This assistant has reached its usage limit for now." },
-      429,
-      headers
-    );
-  }
-
   try {
-    // 6. Embed the question and retrieve the most relevant chunks.
-    const [queryEmbedding] = await embedTexts([question]);
-    const chunks = await retrieveChunks(
-      admin,
-      site.id,
-      queryEmbedding,
-      TOP_K
-    );
+    await admin
+      .from("sites")
+      .update({ crawl_status: "crawling" })
+      .eq("id", siteId);
 
-    if (chunks.length === 0) {
-      return json(
-        {
-          answer:
-            "I don't have any information about that yet. The site may not be fully set up.",
-        },
-        200,
-        headers
+    // 4. Discover and harvest.
+    const urls = await discoverUrls(origin, MAX_PAGES);
+    const pages = await harvest(urls);
+
+    if (pages.length === 0) {
+      await admin
+        .from("sites")
+        .update({ crawl_status: "error" })
+        .eq("id", siteId);
+      return NextResponse.json(
+        { error: "No crawlable content found at that domain." },
+        { status: 422 }
       );
     }
 
-    const context = chunks.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n");
+    // 5. Destructive re-crawl: clear old pages (chunks cascade off the FK).
+    await admin.from("pages").delete().eq("site_id", siteId);
 
-    // 7. Generate the answer with guardrails.
-    const { answer, totalTokens } = await generateAnswer(
-      site.system_prompt,
-      context,
-      question
-    );
+    // 6. Insert pages, get their ids back keyed by url.
+    const pageRows = pages.map((p) => ({
+      site_id: siteId,
+      user_id: user.id,
+      url: p.url,
+      title: p.title,
+      content: p.text,
+      status: "embedded",
+      fetched_at: new Date().toISOString(),
+    }));
+    const { data: inserted, error: pageErr } = await admin
+      .from("pages")
+      .insert(pageRows)
+      .select("id, url");
+    if (pageErr) throw new Error("Page insert failed: " + pageErr.message);
 
-    // 8. Account for spend and log the exchange (best-effort).
-    await admin.rpc("add_site_token_usage", {
-      p_site_id: site.id,
-      p_tokens: totalTokens,
-    });
+    const idByUrl = new Map(inserted!.map((r) => [r.url, r.id]));
 
-    const { data: convo } = await admin
-      .from("conversations")
-      .insert({
-        site_id: site.id,
-        user_id: site.user_id,
-        origin: origin,
-        ip_hash: ipHash,
-      })
-      .select("id")
-      .single();
-
-    if (convo) {
-      await admin.from("messages").insert([
-        {
-          conversation_id: convo.id,
-          user_id: site.user_id,
-          role: "user",
-          content: question,
-        },
-        {
-          conversation_id: convo.id,
-          user_id: site.user_id,
-          role: "assistant",
-          content: answer,
-          token_count: totalTokens,
-        },
-      ]);
+    // 7. Build chunks across all pages (capped).
+    type ChunkWork = { page_id: string; content: string; chunk_index: number };
+    const chunkWork: ChunkWork[] = [];
+    for (const p of pages) {
+      const pageId = idByUrl.get(p.url);
+      if (!pageId) continue;
+      const parts = chunkText(p.text);
+      parts.forEach((content, idx) => {
+        if (chunkWork.length < MAX_CHUNKS) {
+          chunkWork.push({ page_id: pageId, content, chunk_index: idx });
+        }
+      });
     }
 
-    return json({ answer }, 200, headers);
+    if (chunkWork.length === 0) {
+      await admin
+        .from("sites")
+        .update({ crawl_status: "error" })
+        .eq("id", siteId);
+      return NextResponse.json(
+        { error: "Pages had no usable text to embed." },
+        { status: 422 }
+      );
+    }
+
+    // 8. Embed all chunk contents, then insert with vectors (batched).
+    const vectors = await embedTexts(chunkWork.map((c) => c.content));
+
+    for (let i = 0; i < chunkWork.length; i += INSERT_BATCH) {
+      const slice = chunkWork.slice(i, i + INSERT_BATCH);
+      const rows = slice.map((c, j) => ({
+        site_id: siteId,
+        page_id: c.page_id,
+        user_id: user.id,
+        content: c.content,
+        chunk_index: c.chunk_index,
+        token_count: Math.round(c.content.length / 4),
+        embedding: toVectorLiteral(vectors[i + j]),
+      }));
+      const { error: chunkErr } = await admin.from("chunks").insert(rows);
+      if (chunkErr) throw new Error("Chunk insert failed: " + chunkErr.message);
+    }
+
+    // 9. Mark ready.
+    await admin
+      .from("sites")
+      .update({
+        crawl_status: "ready",
+        last_crawled_at: new Date().toISOString(),
+      })
+      .eq("id", siteId);
+
+    return NextResponse.json({
+      ok: true,
+      pages: pages.length,
+      chunks: chunkWork.length,
+    });
   } catch (err) {
-    // Never leak internal detail to the public client.
-    console.error("answer route error:", err);
-    return json(
-      { error: "Something went wrong generating an answer." },
-      500,
-      headers
-    );
+    await admin
+      .from("sites")
+      .update({ crawl_status: "error" })
+      .eq("id", siteId)
+      .then(() => {});
+    const message = err instanceof Error ? err.message : "Crawl failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
