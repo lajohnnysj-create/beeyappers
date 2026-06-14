@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BrandingForm } from "./branding-form";
+import { KnowledgePanel, type KnowledgeItem } from "./knowledge-panel";
 import { CrawlButton } from "@/app/dashboard/crawl-button";
 import { EmbedSnippet } from "@/app/dashboard/embed-snippet";
 import type { WidgetConfig } from "@/lib/widget-config";
@@ -19,6 +20,7 @@ type Props = {
   pageCount: number;
   chunkCount: number;
   config: WidgetConfig;
+  knowledge: KnowledgeItem[];
 };
 
 const NAV: { id: Tab; label: string; icon: JSX.Element }[] = [
@@ -95,6 +97,7 @@ export function Workspace(props: Props) {
             lastCrawledAt={props.lastCrawledAt}
             pageCount={props.pageCount}
             chunkCount={props.chunkCount}
+            knowledge={props.knowledge}
           />
         )}
         {tab === "customize" && (
@@ -138,6 +141,7 @@ function TrainPanel({
   lastCrawledAt,
   pageCount,
   chunkCount,
+  knowledge,
 }: {
   siteId: string;
   domain: string | null;
@@ -145,13 +149,14 @@ function TrainPanel({
   lastCrawledAt: string | null;
   pageCount: number;
   chunkCount: number;
+  knowledge: KnowledgeItem[];
 }) {
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-base font-semibold text-slate-900">Knowledge base</h2>
+            <h2 className="text-base font-semibold text-slate-900">Website</h2>
             <p className="mt-1 text-sm text-slate-600">
               Bleviq crawls {domain || "your site"} and learns its content.
             </p>
@@ -174,10 +179,7 @@ function TrainPanel({
         </div>
       </section>
 
-      <p className="text-sm text-slate-500">
-        Re-training replaces the old content with a fresh crawl. Set a domain on
-        the site if it is empty.
-      </p>
+      <KnowledgePanel siteId={siteId} items={knowledge} />
     </div>
   );
 }
