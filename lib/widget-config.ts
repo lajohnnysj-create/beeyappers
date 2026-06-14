@@ -13,6 +13,13 @@ export type WidgetConfig = {
   assistantBubbleColor: string; // bot message bubble
   textColor: string; // primary text in the panel
   fontFamily: string; // a key from FONT_OPTIONS
+  // Launcher bubble (rendered on the host site by widget.js)
+  launcherPosition: "bottom-right" | "bottom-left";
+  launcherIcon: "default" | "emoji" | "favicon";
+  launcherEmoji: string;
+  launcherLabel: string;
+  panelWidth: number;
+  panelHeight: number;
 };
 
 export const FONT_OPTIONS: Record<string, string> = {
@@ -44,6 +51,12 @@ export const DEFAULT_CONFIG: WidgetConfig = {
   assistantBubbleColor: "#f1f5f9",
   textColor: "#0f172a",
   fontFamily: "system",
+  launcherPosition: "bottom-right",
+  launcherIcon: "default",
+  launcherEmoji: "\uD83D\uDCAC",
+  launcherLabel: "",
+  panelWidth: 380,
+  panelHeight: 560,
 };
 
 // Merge stored (possibly partial) config over defaults.
