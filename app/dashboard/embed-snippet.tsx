@@ -21,17 +21,17 @@ export function EmbedSnippet({ widgetKey }: { widgetKey: string }) {
   }
 
   return (
-    <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
-      <div className="mb-1 flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-600">Embed code</span>
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-900">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
+        <span className="text-xs font-medium text-slate-400">Embed snippet</span>
         <button
           onClick={copy}
-          className="text-xs font-medium text-brand-700 hover:text-brand-600"
+          className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-white/20"
         >
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <code className="block overflow-x-auto whitespace-pre font-mono text-xs text-slate-800">
+      <code className="block overflow-x-auto whitespace-pre px-4 py-3 font-mono text-xs text-slate-100">
         {snippet}
       </code>
     </div>
