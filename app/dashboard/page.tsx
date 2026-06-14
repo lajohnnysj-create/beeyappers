@@ -3,6 +3,7 @@ import { signOut } from "@/app/auth/actions";
 import { Wordmark } from "@/app/wordmark";
 import { NewSiteForm } from "./new-site-form";
 import { CrawlButton } from "./crawl-button";
+import { EmbedSnippet } from "./embed-snippet";
 
 type Site = {
   id: string;
@@ -70,23 +71,26 @@ export default async function DashboardPage() {
             list.map((site) => (
               <div
                 key={site.id}
-                className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5"
+                className="rounded-2xl border border-slate-200 bg-white p-5"
               >
-                <div>
-                  <p className="font-medium text-slate-900">{site.name}</p>
-                  <p className="text-sm text-slate-600">
-                    {site.domain || "No domain set"}
-                  </p>
-                  <p className="mt-1 font-mono text-xs text-slate-400">
-                    {site.widget_key}
-                  </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-slate-900">{site.name}</p>
+                    <p className="text-sm text-slate-600">
+                      {site.domain || "No domain set"}
+                    </p>
+                    <p className="mt-1 font-mono text-xs text-slate-400">
+                      {site.widget_key}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
+                      {site.crawl_status}
+                    </span>
+                    <CrawlButton siteId={site.id} />
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
-                    {site.crawl_status}
-                  </span>
-                  <CrawlButton siteId={site.id} />
-                </div>
+                <EmbedSnippet widgetKey={site.widget_key} />
               </div>
             ))
           )}
