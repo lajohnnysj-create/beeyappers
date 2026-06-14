@@ -9,13 +9,6 @@ import type { WidgetConfig } from "@/lib/widget-config";
 
 type Tab = "train" | "customize" | "code";
 
-// Free on-demand homepage screenshot (no key, cached by the service).
-function screenshotUrl(domain: string): string {
-  let d = domain.trim();
-  if (!/^https?:\/\//i.test(d)) d = "https://" + d;
-  return "https://s.wordpress.com/mshots/v1/" + encodeURIComponent(d) + "?w=1200&h=900";
-}
-
 type Props = {
   siteId: string;
   userId: string;
@@ -122,6 +115,25 @@ export function Workspace(props: Props) {
   );
 }
 
+function SitePreview({ siteId }: { siteId: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className="relative aspect-[16/10] w-full max-w-[200px] overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+      {!loaded && <div className="absolute inset-0 animate-pulse bg-slate-200" />}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`/api/screenshot?siteId=${siteId}`}
+        alt="Homepage preview"
+        onLoad={() => setLoaded(true)}
+        className={
+          "h-full w-full object-cover object-top transition-opacity duration-300 " +
+          (loaded ? "opacity-100" : "opacity-0")
+        }
+      />
+    </div>
+  );
+}
+
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     ready: "bg-emerald-50 text-emerald-700",
@@ -171,6 +183,12 @@ function TrainPanel({
           <StatusBadge status={crawlStatus} />
         </div>
 
+        {crawlStatus === "ready" && (
+          <div className="mt-4">
+            <SitePreview siteId={siteId} />
+          </div>
+        )}
+
         <div className="mt-5 flex items-center gap-3">
           <CrawlButton siteId={siteId} />
           {lastCrawledAt && (
@@ -179,20 +197,6 @@ function TrainPanel({
             </span>
           )}
         </div>
-
-        {crawlStatus === "ready" && domain && (
-          <div className="mt-5">
-            <p className="mb-2 text-xs font-medium text-slate-500">Homepage preview</p>
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={screenshotUrl(domain)}
-                alt="Homepage preview"
-                className="aspect-[4/3] w-full object-cover object-top"
-              />
-            </div>
-          </div>
-        )}
       </section>
 
       <KnowledgePanel siteId={siteId} items={knowledge} />
