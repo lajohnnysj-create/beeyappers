@@ -17,6 +17,19 @@ body {
   outline-offset: 2px;
 }
 
+/* Indeterminate training bar */
+@keyframes bv-bar {
+  0% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(430%);
+  }
+}
+.animate-bv-bar {
+  animation: bv-bar 1.3s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
