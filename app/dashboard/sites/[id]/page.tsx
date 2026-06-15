@@ -91,7 +91,6 @@ export default async function SiteWorkspacePage({
             planLabel={planLabel}
             status={entitlement.status}
             active={entitlement.active}
-            hasBilling={entitlement.hasBilling}
           />
         </div>
       </header>
