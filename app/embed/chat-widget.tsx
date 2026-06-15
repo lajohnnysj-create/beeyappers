@@ -149,6 +149,8 @@ export function ChatWidget({
           gap: 10,
           padding: "14px 16px",
           background: headerBg,
+          borderTopLeftRadius: radius || 0,
+          borderTopRightRadius: radius || 0,
         }}
       >
         <Avatar config={config} size={36} />

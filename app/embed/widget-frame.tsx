@@ -131,7 +131,7 @@ export function WidgetFrame({
           borderRadius: 16,
           overflow: "hidden",
           isolation: "isolate",
-          background: "#fff",
+          background: "transparent",
           boxShadow: "0 10px 34px rgba(0,0,0,.22)",
           transformOrigin: left ? "bottom left" : "bottom right",
           animation: "bvPop .28s cubic-bezier(.34,1.56,.64,1)",
