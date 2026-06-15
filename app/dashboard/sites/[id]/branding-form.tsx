@@ -518,7 +518,7 @@ export function BrandingForm({
 
       {/* Live preview */}
       <div className="lg:sticky lg:top-6 lg:self-start">
-        <p className="mb-2 text-xs font-medium text-slate-500">Live preview</p>
+        <p className="mb-2 text-center text-xs font-medium text-slate-500">Live preview</p>
         <LauncherPreview config={config} />
         <Preview config={config} />
       </div>
