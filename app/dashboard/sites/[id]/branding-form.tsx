@@ -360,14 +360,24 @@ export function BrandingForm({
   siteId,
   userId,
   initialConfig,
+  canRemoveBranding,
 }: {
   siteId: string;
   userId: string;
   initialConfig: WidgetConfig;
+  canRemoveBranding: boolean;
 }) {
   const [config, setConfig] = useState<WidgetConfig>(initialConfig);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ ok?: string; error?: string } | null>(null);
+
+  // Removing the "Powered by Bleviq" badge is a paid feature. Non-paying
+  // accounts always show it, regardless of their saved setting. The widget
+  // enforces this server-side too; this just keeps the UI honest.
+  const brandingShown = canRemoveBranding ? config.showBranding : true;
+  const previewConfig = canRemoveBranding
+    ? config
+    : { ...config, showBranding: true };
 
   function set<K extends keyof WidgetConfig>(key: K, val: WidgetConfig[K]) {
     setConfig((c) => ({ ...c, [key]: val }));
@@ -573,22 +583,36 @@ export function BrandingForm({
               <p className="mt-0.5 text-xs text-slate-500">
                 Show a small &ldquo;Powered by Bleviq&rdquo; badge in your widget.
               </p>
+              {!canRemoveBranding && (
+                <p className="mt-1 text-xs font-medium text-brand-600">
+                  Upgrade to remove Bleviq branding.
+                </p>
+              )}
             </div>
             <button
               type="button"
               role="switch"
-              aria-checked={config.showBranding}
+              aria-checked={brandingShown}
               aria-label="Bleviq branding"
-              onClick={() => set("showBranding", !config.showBranding)}
+              disabled={!canRemoveBranding}
+              title={
+                canRemoveBranding
+                  ? undefined
+                  : "Upgrade to remove Bleviq branding"
+              }
+              onClick={() => {
+                if (canRemoveBranding) set("showBranding", !config.showBranding);
+              }}
               className={
                 "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition " +
-                (config.showBranding ? "bg-brand-600" : "bg-slate-300")
+                (brandingShown ? "bg-brand-600" : "bg-slate-300") +
+                (canRemoveBranding ? "" : " cursor-not-allowed opacity-60")
               }
             >
               <span
                 className={
                   "inline-block h-5 w-5 transform rounded-full bg-white shadow transition " +
-                  (config.showBranding ? "translate-x-[22px]" : "translate-x-0.5")
+                  (brandingShown ? "translate-x-[22px]" : "translate-x-0.5")
                 }
               />
             </button>
@@ -612,7 +636,7 @@ export function BrandingForm({
       <div className="lg:sticky lg:top-6 lg:self-start">
         <p className="mb-2 text-center text-xs font-medium text-slate-500">Live preview</p>
         <LauncherPreview config={config} />
-        <Preview config={config} />
+        <Preview config={previewConfig} />
       </div>
     </div>
   );

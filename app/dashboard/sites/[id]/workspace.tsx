@@ -23,6 +23,7 @@ type Props = {
   config: WidgetConfig;
   knowledge: KnowledgeItem[];
   canRetrain: boolean;
+  canRemoveBranding: boolean;
 };
 
 const NAV: { id: Tab; label: string; icon: JSX.Element }[] = [
@@ -109,6 +110,7 @@ export function Workspace(props: Props) {
             siteId={props.siteId}
             userId={props.userId}
             initialConfig={props.config}
+            canRemoveBranding={props.canRemoveBranding}
           />
         )}
         {tab === "code" && (
