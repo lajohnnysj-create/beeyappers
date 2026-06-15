@@ -118,7 +118,7 @@ export function Workspace(props: Props) {
 function SitePreview({ siteId }: { siteId: string }) {
   const [loaded, setLoaded] = useState(false);
   return (
-    <div className="relative aspect-[16/10] w-full max-w-[200px] overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+    <div className="relative aspect-[16/10] w-full max-w-[500px] overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
       {!loaded && <div className="absolute inset-0 animate-pulse bg-slate-200" />}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
