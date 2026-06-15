@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { signOut } from "@/app/auth/actions";
 import { mergeConfig } from "@/lib/widget-config";
 import { Wordmark } from "@/app/wordmark";
+import { SettingsMenu } from "@/app/dashboard/settings-menu";
 import { Workspace } from "./workspace";
+
+const MESSAGE_CAP = 1000;
 
 export default async function SiteWorkspacePage({
   params,
@@ -24,8 +26,14 @@ export default async function SiteWorkspacePage({
 
   if (!site || !user) notFound();
 
-  const [{ count: pageCount }, { count: chunkCount }, { data: kRows }] =
-    await Promise.all([
+  const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  const [
+    { count: pageCount },
+    { count: chunkCount },
+    { data: kRows },
+    { count: messagesUsed },
+  ] = await Promise.all([
       supabase.from("pages").select("*", { count: "exact", head: true }).eq("site_id", site.id),
       supabase.from("chunks").select("*", { count: "exact", head: true }).eq("site_id", site.id),
       supabase
@@ -33,6 +41,12 @@ export default async function SiteWorkspacePage({
         .select("source_id, source_type, source_label")
         .eq("site_id", site.id)
         .in("source_type", ["document", "faq"]),
+      supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("role", "assistant")
+        .gte("created_at", since30),
     ]);
 
   // Group manual knowledge chunks by source_id into single items.
@@ -60,18 +74,11 @@ export default async function SiteWorkspacePage({
           <Link href="/dashboard">
             <Wordmark />
           </Link>
-          <div className="flex items-center gap-4">
-            {user?.email && (
-              <span className="hidden text-sm text-slate-500 sm:inline">
-                {user.email}
-              </span>
-            )}
-            <form action={signOut}>
-              <button className="text-sm font-medium text-slate-500 hover:text-slate-900">
-                Sign out
-              </button>
-            </form>
-          </div>
+          <SettingsMenu
+            email={user.email || ""}
+            used={messagesUsed || 0}
+            cap={MESSAGE_CAP}
+          />
         </div>
       </header>
 
