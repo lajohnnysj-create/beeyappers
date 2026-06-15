@@ -142,8 +142,6 @@
       box.style.cssText = "width:38px;height:38px;border-radius:13px;overflow:hidden;display:flex;";
       box.appendChild(avatarEl(38));
       b.appendChild(box);
-    } else {
-      b.textContent = "\uD83D\uDCAC";
     }
     b.addEventListener("click", openChat);
 
@@ -174,15 +172,18 @@
       ";border-radius:22px 22px " + (s === "left" ? "22px 8px" : "8px 22px") +
       ";padding:8px;box-shadow:0 6px 20px rgba(0,0,0,.22);max-width:calc(100vw - 40px);";
 
-    var avBtn = document.createElement("button");
-    avBtn.type = "button";
-    avBtn.setAttribute("aria-label", "Open chat");
-    avBtn.style.cssText =
-      "width:36px;height:36px;border:none;padding:0;cursor:pointer;border-radius:12px;" +
-      "background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;" +
-      "overflow:hidden;flex-shrink:0;";
-    avBtn.appendChild(avatarEl(36));
-    avBtn.addEventListener("click", openChat);
+    var avBtn = null;
+    if (cfg.avatarUrl) {
+      avBtn = document.createElement("button");
+      avBtn.type = "button";
+      avBtn.setAttribute("aria-label", "Open chat");
+      avBtn.style.cssText =
+        "width:36px;height:36px;border:none;padding:0;cursor:pointer;border-radius:12px;" +
+        "background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;" +
+        "overflow:hidden;flex-shrink:0;";
+      avBtn.appendChild(avatarEl(36));
+      avBtn.addEventListener("click", openChat);
+    }
 
     var pill = document.createElement("div");
     pill.style.cssText =
@@ -207,7 +208,7 @@
 
     pill.appendChild(input);
     pill.appendChild(sendBtn);
-    bar.appendChild(avBtn);
+    if (avBtn) bar.appendChild(avBtn);
     bar.appendChild(pill);
 
     var note = document.createElement("div");
