@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { BrandingForm } from "./branding-form";
 import { KnowledgePanel, type KnowledgeItem } from "./knowledge-panel";
-import { CrawlButton } from "@/app/dashboard/crawl-button";
+import { TrainStatus } from "./train-status";
 import { EmbedSnippet } from "@/app/dashboard/embed-snippet";
 import type { WidgetConfig } from "@/lib/widget-config";
 
@@ -189,13 +189,12 @@ function TrainPanel({
           </div>
         )}
 
-        <div className="mt-5 flex items-center gap-3">
-          <CrawlButton siteId={siteId} />
-          {lastCrawledAt && (
-            <span className="text-xs text-slate-500">
-              Last trained {new Date(lastCrawledAt).toLocaleDateString()}
-            </span>
-          )}
+        <div className="mt-5">
+          <TrainStatus
+            siteId={siteId}
+            status={crawlStatus}
+            lastCrawledAt={lastCrawledAt}
+          />
         </div>
       </section>
 
