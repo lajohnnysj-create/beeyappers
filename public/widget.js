@@ -33,9 +33,41 @@
     "background:transparent;z-index:" + Z + ";opacity:0;" +
     "transition:opacity .25s ease;color-scheme:normal;";
 
+  // Lock the host page behind the chat on mobile so focusing the input scrolls
+  // inside the chat, not the page. Body is pinned and scroll restored on close.
+  var savedScrollY = 0;
+  var locked = false;
+  function lockScroll() {
+    if (locked) return;
+    locked = true;
+    savedScrollY = window.scrollY || window.pageYOffset || 0;
+    var b = document.body;
+    b.style.top = "-" + savedScrollY + "px";
+    b.style.position = "fixed";
+    b.style.left = "0";
+    b.style.right = "0";
+    b.style.width = "100%";
+    b.style.overflow = "hidden";
+  }
+  function unlockScroll() {
+    if (!locked) return;
+    locked = false;
+    var b = document.body;
+    b.style.position = "";
+    b.style.top = "";
+    b.style.left = "";
+    b.style.right = "";
+    b.style.width = "";
+    b.style.overflow = "";
+    window.scrollTo(0, savedScrollY);
+  }
+
   function place(side, w, h) {
-    frame.style.width = w + "px";
+    unlockScroll();
+    frame.style.top = "auto";
+    frame.style.bottom = "0";
     frame.style.height = h + "px";
+    frame.style.width = w + "px";
     if (side === "left") {
       frame.style.left = "0";
       frame.style.right = "auto";
@@ -44,6 +76,17 @@
       frame.style.left = "auto";
     }
     frame.style.opacity = "1";
+  }
+
+  function goFullscreen() {
+    frame.style.top = "0";
+    frame.style.left = "0";
+    frame.style.right = "auto";
+    frame.style.bottom = "auto";
+    frame.style.width = "100%";
+    frame.style.height = "100%";
+    frame.style.opacity = "1";
+    lockScroll();
   }
 
   function sendViewport() {
@@ -61,7 +104,11 @@
     if (e.origin !== origin) return;
     var d = e.data;
     if (!d || d.type !== "bleviq:resize") return;
-    place(d.side === "left" ? "left" : "right", Math.max(0, d.w | 0), Math.max(0, d.h | 0));
+    if (d.full) {
+      goFullscreen();
+    } else {
+      place(d.side === "left" ? "left" : "right", Math.max(0, d.w | 0), Math.max(0, d.h | 0));
+    }
   });
 
   function mount() {
