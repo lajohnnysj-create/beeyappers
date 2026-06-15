@@ -439,7 +439,7 @@ export function BrandingForm({
             <ColorField icon={COLOR_ICONS.header} label="Header" value={config.headerColor} onChange={(v) => set("headerColor", v)} />
             <ColorField icon={COLOR_ICONS.background} label="Background" value={config.backgroundColor} onChange={(v) => set("backgroundColor", v)} />
             <ColorField icon={COLOR_ICONS.visitor} label="Visitor message" value={config.userBubbleColor} onChange={(v) => set("userBubbleColor", v)} />
-            <ColorField icon={COLOR_ICONS.bot} label="Bot message" value={config.assistantBubbleColor} onChange={(v) => set("assistantBubbleColor", v)} />
+            <ColorField icon={COLOR_ICONS.bot} label="AI message" value={config.assistantBubbleColor} onChange={(v) => set("assistantBubbleColor", v)} />
             <ColorField icon={COLOR_ICONS.text} label="Text" value={config.textColor} onChange={(v) => set("textColor", v)} />
           </div>
         </Section>
