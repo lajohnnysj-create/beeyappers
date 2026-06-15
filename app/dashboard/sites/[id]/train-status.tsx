@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { MAX_PAGES } from "@/lib/crawl/limits";
 
 const MESSAGES = [
   "Reading your pages...",
@@ -135,6 +136,11 @@ export function TrainStatus({
             <dt className="text-xs font-medium text-slate-500">Pages trained</dt>
             <dd className="mt-0.5 text-lg font-semibold text-slate-900">
               {pageCount ?? 0}
+              {(pageCount ?? 0) >= MAX_PAGES && (
+                <span className="ml-1 text-xs font-medium text-slate-500">
+                  (Max)
+                </span>
+              )}
             </dd>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
