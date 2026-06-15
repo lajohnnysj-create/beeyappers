@@ -349,13 +349,18 @@ export function ChatWidget({
     q = q.trim();
     if (!q || busy) return;
     setInput("");
+    // Prior turns (minus the opening greeting) so follow-ups keep context.
+    const history = messages
+      .slice(1)
+      .slice(-8)
+      .map((m) => ({ role: m.role, content: m.content }));
     setMessages((m) => [...m, { role: "user", content: q }]);
     setBusy(true);
     try {
       const res = await fetch("/api/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ widgetKey, question: q, hp }),
+        body: JSON.stringify({ widgetKey, question: q, hp, history }),
       });
       const data = await res.json();
       const reply =
