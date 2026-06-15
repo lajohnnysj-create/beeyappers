@@ -407,6 +407,42 @@ export function BrandingForm({
         <Section icon={ICONS.bubble} title="Chat bubble">
           <div className="space-y-4">
             <div>
+              <span className="text-sm font-medium text-slate-700">Style</span>
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                {(["bubble", "bar"] as const).map((s) => {
+                  const active = config.launcherStyle === s;
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => set("launcherStyle", s)}
+                      className={
+                        "flex flex-col items-center gap-2 rounded-xl border p-3 transition " +
+                        (active
+                          ? "border-brand-500 bg-brand-50/40 ring-2 ring-brand-200"
+                          : "border-slate-200 hover:border-slate-300")
+                      }
+                    >
+                      {s === "bubble" ? (
+                        <BubbleStyleIcon active={active} />
+                      ) : (
+                        <BarStyleIcon active={active} />
+                      )}
+                      <span
+                        className={
+                          "text-xs font-medium " +
+                          (active ? "text-brand-700" : "text-slate-600")
+                        }
+                      >
+                        {s === "bubble" ? "Bubble" : "Chat bar"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
               <span className="text-sm font-medium text-slate-700">Position</span>
               <div className="mt-2 grid grid-cols-2 gap-3 sm:max-w-xs">
                 {(["bottom-left", "bottom-right"] as const).map((pos) => {
@@ -524,11 +560,23 @@ function LauncherPreview({ config }: { config: WidgetConfig }) {
   const left = config.launcherPosition === "bottom-left";
   return (
     <div
-      className="mb-4 flex items-center gap-2"
-      style={{
-        justifyContent: left ? "flex-start" : "flex-end",
-        flexDirection: left ? "row-reverse" : "row",
-      }}
+      className="mb-4 flex"
+      style={{ justifyContent: left ? "flex-start" : "flex-end" }}
+    >
+      {config.launcherStyle === "bar" ? (
+        <BarLauncher config={config} />
+      ) : (
+        <BubbleLauncher config={config} left={left} />
+      )}
+    </div>
+  );
+}
+
+function BubbleLauncher({ config, left }: { config: WidgetConfig; left: boolean }) {
+  return (
+    <div
+      className="flex items-center gap-2"
+      style={{ flexDirection: left ? "row-reverse" : "row" }}
     >
       {config.launcherLabel ? (
         <span
@@ -539,17 +587,75 @@ function LauncherPreview({ config }: { config: WidgetConfig }) {
         </span>
       ) : null}
       <span
-        className="grid h-14 w-14 place-items-center overflow-hidden rounded-full text-2xl text-white shadow"
+        className="grid h-14 w-14 place-items-center rounded-[20px] rounded-br-md text-2xl text-white shadow-lg"
         style={{ background: config.bubbleColor }}
       >
         {config.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={config.avatarUrl} alt="" className="h-full w-full object-cover" />
+          <img
+            src={config.avatarUrl}
+            alt=""
+            className="h-9 w-9 rounded-[13px] object-cover"
+          />
         ) : (
           <span>{"\uD83D\uDCAC"}</span>
         )}
       </span>
     </div>
+  );
+}
+
+function BarLauncher({ config }: { config: WidgetConfig }) {
+  return (
+    <div
+      className="flex items-center gap-2 rounded-[22px] rounded-br-md p-2 shadow-lg"
+      style={{ background: config.bubbleColor }}
+    >
+      <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[13px] bg-white/20 text-lg">
+        {config.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={config.avatarUrl}
+            alt=""
+            className="h-full w-full rounded-[13px] object-cover"
+          />
+        ) : (
+          <span>{"\uD83D\uDE0A"}</span>
+        )}
+      </span>
+      <span className="flex items-center gap-2 rounded-full bg-white py-1.5 pl-3.5 pr-1.5">
+        <span
+          className="text-sm text-slate-500"
+          style={{ whiteSpace: "nowrap" }}
+        >
+          {config.launcherLabel || "Ask AI"}
+        </span>
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-slate-900 text-white">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 19V5M5 12l7-7 7 7" />
+          </svg>
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function BubbleStyleIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="72" height="40" viewBox="0 0 72 40" fill="none">
+      <rect x="22" y="6" width="28" height="28" rx="9" className={active ? "fill-brand-600" : "fill-slate-400"} />
+    </svg>
+  );
+}
+
+function BarStyleIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="72" height="40" viewBox="0 0 72 40" fill="none">
+      <rect x="6" y="11" width="60" height="18" rx="9" className={active ? "fill-brand-600" : "fill-slate-400"} />
+      <circle cx="16" cy="20" r="4.5" className="fill-white" />
+      <rect x="24" y="16.5" width="26" height="7" rx="3.5" className="fill-white" />
+      <circle cx="58" cy="20" r="4.5" className="fill-slate-900" />
+    </svg>
   );
 }
 
