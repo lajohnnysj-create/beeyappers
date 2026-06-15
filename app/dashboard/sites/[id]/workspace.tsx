@@ -22,6 +22,7 @@ type Props = {
   chunkCount: number;
   config: WidgetConfig;
   knowledge: KnowledgeItem[];
+  canRetrain: boolean;
 };
 
 const NAV: { id: Tab; label: string; icon: JSX.Element }[] = [
@@ -100,6 +101,7 @@ export function Workspace(props: Props) {
             chunkCount={props.chunkCount}
             knowledge={props.knowledge}
             siteName={props.siteName}
+            canRetrain={props.canRetrain}
           />
         )}
         {tab === "customize" && (
@@ -145,6 +147,7 @@ function TrainPanel({
   chunkCount,
   knowledge,
   siteName,
+  canRetrain,
 }: {
   siteId: string;
   domain: string | null;
@@ -154,6 +157,7 @@ function TrainPanel({
   chunkCount: number;
   knowledge: KnowledgeItem[];
   siteName: string;
+  canRetrain: boolean;
 }) {
   return (
     <div className="space-y-6">
@@ -184,6 +188,7 @@ function TrainPanel({
             lastCrawledAt={lastCrawledAt}
             domain={domain}
             pageCount={pageCount}
+            canRetrain={canRetrain}
           />
         </div>
       </section>

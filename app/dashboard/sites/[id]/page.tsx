@@ -117,6 +117,7 @@ export default async function SiteWorkspacePage({
           chunkCount={chunkCount || 0}
           config={mergeConfig(site.widget_config)}
           knowledge={knowledge}
+          canRetrain={entitlement.active}
         />
       </main>
     </div>

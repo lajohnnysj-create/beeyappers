@@ -26,12 +26,14 @@ export function TrainStatus({
   lastCrawledAt,
   domain,
   pageCount,
+  canRetrain = true,
 }: {
   siteId: string;
   status: string;
   lastCrawledAt: string | null;
   domain?: string | null;
   pageCount?: number;
+  canRetrain?: boolean;
 }) {
   const router = useRouter();
   const [training, setTraining] = useState(
@@ -182,13 +184,36 @@ export function TrainStatus({
         )}
 
         <div className="mt-auto flex flex-col items-start gap-2 pt-4">
-          <button onClick={startCrawl} className={btnClass}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 12a9 9 0 1 1-2.64-6.36" />
-              <path d="M21 3v6h-6" />
-            </svg>
-            Re-train site
-          </button>
+          {canRetrain ? (
+            <button onClick={startCrawl} className={btnClass}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                <path d="M21 3v6h-6" />
+              </svg>
+              Re-train site
+            </button>
+          ) : (
+            <div className="group relative inline-block cursor-not-allowed">
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                className={`${btnClass} pointer-events-none opacity-50`}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                  <path d="M21 3v6h-6" />
+                </svg>
+                Re-train site
+              </button>
+              <span
+                role="tooltip"
+                className="pointer-events-none absolute bottom-full left-0 z-20 mb-1.5 w-max max-w-[15rem] rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-normal leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100"
+              >
+                Please upgrade to re-train your website
+              </span>
+            </div>
+          )}
           {error && <span className="text-xs text-red-600">{error}</span>}
         </div>
       </div>
