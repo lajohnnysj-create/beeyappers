@@ -391,7 +391,7 @@ export function BrandingForm({
   return (
     <div className="mt-2 grid gap-6 lg:grid-cols-[1fr_360px]">
       {/* Editor */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         <Section
           icon={ICONS.avatar}
           title="Avatar"
