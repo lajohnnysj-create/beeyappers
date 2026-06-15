@@ -41,24 +41,26 @@
     if (locked) return;
     locked = true;
     savedScrollY = window.scrollY || window.pageYOffset || 0;
-    var b = document.body;
+    var b = document.body, h = document.documentElement;
     b.style.top = "-" + savedScrollY + "px";
     b.style.position = "fixed";
     b.style.left = "0";
     b.style.right = "0";
     b.style.width = "100%";
     b.style.overflow = "hidden";
+    h.style.overflow = "hidden";
   }
   function unlockScroll() {
     if (!locked) return;
     locked = false;
-    var b = document.body;
+    var b = document.body, h = document.documentElement;
     b.style.position = "";
     b.style.top = "";
     b.style.left = "";
     b.style.right = "";
     b.style.width = "";
     b.style.overflow = "";
+    h.style.overflow = "";
     window.scrollTo(0, savedScrollY);
   }
 
@@ -103,7 +105,12 @@
   window.addEventListener("message", function (e) {
     if (e.origin !== origin) return;
     var d = e.data;
-    if (!d || d.type !== "bleviq:resize") return;
+    if (!d) return;
+    if (d.type === "bleviq:ready") {
+      sendViewport();
+      return;
+    }
+    if (d.type !== "bleviq:resize") return;
     if (d.full) {
       goFullscreen();
     } else {
