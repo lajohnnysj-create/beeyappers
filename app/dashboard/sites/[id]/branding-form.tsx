@@ -93,25 +93,53 @@ function Section({
   icon,
   title,
   subtitle,
+  isOpen,
+  onToggle,
   children,
 }: {
   icon: ReactNode;
   title: string;
   subtitle?: string;
+  isOpen: boolean;
+  onToggle: () => void;
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-      <div className="flex items-center gap-3">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-50 text-brand-600">
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        className="flex w-full items-center gap-3 px-6 py-5 text-left transition hover:bg-slate-50/60"
+      >
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
           {icon}
         </span>
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
           {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
         </div>
-      </div>
-      <div className="mt-4">{children}</div>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={
+            "shrink-0 text-slate-400 transition-transform " +
+            (isOpen ? "rotate-180" : "")
+          }
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      {isOpen && (
+        <div className="border-t border-slate-100 px-6 py-5">{children}</div>
+      )}
     </section>
   );
 }
@@ -326,6 +354,13 @@ export function BrandingForm({
     setConfig((c) => ({ ...c, [key]: val }));
   }
 
+  // Accordion: at most one section open at a time.
+  const [openId, setOpenId] = useState<string>("avatar");
+  const sectionProps = (id: string) => ({
+    isOpen: openId === id,
+    onToggle: () => setOpenId((cur) => (cur === id ? "" : id)),
+  });
+
   async function save() {
     setSaving(true);
     setMsg(null);
@@ -342,6 +377,7 @@ export function BrandingForm({
           icon={ICONS.avatar}
           title="Avatar"
           subtitle="Shown on the chat bubble, the header, and each reply."
+          {...sectionProps("avatar")}
         >
           <AvatarPicker
             siteId={siteId}
@@ -351,7 +387,7 @@ export function BrandingForm({
           />
         </Section>
 
-        <Section icon={ICONS.chat} title="Assistant">
+        <Section icon={ICONS.chat} title="Assistant" {...sectionProps("assistant")}>
           <div className="space-y-4">
             <label className="block">
               <span className="text-sm font-medium text-slate-700">
@@ -379,7 +415,7 @@ export function BrandingForm({
           </div>
         </Section>
 
-        <Section icon={ICONS.palette} title="Colors">
+        <Section icon={ICONS.palette} title="Colors" {...sectionProps("colors")}>
           <div className="space-y-2.5">
             <ColorField icon={COLOR_ICONS.accent} label="Accent" value={config.bubbleColor} onChange={(v) => set("bubbleColor", v)} />
             <ColorField icon={COLOR_ICONS.header} label="Header" value={config.headerColor} onChange={(v) => set("headerColor", v)} />
@@ -390,7 +426,7 @@ export function BrandingForm({
           </div>
         </Section>
 
-        <Section icon={ICONS.type} title="Font">
+        <Section icon={ICONS.type} title="Font" {...sectionProps("font")}>
           <select
             value={config.fontFamily}
             onChange={(e) => set("fontFamily", e.target.value)}
@@ -404,7 +440,7 @@ export function BrandingForm({
           </select>
         </Section>
 
-        <Section icon={ICONS.bubble} title="Chat bubble">
+        <Section icon={ICONS.bubble} title="Chat bubble" {...sectionProps("bubble")}>
           <div className="space-y-4">
             <div>
               <span className="text-sm font-medium text-slate-700">Style</span>
@@ -511,6 +547,7 @@ export function BrandingForm({
             </svg>
           }
           title="Settings"
+          {...sectionProps("settings")}
         >
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
