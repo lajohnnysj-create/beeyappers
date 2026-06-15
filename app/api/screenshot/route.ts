@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
@@ -21,6 +22,14 @@ function mshots(domain: string): string {
 }
 
 export async function GET(req: Request) {
+  // Used by the authenticated dashboard preview. Gate it so anonymous callers
+  // can't enumerate sites or burn function time hammering the shot service.
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return new NextResponse("Unauthorized", { status: 401 });
+
   const siteId = new URL(req.url).searchParams.get("siteId") || "";
   if (!siteId) return new NextResponse("Missing siteId", { status: 400 });
 
