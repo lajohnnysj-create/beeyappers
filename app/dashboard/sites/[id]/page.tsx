@@ -118,6 +118,7 @@ export default async function SiteWorkspacePage({
           config={mergeConfig(site.widget_config)}
           knowledge={knowledge}
           canRetrain={entitlement.active}
+          canRemoveBranding={entitlement.active}
         />
       </main>
     </div>
