@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Bleviq",
+  title: "24/7 AI Chatbot: Train in just minutes | Bleviq",
   description: "An AI chat widget trained on your website.",
   icons: {
     icon: [
