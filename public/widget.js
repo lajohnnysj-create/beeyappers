@@ -48,7 +48,13 @@
   function avatarEl(size) {
     if (cfg.avatarUrl) {
       var img = document.createElement("img");
-      img.src = cfg.avatarUrl;
+      var url = cfg.avatarUrl;
+      // Preset avatars are root-relative ("/agent/1.webp"); on a customer page
+      // those would resolve to the customer's domain. Anchor them to Bleviq.
+      if (!/^https?:\/\//i.test(url)) {
+        url = origin + (url.charAt(0) === "/" ? url : "/" + url);
+      }
+      img.src = url;
       img.alt = "";
       img.style.cssText =
         "width:" + size + "px;height:" + size + "px;border-radius:" +
