@@ -61,7 +61,7 @@ function SuggestionChips({
             border: "1px solid rgba(0,0,0,.10)",
             background: "#ffffff",
             color: "#1f2937",
-            fontSize: 13,
+            fontSize: 15,
             lineHeight: 1.3,
             padding: "7px 11px",
             borderRadius: 14,
@@ -104,7 +104,7 @@ function LinkButton({
         background: config.bubbleColor,
         color: readable(config.bubbleColor),
         textDecoration: "none",
-        fontSize: 13,
+        fontSize: 15,
         fontWeight: 600,
         boxShadow: "0 1px 2px rgba(0,0,0,.08)",
       }}
@@ -146,7 +146,7 @@ function renderInline(
       out.push(<strong key={k}>{m[3] ?? m[4]}</strong>);
     } else if (m[5] !== undefined) {
       out.push(
-        <code key={k} style={{ background: "rgba(0,0,0,.06)", borderRadius: 4, padding: "0 4px", fontSize: 13 }}>
+        <code key={k} style={{ background: "rgba(0,0,0,.06)", borderRadius: 4, padding: "0 4px", fontSize: 15 }}>
           {m[5]}
         </code>
       );
@@ -417,7 +417,7 @@ export function ChatWidget({
         <span
           style={{
             flex: 1,
-            fontSize: 15,
+            fontSize: 17,
             fontWeight: 700,
             color: headerFg,
             letterSpacing: "-0.01em",
@@ -483,7 +483,7 @@ export function ChatWidget({
                   borderRadius: 18,
                   borderBottomRightRadius: 6,
                   padding: "9px 13px",
-                  fontSize: 14,
+                  fontSize: 16,
                   lineHeight: 1.45,
                   background: config.userBubbleColor,
                   color: "#fff",
@@ -502,7 +502,7 @@ export function ChatWidget({
                     borderRadius: 18,
                     borderBottomLeftRadius: 6,
                     padding: "9px 13px",
-                    fontSize: 14,
+                    fontSize: 16,
                     lineHeight: 1.45,
                     background: config.assistantBubbleColor,
                     color: config.textColor,
@@ -614,7 +614,7 @@ export function ChatWidget({
               border: "none",
               background: "transparent",
               outline: "none",
-              fontSize: 14,
+              fontSize: 16,
               color: "#0f172a",
               fontFamily: font,
             }}
