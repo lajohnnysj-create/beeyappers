@@ -59,6 +59,13 @@ export function WidgetFrame({
       }
     }
     window.addEventListener("message", onMsg);
+    // The loader posts the viewport once on iframe load, which can land before
+    // this listener exists. Announce readiness so it (re)sends it now.
+    try {
+      window.parent.postMessage({ type: "bleviq:ready" }, "*");
+    } catch {
+      /* ignore */
+    }
     return () => window.removeEventListener("message", onMsg);
   }, []);
 
