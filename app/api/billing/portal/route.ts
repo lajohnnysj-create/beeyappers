@@ -2,10 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/billing/stripe";
+import { checkRateLimit } from "@/lib/security/rate-limit";
+import { isSameOrigin } from "@/lib/security/same-origin";
 
 export const dynamic = "force-dynamic";
 
+const RL_LIMIT = 10;
+const RL_WINDOW = 60; // seconds
+
 export async function POST(req: NextRequest) {
+  if (!isSameOrigin(req)) {
+    return NextResponse.json({ error: "Bad origin" }, { status: 403 });
+  }
+
   const supabase = createClient();
   const {
     data: { user },
@@ -15,6 +24,20 @@ export async function POST(req: NextRequest) {
   }
 
   const admin = createAdminClient();
+
+  const allowed = await checkRateLimit(
+    admin,
+    `billing:portal:${user.id}`,
+    RL_LIMIT,
+    RL_WINDOW
+  );
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please slow down." },
+      { status: 429 }
+    );
+  }
+
   const { data } = await admin
     .from("subscriptions")
     .select("stripe_customer_id")
