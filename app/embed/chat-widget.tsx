@@ -38,12 +38,14 @@ function Avatar({ config, size }: { config: WidgetConfig; size: number }) {
 export function ChatWidget({
   widgetKey,
   config,
+  radius,
   onClose,
   pendingQuestion,
   onQuestionConsumed,
 }: {
   widgetKey: string;
   config: WidgetConfig;
+  radius?: number;
   onClose?: () => void;
   pendingQuestion?: string;
   onQuestionConsumed?: () => void;
@@ -132,6 +134,8 @@ export function ChatWidget({
         display: "flex",
         flexDirection: "column",
         height: "100%",
+        borderRadius: radius || 0,
+        overflow: "hidden",
         background: config.backgroundColor,
         color: config.textColor,
         fontFamily: font,

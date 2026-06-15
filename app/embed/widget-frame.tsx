@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { type WidgetConfig } from "@/lib/widget-config";
 import { ChatWidget } from "./chat-widget";
 
-const SHADOW = 22; // transparent room for drop shadows
+const SHADOW = 36; // transparent room for drop shadows
 const MARGIN = 18; // gap between widget and the viewport corner
 const GAP = 8; // gap between panel and the close button
 const X_SIZE = 56;
@@ -44,19 +44,22 @@ export function WidgetFrame({
   const left = config.launcherPosition === "bottom-left";
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState<string | undefined>(undefined);
-  const [vw, setVw] = useState(1200);
-  const [vh, setVh] = useState(800);
+  const [vw, setVw] = useState(1280);
+  const [vh, setVh] = useState(900);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // Track viewport so the panel never exceeds the screen on small devices.
+  // window.innerHeight here is the IFRAME's size, not the host page's, so the
+  // loader posts the real host viewport for responsive sizing.
   useEffect(() => {
-    function up() {
-      setVw(window.innerWidth);
-      setVh(window.innerHeight);
+    function onMsg(e: MessageEvent) {
+      const d = e.data;
+      if (d && d.type === "bleviq:viewport") {
+        if (typeof d.w === "number") setVw(d.w);
+        if (typeof d.h === "number") setVh(d.h);
+      }
     }
-    up();
-    window.addEventListener("resize", up);
-    return () => window.removeEventListener("resize", up);
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
   }, []);
 
   const panelW = Math.max(260, Math.min(config.panelWidth || 380, vw - 2 * MARGIN - 4));
@@ -127,8 +130,9 @@ export function WidgetFrame({
           marginBottom: GAP,
           borderRadius: 16,
           overflow: "hidden",
+          isolation: "isolate",
           background: "#fff",
-          boxShadow: "0 10px 40px rgba(0,0,0,.28)",
+          boxShadow: "0 10px 34px rgba(0,0,0,.22)",
           transformOrigin: left ? "bottom left" : "bottom right",
           animation: "bvPop .28s cubic-bezier(.34,1.56,.64,1)",
         }}
@@ -136,6 +140,7 @@ export function WidgetFrame({
         <ChatWidget
           widgetKey={widgetKey}
           config={config}
+          radius={16}
           onClose={closeChat}
           pendingQuestion={pending}
           onQuestionConsumed={() => setPending(undefined)}
