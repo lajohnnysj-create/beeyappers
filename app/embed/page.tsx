@@ -1,12 +1,16 @@
 import { createPublicClient } from "@/lib/supabase/public";
 import { mergeConfig } from "@/lib/widget-config";
-import { WidgetFrame } from "../embed/widget-frame";
+import { ChatWidget } from "./chat-widget";
+
+// Always render fresh so dashboard config changes show up immediately.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function FramePage({
+export default async function EmbedPage({
   searchParams,
 }: {
   searchParams: { key?: string };
@@ -25,10 +29,8 @@ export default async function FramePage({
   }
 
   return (
-    <>
-      {/* The loader's iframe must be see-through outside the widget itself. */}
-      <style>{`html,body{background:transparent !important;margin:0;overflow:hidden}`}</style>
-      <WidgetFrame widgetKey={key} config={config} />
-    </>
+    <div style={{ height: "100vh" }}>
+      <ChatWidget widgetKey={key} config={config} />
+    </div>
   );
 }
