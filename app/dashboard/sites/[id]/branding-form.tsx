@@ -937,6 +937,7 @@ function FontSelect({
 function Preview({ config }: { config: WidgetConfig }) {
   const font = resolveFont(config.fontFamily);
   const headerFg = readable(config.headerColor);
+  const panelIsDark = readable(config.backgroundColor) === "#ffffff";
   return (
     <div
       className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 shadow-sm"
@@ -995,13 +996,13 @@ function Preview({ config }: { config: WidgetConfig }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-4 pb-2.5 pt-1.5 text-[11px]" style={{ color: "#64748b" }}>
+      <div className="flex items-center justify-between px-4 pb-2.5 pt-1.5 text-[11px]" style={{ color: panelIsDark ? "rgba(255,255,255,0.6)" : "#64748b" }}>
         <span>This chat is recorded.</span>
         {config.showBranding && (
           <span className="flex items-center gap-0.5">
             <span className="text-[10px]">Powered by</span>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Bleviq" className="h-3 w-auto" />
+            <img src={panelIsDark ? "/logowhite-small.png" : "/logoblack-small.png"} alt="Bleviq" className="h-3 w-auto" />
           </span>
         )}
       </div>
