@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { embedTexts } from "@/lib/embed/openai";
 import { retrieveChunks, type MatchedChunk } from "@/lib/answer/retrieve";
 import { rewriteQuery } from "@/lib/answer/rewrite";
-import { generateAnswer } from "@/lib/answer/generate";
+import { generateAnswer, suggestAnswerableQuestions } from "@/lib/answer/generate";
 import { getClientIp, hashIp } from "@/lib/security/ip";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 
@@ -17,6 +17,14 @@ const HOURLY_LIMIT = 30; // requests per hour, per IP per site (sustained cap)
 const HOURLY_WINDOW = 3600;
 const MONTHLY_MESSAGE_CAP = 1000; // rolling 30-day answers per account
 const TOP_K = 8;
+
+// Friendly copy shown when we have no answer. If we can suggest answerable
+// questions, the line sets them up; otherwise it stands alone.
+function noInfoText(hasSuggestions: boolean): string {
+  return hasSuggestions
+    ? "I don't have that one in my knowledge yet, but you can ask me about:"
+    : "I don't have that information yet.";
+}
 
 type SiteRow = {
   id: string;
@@ -191,20 +199,7 @@ export async function POST(req: Request) {
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, TOP_K);
 
-    if (chunks.length === 0) {
-      return json(
-        {
-          answer:
-            "I don't have any information about that yet. The site may not be fully set up.",
-        },
-        200,
-        headers
-      );
-    }
-
-    const context = chunks.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n");
-
-    // Page list the assistant can link to (favor shallow, nav-level URLs).
+    // Page list (for linking + suggestions) and FAQ questions (for suggestions).
     const { data: pageRows } = await admin
       .from("pages")
       .select("url, title")
@@ -216,13 +211,44 @@ export async function POST(req: Request) {
       .sort((a, b) => a.url.length - b.url.length)
       .slice(0, 30);
 
+    const { data: faqRows } = await admin
+      .from("chunks")
+      .select("source_label")
+      .eq("site_id", site.id)
+      .eq("source_type", "faq")
+      .limit(50);
+    const faqQuestions = (faqRows ?? [])
+      .map((r) => String(r.source_label || "").trim())
+      .filter(Boolean);
+
+    if (chunks.length === 0) {
+      const suggestions = await suggestAnswerableQuestions(pages, faqQuestions);
+      return json(
+        { answer: noInfoText(suggestions.length > 0), suggestions },
+        200,
+        headers
+      );
+    }
+
+    const context = chunks.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n");
+
     // 7. Generate the answer with guardrails.
-    const { answer, totalTokens } = await generateAnswer(
+    const gen = await generateAnswer(
       site.system_prompt,
       context,
       question,
       pages
     );
+    let answer = gen.answer;
+    const totalTokens = gen.totalTokens;
+    let suggestions: string[] | undefined;
+
+    // The model emits NO_INFO when the context doesn't cover the question.
+    // Swap in friendly copy and offer questions it can actually answer.
+    if (answer.trim().toUpperCase().startsWith("NO_INFO")) {
+      suggestions = await suggestAnswerableQuestions(pages, faqQuestions);
+      answer = noInfoText(suggestions.length > 0);
+    }
 
     // 8. Account for spend and log the exchange (best-effort).
     await admin.rpc("add_site_token_usage", {
@@ -259,7 +285,7 @@ export async function POST(req: Request) {
       ]);
     }
 
-    return json({ answer }, 200, headers);
+    return json(suggestions ? { answer, suggestions } : { answer }, 200, headers);
   } catch (err) {
     // Never leak internal detail to the public client.
     console.error("answer route error:", err);
