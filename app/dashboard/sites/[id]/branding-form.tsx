@@ -405,44 +405,62 @@ export function BrandingForm({
         </Section>
 
         <Section icon={ICONS.bubble} title="Chat bubble">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
+          <div className="space-y-4">
+            <div>
               <span className="text-sm font-medium text-slate-700">Position</span>
-              <select
-                value={config.launcherPosition}
-                onChange={(e) =>
-                  set("launcherPosition", e.target.value as WidgetConfig["launcherPosition"])
-                }
-                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
-              >
-                <option value="bottom-right">Bottom right</option>
-                <option value="bottom-left">Bottom left</option>
-              </select>
-            </label>
+              <div className="mt-2 grid grid-cols-2 gap-3 sm:max-w-xs">
+                {(["bottom-left", "bottom-right"] as const).map((pos) => {
+                  const active = config.launcherPosition === pos;
+                  const left = pos === "bottom-left";
+                  return (
+                    <button
+                      key={pos}
+                      type="button"
+                      onClick={() => set("launcherPosition", pos)}
+                      className={
+                        "flex flex-col items-center gap-2 rounded-xl border p-3 transition " +
+                        (active
+                          ? "border-brand-500 bg-brand-50/40 ring-2 ring-brand-200"
+                          : "border-slate-200 hover:border-slate-300")
+                      }
+                    >
+                      <svg width="72" height="48" viewBox="0 0 72 48" fill="none">
+                        <rect
+                          x="1.5"
+                          y="1.5"
+                          width="69"
+                          height="45"
+                          rx="5"
+                          className="fill-slate-100 stroke-slate-300"
+                          strokeWidth="1.5"
+                        />
+                        <circle
+                          cx={left ? 14 : 58}
+                          cy={37}
+                          r="7"
+                          className={active ? "fill-brand-600" : "fill-slate-400"}
+                        />
+                      </svg>
+                      <span
+                        className={
+                          "text-xs font-medium " +
+                          (active ? "text-brand-700" : "text-slate-600")
+                        }
+                      >
+                        {left ? "Bottom left" : "Bottom right"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <label className="block">
               <span className="text-sm font-medium text-slate-700">Label (optional)</span>
               <input
                 value={config.launcherLabel}
                 onChange={(e) => set("launcherLabel", e.target.value)}
                 placeholder="e.g. Chat with us"
-                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Panel width (px)</span>
-              <input
-                type="number"
-                value={config.panelWidth}
-                onChange={(e) => set("panelWidth", Number(e.target.value) || 380)}
-                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
-              />
-            </label>
-            <label className="block">
-              <span className="text-sm font-medium text-slate-700">Panel height (px)</span>
-              <input
-                type="number"
-                value={config.panelHeight}
-                onChange={(e) => set("panelHeight", Number(e.target.value) || 560)}
                 className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
               />
             </label>
