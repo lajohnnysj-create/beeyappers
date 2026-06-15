@@ -10,6 +10,7 @@ export async function getOrCreateCustomer(
   email: string | null
 ): Promise<string> {
   const admin = createAdminClient();
+  const stripe = getStripe();
 
   const { data: existing } = await admin
     .from("subscriptions")
@@ -17,9 +18,23 @@ export async function getOrCreateCustomer(
     .eq("user_id", userId)
     .maybeSingle();
 
-  if (existing?.stripe_customer_id) return existing.stripe_customer_id;
+  // Reuse the stored customer only if it still exists in the current Stripe
+  // mode. It can be gone (deleted during testing, removed by account deletion)
+  // or belong to the other mode (a live customer is invisible to test keys and
+  // vice versa). In any of those cases we fall through and mint a fresh one so
+  // checkout never hard-fails on a dangling reference.
+  if (existing?.stripe_customer_id) {
+    try {
+      const c = await stripe.customers.retrieve(existing.stripe_customer_id);
+      if (!(c as { deleted?: boolean }).deleted) {
+        return existing.stripe_customer_id;
+      }
+    } catch {
+      // resource_missing (or wrong-mode) — recreate below.
+    }
+  }
 
-  const customer = await getStripe().customers.create({
+  const customer = await stripe.customers.create({
     email: email || undefined,
     metadata: { user_id: userId },
   });
