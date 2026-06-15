@@ -215,7 +215,7 @@ export default async function TermsPage() {
       <h2>Contact us</h2>
       <p>
         Questions about these Terms? Email{" "}
-        <a href="mailto:support@bleviq.com">support@bleviq.com</a>. Bleviq is
+        <a href="mailto:johnnyla@mrla-media.com">johnnyla@mrla-media.com</a>. Bleviq is
         operated by MRLA Media LLC, Los Angeles, California, USA.
       </p>
     </LegalShell>
