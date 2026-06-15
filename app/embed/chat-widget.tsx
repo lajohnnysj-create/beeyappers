@@ -80,8 +80,8 @@ export function ChatWidget({
     }
   }
 
-  async function send() {
-    const q = input.trim();
+  async function sendText(q: string) {
+    q = q.trim();
     if (!q || busy) return;
     setInput("");
     setMessages((m) => [...m, { role: "user", content: q }]);
@@ -105,6 +105,26 @@ export function ChatWidget({
       setBusy(false);
     }
   }
+
+  function send() {
+    sendText(input);
+  }
+
+  // Receive a question typed in the launcher's chat bar and send it.
+  const sendRef = useRef(sendText);
+  sendRef.current = sendText;
+  useEffect(() => {
+    function onMsg(e: MessageEvent) {
+      if (!e.data || e.data.type !== "bleviq-ask") return;
+      const q = typeof e.data.question === "string" ? e.data.question : "";
+      if (q) {
+        setFocused(true);
+        sendRef.current(q);
+      }
+    }
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
 
   function onKey(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
