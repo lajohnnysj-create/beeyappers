@@ -149,9 +149,19 @@ export function TrainStatus({
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
             <dt className="text-xs font-medium text-slate-500">Last trained</dt>
             <dd className="mt-0.5 text-sm font-semibold text-slate-900">
-              {lastCrawledAt
-                ? new Date(lastCrawledAt).toLocaleDateString()
-                : "\u2014"}
+              {lastCrawledAt ? (
+                <>
+                  {new Date(lastCrawledAt).toLocaleDateString()}
+                  <span className="ml-1 text-xs font-normal text-slate-500">
+                    {new Date(lastCrawledAt).toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </>
+              ) : (
+                "\u2014"
+              )}
             </dd>
           </div>
         </dl>
