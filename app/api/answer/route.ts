@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { embedTexts } from "@/lib/embed/openai";
 import { retrieveChunks, type MatchedChunk } from "@/lib/answer/retrieve";
 import { rewriteQuery } from "@/lib/answer/rewrite";
-import { generateAnswer, suggestAnswerableQuestions } from "@/lib/answer/generate";
+import { generateAnswer, suggestAnswerableQuestions, type ChatTurn } from "@/lib/answer/generate";
 import { getClientIp, hashIp } from "@/lib/security/ip";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 
@@ -74,11 +74,27 @@ export async function POST(req: Request) {
   let widgetKey = "";
   let question = "";
   let honeypot = "";
+  let history: ChatTurn[] = [];
   try {
     const body = await req.json();
     widgetKey = String(body.widgetKey || "");
     question = String(body.question || "").trim();
     honeypot = String(body.hp || "");
+    // Recent turns for context. Keep it bounded: last 8 turns, each clamped to
+    // the question length cap, only well-formed user/assistant entries.
+    if (Array.isArray(body.history)) {
+      history = body.history
+        .filter(
+          (t: unknown): t is { role: string; content: unknown } =>
+            !!t && typeof t === "object"
+        )
+        .map((t: { role: string; content: unknown }) => ({
+          role: t.role === "assistant" ? "assistant" : "user",
+          content: String(t.content ?? "").slice(0, MAX_QUESTION_CHARS),
+        }))
+        .filter((t: ChatTurn) => t.content.trim().length > 0)
+        .slice(-8) as ChatTurn[];
+    }
   } catch {
     return json({ error: "Bad request" }, 400, baseHeaders);
   }
@@ -180,7 +196,7 @@ export async function POST(req: Request) {
     // 6. Rewrite the question, then retrieve using BOTH the original and the
     //    rewritten query, merging results so messy phrasing still finds the
     //    right content.
-    const rewritten = await rewriteQuery(question);
+    const rewritten = await rewriteQuery(question, history);
     const queries = [question];
     if (rewritten && rewritten.toLowerCase() !== question.toLowerCase()) {
       queries.push(rewritten);
@@ -237,7 +253,8 @@ export async function POST(req: Request) {
       site.system_prompt,
       context,
       question,
-      pages
+      pages,
+      history
     );
     let answer = gen.answer;
     const totalTokens = gen.totalTokens;
