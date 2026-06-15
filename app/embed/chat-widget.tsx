@@ -5,17 +5,29 @@ import { type WidgetConfig, resolveFont } from "@/lib/widget-config";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-function Avatar({ config }: { config: WidgetConfig }) {
-  if (config.faviconUrl) {
+// Pick readable foreground (dark or white) for a given hex background.
+function readable(bg: string): string {
+  const h = bg.replace("#", "");
+  if (h.length < 6) return "#0f172a";
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const L = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return L > 0.62 ? "#0f172a" : "#ffffff";
+}
+
+function Avatar({ config, size }: { config: WidgetConfig; size: number }) {
+  const radius = Math.round(size * 0.32);
+  if (config.avatarUrl) {
     // eslint-disable-next-line @next/next/no-img-element
     return (
       <img
-        src={config.faviconUrl}
+        src={config.avatarUrl}
         alt=""
         style={{
-          height: 24,
-          width: 24,
-          borderRadius: "50%",
+          height: size,
+          width: size,
+          borderRadius: radius,
           objectFit: "cover",
           flexShrink: 0,
         }}
@@ -25,9 +37,9 @@ function Avatar({ config }: { config: WidgetConfig }) {
   return (
     <span
       style={{
-        height: 24,
-        width: 24,
-        borderRadius: "50%",
+        height: size,
+        width: size,
+        borderRadius: radius,
         background: config.bubbleColor,
         display: "inline-block",
         flexShrink: 0,
@@ -52,9 +64,20 @@ export function ChatWidget({
   const scrollRef = useRef<HTMLDivElement>(null);
   const font = resolveFont(config.fontFamily);
 
+  const headerBg = config.headerColor;
+  const headerFg = readable(headerBg);
+
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
   }, [messages, busy]);
+
+  function close() {
+    try {
+      window.parent.postMessage({ type: "bleviq-close" }, "*");
+    } catch {
+      /* ignore */
+    }
+  }
 
   async function send() {
     const q = input.trim();
@@ -100,38 +123,72 @@ export function ChatWidget({
         fontFamily: font,
       }}
     >
+      {/* Header */}
       <header
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
-          padding: "12px 16px",
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
-          background: config.headerColor,
+          gap: 10,
+          padding: "14px 16px",
+          background: headerBg,
         }}
       >
-        {config.logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={config.logoUrl} alt="" style={{ height: 24, width: "auto" }} />
-        ) : null}
-        <span style={{ fontSize: 14, fontWeight: 600, color: config.textColor }}>
+        <Avatar config={config} size={36} />
+        <span
+          style={{
+            flex: 1,
+            fontSize: 15,
+            fontWeight: 700,
+            color: headerFg,
+            letterSpacing: "-0.01em",
+          }}
+        >
           {config.assistantName}
         </span>
+        <button
+          onClick={close}
+          aria-label="Close chat"
+          style={{
+            border: "none",
+            background: "transparent",
+            color: headerFg,
+            cursor: "pointer",
+            opacity: 0.85,
+            padding: 4,
+            display: "grid",
+            placeItems: "center",
+            borderRadius: 8,
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
       </header>
 
+      {/* Messages */}
       <div
         ref={scrollRef}
-        style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12 }}
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: 16,
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
       >
         {messages.map((m, i) =>
           m.role === "user" ? (
             <div key={i} style={{ display: "flex", justifyContent: "flex-end" }}>
               <div
                 style={{
-                  maxWidth: "80%",
-                  borderRadius: 16,
-                  padding: "8px 12px",
+                  maxWidth: "82%",
+                  borderRadius: 18,
+                  borderBottomRightRadius: 6,
+                  padding: "9px 13px",
                   fontSize: 14,
+                  lineHeight: 1.45,
                   background: config.userBubbleColor,
                   color: "#fff",
                 }}
@@ -140,14 +197,16 @@ export function ChatWidget({
               </div>
             </div>
           ) : (
-            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-              <Avatar config={config} />
+            <div key={i} style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+              <Avatar config={config} size={26} />
               <div
                 style={{
-                  maxWidth: "80%",
-                  borderRadius: 16,
-                  padding: "8px 12px",
+                  maxWidth: "82%",
+                  borderRadius: 18,
+                  borderBottomLeftRadius: 6,
+                  padding: "9px 13px",
                   fontSize: 14,
+                  lineHeight: 1.45,
                   background: config.assistantBubbleColor,
                   color: config.textColor,
                 }}
@@ -158,25 +217,39 @@ export function ChatWidget({
           )
         )}
         {busy && (
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Avatar config={config} />
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+            <Avatar config={config} size={26} />
             <div
               style={{
-                borderRadius: 16,
-                padding: "8px 12px",
-                fontSize: 14,
+                display: "flex",
+                gap: 4,
+                borderRadius: 18,
+                borderBottomLeftRadius: 6,
+                padding: "12px 14px",
                 background: config.assistantBubbleColor,
-                color: config.textColor,
-                opacity: 0.7,
               }}
             >
-              Thinking...
+              {[0, 1, 2].map((d) => (
+                <span
+                  key={d}
+                  style={{
+                    height: 6,
+                    width: 6,
+                    borderRadius: "50%",
+                    background: config.textColor,
+                    opacity: 0.4,
+                    animation: "bvBlink 1.2s ease-in-out infinite",
+                    animationDelay: d * 0.15 + "s",
+                  }}
+                />
+              ))}
             </div>
           </div>
         )}
       </div>
 
-      <div style={{ borderTop: "1px solid rgba(0,0,0,0.06)", padding: 12 }}>
+      {/* Input */}
+      <div style={{ padding: "10px 14px 6px" }}>
         <input
           type="text"
           value={hp}
@@ -186,42 +259,77 @@ export function ChatWidget({
           aria-hidden="true"
           style={{ position: "absolute", left: -9999, width: 1, height: 1 }}
         />
-        <div style={{ display: "flex", gap: 8 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: "#f1f5f9",
+            borderRadius: 9999,
+            padding: "6px 6px 6px 16px",
+          }}
+        >
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
-            placeholder="Type your question..."
+            placeholder="Type here..."
             style={{
               flex: 1,
-              borderRadius: 8,
-              border: "1px solid #cbd5e1",
-              padding: "8px 12px",
+              border: "none",
+              background: "transparent",
+              outline: "none",
               fontSize: 14,
               color: "#0f172a",
-              outline: "none",
               fontFamily: font,
             }}
           />
           <button
             onClick={send}
             disabled={busy}
+            aria-label="Send"
             style={{
-              borderRadius: 8,
+              height: 36,
+              width: 36,
+              flexShrink: 0,
+              borderRadius: "50%",
               border: "none",
-              padding: "8px 16px",
-              fontSize: 14,
-              fontWeight: 500,
-              color: "#fff",
               background: config.bubbleColor,
+              color: "#fff",
               cursor: busy ? "default" : "pointer",
               opacity: busy ? 0.6 : 1,
+              display: "grid",
+              placeItems: "center",
             }}
           >
-            Send
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 19V5M5 12l7-7 7 7" />
+            </svg>
           </button>
         </div>
       </div>
+
+      {/* Footer */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+          padding: "6px 16px 10px",
+          fontSize: 11,
+          color: "#64748b",
+        }}
+      >
+        <span>This chat is recorded.</span>
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <span style={{ fontSize: 10 }}>Powered by</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Bleviq" style={{ height: 13, width: "auto" }} />
+        </span>
+      </div>
+
+      <style>{`@keyframes bvBlink{0%,80%,100%{opacity:.25}40%{opacity:.9}}`}</style>
     </div>
   );
 }
