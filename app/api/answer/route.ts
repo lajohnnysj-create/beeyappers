@@ -6,6 +6,7 @@ import { rewriteQuery } from "@/lib/answer/rewrite";
 import { generateAnswer, suggestAnswerableQuestions, type ChatTurn } from "@/lib/answer/generate";
 import { getClientIp, hashIp } from "@/lib/security/ip";
 import { checkRateLimit } from "@/lib/security/rate-limit";
+import { getEntitlementByUserId } from "@/lib/billing/entitlement";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -15,7 +16,6 @@ const BURST_LIMIT = 20; // requests per minute, per IP per site (anti-flood)
 const BURST_WINDOW = 60;
 const HOURLY_LIMIT = 30; // requests per hour, per IP per site (sustained cap)
 const HOURLY_WINDOW = 3600;
-const MONTHLY_MESSAGE_CAP = 1000; // rolling 30-day answers per account
 const TOP_K = 8;
 
 // Friendly copy shown when we have no answer. If we can suggest answerable
@@ -164,7 +164,19 @@ export async function POST(req: Request) {
     );
   }
 
-  // 5. Rolling 30-day message cap, per account (across all the owner's sites).
+  // 5. Entitlement: the widget only serves answers while the owner's account
+  //    is on an active plan or trial. This check is before any paid OpenAI
+  //    call, so an inactive account costs nothing.
+  const entitlement = await getEntitlementByUserId(site.user_id);
+  if (!entitlement.active) {
+    return json(
+      { answer: "This chat is currently unavailable. Please check back soon." },
+      200,
+      headers
+    );
+  }
+
+  // Rolling 30-day message cap, per account (across all the owner's sites).
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const { count: msgsUsed } = await admin
     .from("messages")
@@ -172,7 +184,7 @@ export async function POST(req: Request) {
     .eq("user_id", site.user_id)
     .eq("role", "assistant")
     .gte("created_at", since30);
-  if ((msgsUsed ?? 0) >= MONTHLY_MESSAGE_CAP) {
+  if ((msgsUsed ?? 0) >= entitlement.messageCap) {
     return json(
       { error: "This assistant has reached its monthly message limit." },
       429,
