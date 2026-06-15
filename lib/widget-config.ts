@@ -6,6 +6,7 @@ export type WidgetConfig = {
   greeting: string;
   logoUrl: string | null;
   faviconUrl: string | null;
+  avatarUrl: string | null; // agent photo: bubble, header, message avatars
   bubbleColor: string; // launcher button + accents
   headerColor: string; // chatbox header background
   backgroundColor: string; // chat panel background
@@ -44,6 +45,7 @@ export const DEFAULT_CONFIG: WidgetConfig = {
   greeting: "Hi! Ask me anything about this site.",
   logoUrl: null,
   faviconUrl: null,
+  avatarUrl: null,
   bubbleColor: "#2563eb",
   headerColor: "#ffffff",
   backgroundColor: "#ffffff",
