@@ -35,6 +35,152 @@ function Avatar({ config, size }: { config: WidgetConfig; size: number }) {
   );
 }
 
+function LinkChip({
+  href,
+  label,
+  config,
+}: {
+  href: string;
+  label: string;
+  config: WidgetConfig;
+}) {
+  if (!/^https?:\/\//i.test(href)) return <>{label}</>;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 4,
+        padding: "2px 10px",
+        margin: "2px 2px",
+        borderRadius: 9999,
+        background: config.bubbleColor,
+        color: readable(config.bubbleColor),
+        textDecoration: "none",
+        fontSize: 13,
+        fontWeight: 600,
+        lineHeight: 1.6,
+      }}
+    >
+      {label}
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M7 17 17 7M9 7h8v8" />
+      </svg>
+    </a>
+  );
+}
+
+function renderInline(
+  text: string,
+  config: WidgetConfig,
+  keyBase: string
+): React.ReactNode[] {
+  const out: React.ReactNode[] = [];
+  const re =
+    /\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_/g;
+  let last = 0;
+  let i = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    const k = keyBase + "-" + i++;
+    if (m[1] !== undefined) {
+      out.push(<LinkChip key={k} href={m[2]} label={m[1]} config={config} />);
+    } else if (m[3] !== undefined || m[4] !== undefined) {
+      out.push(<strong key={k}>{m[3] ?? m[4]}</strong>);
+    } else if (m[5] !== undefined) {
+      out.push(
+        <code key={k} style={{ background: "rgba(0,0,0,.06)", borderRadius: 4, padding: "0 4px", fontSize: 13 }}>
+          {m[5]}
+        </code>
+      );
+    } else if (m[6] !== undefined || m[7] !== undefined) {
+      out.push(<em key={k}>{m[6] ?? m[7]}</em>);
+    }
+    last = re.lastIndex;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
+function MessageContent({ text, config }: { text: string; config: WidgetConfig }) {
+  const lines = text.replace(/\r/g, "").split("\n");
+  const blocks: React.ReactNode[] = [];
+  let i = 0;
+  let b = 0;
+  const bullet = /^\s*[-*•]\s+/;
+  const ordered = /^\s*\d+\.\s+/;
+
+  while (i < lines.length) {
+    if (!lines[i].trim()) {
+      i++;
+      continue;
+    }
+    if (bullet.test(lines[i])) {
+      const items: string[] = [];
+      while (i < lines.length && bullet.test(lines[i])) {
+        items.push(lines[i].replace(bullet, ""));
+        i++;
+      }
+      const bk = "b" + b++;
+      blocks.push(
+        <ul key={bk} style={{ margin: "2px 0 6px", paddingLeft: 18 }}>
+          {items.map((it, j) => (
+            <li key={j} style={{ margin: "2px 0" }}>
+              {renderInline(it, config, bk + "-" + j)}
+            </li>
+          ))}
+        </ul>
+      );
+      continue;
+    }
+    if (ordered.test(lines[i])) {
+      const items: string[] = [];
+      while (i < lines.length && ordered.test(lines[i])) {
+        items.push(lines[i].replace(ordered, ""));
+        i++;
+      }
+      const bk = "b" + b++;
+      blocks.push(
+        <ol key={bk} style={{ margin: "2px 0 6px", paddingLeft: 20 }}>
+          {items.map((it, j) => (
+            <li key={j} style={{ margin: "2px 0" }}>
+              {renderInline(it, config, bk + "-" + j)}
+            </li>
+          ))}
+        </ol>
+      );
+      continue;
+    }
+    const para: string[] = [];
+    while (
+      i < lines.length &&
+      lines[i].trim() &&
+      !bullet.test(lines[i]) &&
+      !ordered.test(lines[i])
+    ) {
+      para.push(lines[i]);
+      i++;
+    }
+    const bk = "b" + b++;
+    blocks.push(
+      <p key={bk} style={{ margin: "0 0 6px" }}>
+        {para.map((ln, j) => (
+          <span key={j}>
+            {renderInline(ln, config, bk + "-" + j)}
+            {j < para.length - 1 ? <br /> : null}
+          </span>
+        ))}
+      </p>
+    );
+  }
+
+  return <div style={{ marginBottom: -6 }}>{blocks}</div>;
+}
+
 export function ChatWidget({
   widgetKey,
   config,
@@ -245,7 +391,7 @@ export function ChatWidget({
                   color: config.textColor,
                 }}
               >
-                {m.content}
+                <MessageContent text={m.content} config={config} />
               </div>
             </div>
           )
