@@ -25,9 +25,10 @@ export const PLANS: Record<PlanKey, Plan> = {
     monthly: 20,
     annualMonthly: 12,
     features: [
-      "1 trained site",
       "1,000 AI replies",
+      "1 trained site",
       "Custom branding, colors & fonts",
+      "No Bleviq branding",
     ],
   },
   pro: {
