@@ -11,7 +11,7 @@ import { checkRateLimit } from "@/lib/security/rate-limit";
 export const runtime = "nodejs";
 export const maxDuration = 60; // raise to 300 on Pro for larger sites
 
-const MAX_PAGES = 40;
+const MAX_PAGES = 90;
 const MAX_CHUNKS = 1000;
 const FETCH_CONCURRENCY = 8;
 const INSERT_BATCH = 200;
