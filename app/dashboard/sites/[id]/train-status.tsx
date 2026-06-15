@@ -153,6 +153,7 @@ export function TrainStatus({
                 <>
                   {new Date(lastCrawledAt).toLocaleDateString()}
                   <span className="ml-1 text-xs font-normal text-slate-500">
+                    at{" "}
                     {new Date(lastCrawledAt).toLocaleTimeString([], {
                       hour: "numeric",
                       minute: "2-digit",
