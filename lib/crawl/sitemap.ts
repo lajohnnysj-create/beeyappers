@@ -144,6 +144,32 @@ async function fromHomepageLinks(
   return [...found];
 }
 
+// Rank URLs so high-value pages (home, pricing, terms, privacy, contact, FAQ)
+// are kept when the crawl cap is hit, and bulk content (blog/news/tags) only
+// fills the remaining slots. Lower score = crawled first.
+function rankUrl(url: string): number {
+  try {
+    const path = new URL(url).pathname.replace(/\/+$/, "").toLowerCase();
+    if (path === "") return 0; // homepage
+    const depth = path.split("/").filter(Boolean).length;
+    const slug = path.replace(/[^a-z0-9]+/g, " ").trim();
+
+    // Bulk content: demote so it never crowds out the essentials.
+    const LOW =
+      /\b(blog|blogs|post|posts|article|articles|news|story|stories|tag|tags|category|categories|topic|topics|author|authors|archive|archives)\b/;
+    if (LOW.test(slug) || /\bpage \d+\b/.test(slug)) return 100 + depth;
+
+    // Essential pages a visitor (and the assistant) most often needs.
+    const HIGH =
+      /\b(pricing|price|prices|plan|plans|cost|costs|terms|tos|conditions|privacy|policy|policies|refund|refunds|return|returns|cancellation|guarantee|about|company|contact|faq|faqs|support|help|feature|features|started|docs|documentation)\b/;
+    if (HIGH.test(slug)) return 1 + depth * 0.1;
+
+    return 10 + depth; // everything else, shallower first
+  } catch {
+    return 50;
+  }
+}
+
 // Returns a de-duplicated, same-site list of page URLs to crawl, capped.
 export async function discoverUrls(
   origin: string,
@@ -165,5 +191,6 @@ export async function discoverUrls(
   const unique = [...new Set(pages.map(normalize))].filter((u) =>
     isPageUrl(u)
   );
+  unique.sort((a, b) => rankUrl(a) - rankUrl(b));
   return unique.slice(0, limit);
 }
