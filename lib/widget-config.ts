@@ -16,6 +16,7 @@ export type WidgetConfig = {
   fontFamily: string; // a key from FONT_OPTIONS
   // Launcher bubble (rendered on the host site by widget.js)
   launcherPosition: "bottom-right" | "bottom-left";
+  launcherStyle: "bubble" | "bar";
   launcherIcon: "default" | "emoji" | "favicon";
   launcherEmoji: string;
   launcherLabel: string;
@@ -54,6 +55,7 @@ export const DEFAULT_CONFIG: WidgetConfig = {
   textColor: "#0f172a",
   fontFamily: "system",
   launcherPosition: "bottom-right",
+  launcherStyle: "bubble",
   launcherIcon: "default",
   launcherEmoji: "\uD83D\uDCAC",
   launcherLabel: "",
