@@ -2,6 +2,11 @@ import { createPublicClient } from "@/lib/supabase/public";
 import { mergeConfig } from "@/lib/widget-config";
 import { WidgetFrame } from "../embed/widget-frame";
 
+// Always render fresh so dashboard config changes show up immediately
+// (no Next data-cache between requests).
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata = {
   robots: { index: false, follow: false },
 };
