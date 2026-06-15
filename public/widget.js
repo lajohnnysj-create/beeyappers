@@ -104,6 +104,12 @@
   }
   btn.addEventListener("click", toggle);
 
+  // The chatbox X (inside the iframe) asks the loader to close.
+  window.addEventListener("message", function (e) {
+    if (e.origin !== origin) return;
+    if (e.data && e.data.type === "bleviq-close" && open) toggle();
+  });
+
   function mount() {
     container.appendChild(label);
     container.appendChild(btn);
