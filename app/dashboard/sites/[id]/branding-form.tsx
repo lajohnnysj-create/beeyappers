@@ -556,6 +556,20 @@ function AgentAvatar({
   );
 }
 
+function PreviewChatIcon({ fill, dot }: { fill: string; dot: string }) {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M5 4h14a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-6l-5 4v-4H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"
+        fill={fill}
+      />
+      <circle cx="8" cy="10" r="1.4" fill={dot} />
+      <circle cx="12" cy="10" r="1.4" fill={dot} />
+      <circle cx="16" cy="10" r="1.4" fill={dot} />
+    </svg>
+  );
+}
+
 function LauncherPreview({ config }: { config: WidgetConfig }) {
   const left = config.launcherPosition === "bottom-left";
   return (
@@ -564,7 +578,7 @@ function LauncherPreview({ config }: { config: WidgetConfig }) {
       style={{ justifyContent: left ? "flex-start" : "flex-end" }}
     >
       {config.launcherStyle === "bar" ? (
-        <BarLauncher config={config} />
+        <BarLauncher config={config} left={left} />
       ) : (
         <BubbleLauncher config={config} left={left} />
       )}
@@ -587,8 +601,11 @@ function BubbleLauncher({ config, left }: { config: WidgetConfig; left: boolean 
         </span>
       ) : null}
       <span
-        className="grid h-14 w-14 place-items-center rounded-[20px] rounded-br-md text-2xl text-white shadow-lg"
-        style={{ background: config.bubbleColor }}
+        className="grid h-14 w-14 place-items-center text-white shadow-lg"
+        style={{
+          background: config.bubbleColor,
+          borderRadius: left ? "20px 20px 20px 8px" : "20px 20px 8px 20px",
+        }}
       >
         {config.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -597,17 +614,22 @@ function BubbleLauncher({ config, left }: { config: WidgetConfig; left: boolean 
             alt=""
             className="h-9 w-9 rounded-[13px] object-cover"
           />
-        ) : null}
+        ) : (
+          <PreviewChatIcon fill={readable(config.bubbleColor)} dot={config.bubbleColor} />
+        )}
       </span>
     </div>
   );
 }
 
-function BarLauncher({ config }: { config: WidgetConfig }) {
+function BarLauncher({ config, left }: { config: WidgetConfig; left: boolean }) {
   return (
     <div
-      className="flex items-center gap-2 rounded-[22px] rounded-br-md p-2 shadow-lg"
-      style={{ background: config.bubbleColor }}
+      className="flex items-center gap-2 p-2 shadow-lg"
+      style={{
+        background: config.bubbleColor,
+        borderRadius: left ? "22px 22px 22px 8px" : "22px 22px 8px 22px",
+      }}
     >
       {config.avatarUrl ? (
         <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[13px] bg-white/20 text-lg">
