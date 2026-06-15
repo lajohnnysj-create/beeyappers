@@ -9,6 +9,31 @@ const MARGIN = 18; // gap between widget and the viewport corner
 const GAP = 8; // gap between panel and the close button
 const X_SIZE = 56;
 
+// Pick a legible icon color (dark or white) for a given hex background.
+function readable(bg: string): string {
+  const h = bg.replace("#", "");
+  if (h.length < 6) return "#ffffff";
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const L = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return L > 0.62 ? "#0f172a" : "#ffffff";
+}
+
+function ChatIcon({ fill, dot }: { fill: string; dot: string }) {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M5 4h14a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-6l-5 4v-4H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"
+        fill={fill}
+      />
+      <circle cx="8" cy="10" r="1.4" fill={dot} />
+      <circle cx="12" cy="10" r="1.4" fill={dot} />
+      <circle cx="16" cy="10" r="1.4" fill={dot} />
+    </svg>
+  );
+}
+
 export function WidgetFrame({
   widgetKey,
   config,
@@ -162,7 +187,7 @@ function BubbleLauncher({
       style={{
         width: 56,
         height: 56,
-        borderRadius: "20px 20px 8px 20px",
+        borderRadius: left ? "20px 20px 20px 8px" : "20px 20px 8px 20px",
         background: config.bubbleColor,
         border: "none",
         cursor: "pointer",
@@ -171,7 +196,6 @@ function BubbleLauncher({
         alignItems: "center",
         justifyContent: "center",
         padding: 0,
-        fontSize: 24,
       }}
     >
       {config.avatarUrl ? (
@@ -182,7 +206,7 @@ function BubbleLauncher({
           style={{ width: 38, height: 38, borderRadius: 13, objectFit: "cover" }}
         />
       ) : (
-        <span>{"\uD83D\uDCAC"}</span>
+        <ChatIcon fill={readable(config.bubbleColor)} dot={config.bubbleColor} />
       )}
     </button>
   );
