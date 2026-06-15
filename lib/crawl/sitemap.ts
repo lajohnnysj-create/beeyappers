@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import { fetchPage } from "./fetch-page";
+import { safeFetch } from "./safe-fetch";
 
 const UA = "BeeYappersBot/0.1";
 const TIMEOUT_MS = 10_000;
@@ -53,12 +54,11 @@ async function fetchText(url: string): Promise<string | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    const res = await fetch(url, {
+    const res = await safeFetch(url, {
       signal: controller.signal,
-      redirect: "follow",
       headers: { "User-Agent": UA },
     });
-    if (!res.ok) return null;
+    if (!res || !res.ok) return null;
     return await res.text();
   } catch {
     return null;

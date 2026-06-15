@@ -3,18 +3,19 @@ const TIMEOUT_MS = 12_000;
 const UA =
   "BeeYappersBot/0.1 (+https://bee-yappers.example; AI site assistant)";
 
+import { safeFetch } from "./safe-fetch";
+
 export async function fetchPage(url: string): Promise<string | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const res = await fetch(url, {
+    const res = await safeFetch(url, {
       signal: controller.signal,
-      redirect: "follow",
       headers: { "User-Agent": UA, Accept: "text/html" },
     });
 
-    if (!res.ok) return null;
+    if (!res || !res.ok) return null;
 
     const type = res.headers.get("content-type") || "";
     if (!type.includes("text/html")) return null;
