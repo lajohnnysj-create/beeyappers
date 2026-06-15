@@ -26,7 +26,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     annualMonthly: 12,
     features: [
       "1 trained site",
-      "1,000 AI replies per month",
+      "1,000 AI replies",
       "Custom branding, colors & fonts",
     ],
   },
@@ -39,7 +39,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     monthly: 40,
     annualMonthly: 30,
     features: [
-      "10,000 AI replies per month",
+      "10,000 AI replies",
       "Everything in Basic",
       "Priority support",
     ],
