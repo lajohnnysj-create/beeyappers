@@ -35,7 +35,7 @@ function Avatar({ config, size }: { config: WidgetConfig; size: number }) {
   );
 }
 
-function LinkChip({
+function LinkButton({
   href,
   label,
   config,
@@ -44,29 +44,38 @@ function LinkChip({
   label: string;
   config: WidgetConfig;
 }) {
-  if (!/^https?:\/\//i.test(href)) return <>{label}</>;
+  if (!/^https?:\/\//i.test(href)) return null;
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
       style={{
-        display: "inline-flex",
+        display: "flex",
         alignItems: "center",
-        gap: 4,
-        padding: "2px 10px",
-        margin: "2px 2px",
-        borderRadius: 9999,
+        justifyContent: "space-between",
+        gap: 10,
+        maxWidth: 280,
+        padding: "10px 14px",
+        borderRadius: 12,
         background: config.bubbleColor,
         color: readable(config.bubbleColor),
         textDecoration: "none",
         fontSize: 13,
         fontWeight: 600,
-        lineHeight: 1.6,
+        boxShadow: "0 1px 2px rgba(0,0,0,.08)",
       }}
     >
-      {label}
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+      <span
+        style={{
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {label}
+      </span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
         <path d="M7 17 17 7M9 7h8v8" />
       </svg>
     </a>
@@ -88,7 +97,8 @@ function renderInline(
     if (m.index > last) out.push(text.slice(last, m.index));
     const k = keyBase + "-" + i++;
     if (m[1] !== undefined) {
-      out.push(<LinkChip key={k} href={m[2]} label={m[1]} config={config} />);
+      // Label stays inline as plain text; the clickable button renders below.
+      out.push(m[1]);
     } else if (m[3] !== undefined || m[4] !== undefined) {
       out.push(<strong key={k}>{m[3] ?? m[4]}</strong>);
     } else if (m[5] !== undefined) {
@@ -107,6 +117,18 @@ function renderInline(
 }
 
 function MessageContent({ text, config }: { text: string; config: WidgetConfig }) {
+  // Collect unique page links to render as buttons under the message.
+  const links: { label: string; url: string }[] = [];
+  const seen = new Set<string>();
+  const linkRe = /\[([^\]]+)\]\(([^)\s]+)\)/g;
+  let lm: RegExpExecArray | null;
+  while ((lm = linkRe.exec(text)) !== null) {
+    if (/^https?:\/\//i.test(lm[2]) && !seen.has(lm[2])) {
+      seen.add(lm[2]);
+      links.push({ label: lm[1], url: lm[2] });
+    }
+  }
+
   const lines = text.replace(/\r/g, "").split("\n");
   const blocks: React.ReactNode[] = [];
   let i = 0;
@@ -178,7 +200,18 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
     );
   }
 
-  return <div style={{ marginBottom: -6 }}>{blocks}</div>;
+  return (
+    <div style={{ marginBottom: -6 }}>
+      {blocks}
+      {links.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
+          {links.map((l, j) => (
+            <LinkButton key={j} href={l.url} label={l.label} config={config} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function ChatWidget({
@@ -360,7 +393,7 @@ export function ChatWidget({
         >
         {messages.map((m, i) =>
           m.role === "user" ? (
-            <div key={i} style={{ display: "flex", justifyContent: "flex-end" }}>
+            <div key={i} style={{ display: "flex", justifyContent: "flex-end", animation: "bvFade .35s ease both" }}>
               <div
                 style={{
                   maxWidth: "82%",
@@ -377,7 +410,7 @@ export function ChatWidget({
               </div>
             </div>
           ) : (
-            <div key={i} style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+            <div key={i} style={{ display: "flex", alignItems: "flex-end", gap: 8, animation: "bvFade .35s ease both" }}>
               <Avatar config={config} size={26} />
               <div
                 style={{
@@ -519,7 +552,7 @@ export function ChatWidget({
       </div>
       </div>
 
-      <style>{`@keyframes bvBlink{0%,80%,100%{opacity:.25}40%{opacity:.9}}`}</style>
+      <style>{`@keyframes bvBlink{0%,80%,100%{opacity:.25}40%{opacity:.9}}@keyframes bvFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}`}</style>
     </div>
   );
 }
