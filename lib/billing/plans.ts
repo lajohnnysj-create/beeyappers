@@ -19,7 +19,7 @@ export const PLANS: Record<PlanKey, Plan> = {
   basic: {
     key: "basic",
     name: "Basic",
-    tagline: "For a single site getting started.",
+    tagline: "For small businesses and start-ups.",
     messageCap: 1000,
     maxSites: 1,
     monthly: 20,
@@ -28,7 +28,6 @@ export const PLANS: Record<PlanKey, Plan> = {
       "1 trained site",
       "1,000 AI replies per month",
       "Custom branding, colors & fonts",
-      "Unlimited FAQs & documents",
     ],
   },
   pro: {
