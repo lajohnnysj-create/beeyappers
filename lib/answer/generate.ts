@@ -93,6 +93,8 @@ function systemPrompt(
   ].join("\n");
 }
 
+export type ChatTurn = { role: "user" | "assistant"; content: string };
+
 export type Generated = { answer: string; answered: boolean; totalTokens: number };
 
 // A bare all-caps control token (NO_INFO, YES_INFO, ...) must never reach the
@@ -130,7 +132,8 @@ export async function generateAnswer(
   ownerPrompt: string,
   context: string,
   question: string,
-  pages: { title: string; url: string }[] = []
+  pages: { title: string; url: string }[] = [],
+  history: ChatTurn[] = []
 ): Promise<Generated> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error("Missing OPENAI_API_KEY");
@@ -154,6 +157,7 @@ export async function generateAnswer(
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt(ownerPrompt, pages) },
+        ...history.map((t) => ({ role: t.role, content: t.content })),
         { role: "user", content: userContent },
       ],
     }),
