@@ -11,6 +11,13 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
+// Map CSS px 1:1 to device px inside the iframe so the 16px inputs are a true
+// 16px on iOS (no focus-zoom). Pinch-zoom stays enabled for accessibility.
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default async function FramePage({
   searchParams,
 }: {
