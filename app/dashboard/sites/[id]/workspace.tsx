@@ -120,25 +120,6 @@ export function Workspace(props: Props) {
   );
 }
 
-function SitePreview({ siteId }: { siteId: string }) {
-  const [loaded, setLoaded] = useState(false);
-  return (
-    <div className="relative aspect-[16/10] w-full max-w-[400px] overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
-      {!loaded && <div className="absolute inset-0 animate-pulse bg-slate-200" />}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`/api/screenshot?siteId=${siteId}`}
-        alt="Homepage preview"
-        onLoad={() => setLoaded(true)}
-        className={
-          "h-full w-full object-cover object-top transition-opacity duration-300 " +
-          (loaded ? "opacity-100" : "opacity-0")
-        }
-      />
-    </div>
-  );
-}
-
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     ready: "bg-emerald-50 text-emerald-700",
@@ -187,12 +168,6 @@ function TrainPanel({
           </div>
           <StatusBadge status={crawlStatus} />
         </div>
-
-        {crawlStatus === "ready" && (
-          <div className="mt-4">
-            <SitePreview siteId={siteId} />
-          </div>
-        )}
 
         <div className="mt-5">
           <TrainStatus
