@@ -9,7 +9,9 @@ import { extractDocText } from "@/lib/knowledge/extract-doc";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const MAX_FILE_BYTES = 8_000_000;
+const MAX_FILE_BYTES = 25_000_000; // 25 MB per file
+const MAX_TOTAL_DOC_BYTES = 50_000_000; // 50 MB of documents per site
+const MAX_FAQS = 100; // per site
 const MAX_DOC_CHUNKS = 300;
 const INSERT_BATCH = 200;
 
@@ -40,7 +42,25 @@ export async function POST(req: Request) {
     if (!site) return NextResponse.json({ error: "Site not found" }, { status: 404 });
 
     if (file.size > MAX_FILE_BYTES) {
-      return NextResponse.json({ error: "File must be under 8 MB." }, { status: 413 });
+      return NextResponse.json({ error: "File must be under 25 MB." }, { status: 413 });
+    }
+
+    // Cumulative document budget per site (one sized row per document).
+    const { data: docRows } = await supabase
+      .from("chunks")
+      .select("source_bytes")
+      .eq("site_id", siteId)
+      .eq("source_type", "document")
+      .eq("chunk_index", 0);
+    const usedBytes = (docRows ?? []).reduce(
+      (sum, r) => sum + (r.source_bytes || 0),
+      0
+    );
+    if (usedBytes + file.size > MAX_TOTAL_DOC_BYTES) {
+      return NextResponse.json(
+        { error: "This site's 50 MB document limit is reached. Remove a document to free up space." },
+        { status: 413 }
+      );
     }
 
     const buf = Buffer.from(await file.arrayBuffer());
@@ -76,6 +96,7 @@ export async function POST(req: Request) {
       source_type: "document",
       source_label: file.name,
       source_id: sourceId,
+      source_bytes: i === 0 ? file.size : null,
     }));
     for (let i = 0; i < rows.length; i += INSERT_BATCH) {
       const { error } = await admin.from("chunks").insert(rows.slice(i, i + INSERT_BATCH));
@@ -111,6 +132,19 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const { count: faqCount } = await supabase
+      .from("chunks")
+      .select("*", { count: "exact", head: true })
+      .eq("site_id", siteId)
+      .eq("source_type", "faq");
+    if ((faqCount ?? 0) >= MAX_FAQS) {
+      return NextResponse.json(
+        { error: "You've reached the limit of 100 FAQs. Remove one to add another." },
+        { status: 409 }
+      );
+    }
+
     const content = "Q: " + q + "\nA: " + a;
     const [vec] = await embedTexts([content]);
     const { error } = await admin.from("chunks").insert({
