@@ -16,7 +16,7 @@ function mshots(domain: string): string {
   return (
     "https://s.wordpress.com/mshots/v1/" +
     encodeURIComponent(d) +
-    "?w=600&h=375"
+    "?w=1000&h=625"
   );
 }
 
