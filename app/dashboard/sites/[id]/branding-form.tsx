@@ -545,19 +545,13 @@ function AgentAvatar({
   size: number;
 }) {
   const radius = Math.round(size * 0.32);
-  if (config.avatarUrl) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return (
-      <img
-        src={config.avatarUrl}
-        alt=""
-        style={{ width: size, height: size, borderRadius: radius, objectFit: "cover", flexShrink: 0 }}
-      />
-    );
-  }
+  if (!config.avatarUrl) return null;
+  // eslint-disable-next-line @next/next/no-img-element
   return (
-    <span
-      style={{ width: size, height: size, borderRadius: radius, background: config.bubbleColor, flexShrink: 0, display: "inline-block" }}
+    <img
+      src={config.avatarUrl}
+      alt=""
+      style={{ width: size, height: size, borderRadius: radius, objectFit: "cover", flexShrink: 0 }}
     />
   );
 }
@@ -603,9 +597,7 @@ function BubbleLauncher({ config, left }: { config: WidgetConfig; left: boolean 
             alt=""
             className="h-9 w-9 rounded-[13px] object-cover"
           />
-        ) : (
-          <span>{"\uD83D\uDCAC"}</span>
-        )}
+        ) : null}
       </span>
     </div>
   );
@@ -617,18 +609,16 @@ function BarLauncher({ config }: { config: WidgetConfig }) {
       className="flex items-center gap-2 rounded-[22px] rounded-br-md p-2 shadow-lg"
       style={{ background: config.bubbleColor }}
     >
-      <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[13px] bg-white/20 text-lg">
-        {config.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
+      {config.avatarUrl ? (
+        <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-[13px] bg-white/20 text-lg">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={config.avatarUrl}
             alt=""
             className="h-full w-full rounded-[13px] object-cover"
           />
-        ) : (
-          <span>{"\uD83D\uDE0A"}</span>
-        )}
-      </span>
+        </span>
+      ) : null}
       <span className="flex items-center gap-2 rounded-full bg-white py-1.5 pl-3.5 pr-1.5">
         <span
           className="text-sm text-slate-500"
