@@ -136,7 +136,7 @@ export function ChatWidget({
         height: "100%",
         borderRadius: radius || 0,
         overflow: "hidden",
-        background: config.backgroundColor,
+        background: "transparent",
         color: config.textColor,
         fontFamily: font,
       }}
@@ -186,18 +186,32 @@ export function ChatWidget({
         </button>
       </header>
 
-      {/* Messages */}
+      {/* Body carries the chat background, so the header owns the top corners
+          and no light layer bleeds behind it. */}
       <div
-        ref={scrollRef}
         style={{
           flex: 1,
-          overflowY: "auto",
-          padding: 16,
+          minHeight: 0,
           display: "flex",
           flexDirection: "column",
-          gap: 12,
+          background: config.backgroundColor,
+          borderBottomLeftRadius: radius || 0,
+          borderBottomRightRadius: radius || 0,
         }}
       >
+        {/* Messages */}
+        <div
+          ref={scrollRef}
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            padding: 16,
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+          }}
+        >
         {messages.map((m, i) =>
           m.role === "user" ? (
             <div key={i} style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -348,6 +362,7 @@ export function ChatWidget({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Bleviq" style={{ height: 13, width: "auto" }} />
         </span>
+      </div>
       </div>
 
       <style>{`@keyframes bvBlink{0%,80%,100%{opacity:.25}40%{opacity:.9}}`}</style>
