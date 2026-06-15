@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { saveBranding } from "./actions";
 import { AvatarUploader } from "./avatar-uploader";
 import {
@@ -137,9 +137,21 @@ function Section({
           <path d="m6 9 6 6 6-6" />
         </svg>
       </button>
-      {isOpen && (
-        <div className="border-t border-slate-100 px-6 py-5">{children}</div>
-      )}
+      <div
+        className="grid transition-[grid-template-rows] duration-300 ease-out"
+        style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+      >
+        <div className="overflow-hidden" {...(isOpen ? {} : { inert: true })}>
+          <div
+            className={
+              "border-t border-slate-100 px-6 py-5 transition-opacity duration-200 " +
+              (isOpen ? "opacity-100 delay-100" : "opacity-0")
+            }
+          >
+            {children}
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
@@ -360,6 +372,13 @@ export function BrandingForm({
     isOpen: openId === id,
     onToggle: () => setOpenId((cur) => (cur === id ? "" : id)),
   });
+
+  // Auto-dismiss the save confirmation (or error) after a few seconds.
+  useEffect(() => {
+    if (!msg) return;
+    const t = setTimeout(() => setMsg(null), 3500);
+    return () => clearTimeout(t);
+  }, [msg]);
 
   async function save() {
     setSaving(true);
