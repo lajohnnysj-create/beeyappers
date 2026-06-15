@@ -50,8 +50,7 @@ export function Workspace(props: Props) {
   const [tab, setTab] = useState<Tab>("train");
 
   return (
-    <>
-      <div className="grid gap-6 lg:grid-cols-[200px_1fr]">
+    <div className="grid gap-6 lg:grid-cols-[200px_1fr]">
       {/* Sidebar */}
       <nav className="lg:sticky lg:top-6 lg:self-start">
         <ul className="flex gap-1 lg:flex-col">
@@ -100,6 +99,7 @@ export function Workspace(props: Props) {
             pageCount={props.pageCount}
             chunkCount={props.chunkCount}
             knowledge={props.knowledge}
+            siteName={props.siteName}
           />
         )}
         {tab === "customize" && (
@@ -113,10 +113,7 @@ export function Workspace(props: Props) {
           <CodePanel widgetKey={props.widgetKey} crawlStatus={props.crawlStatus} />
         )}
       </div>
-      </div>
-
-      <DeleteSite siteId={props.siteId} siteName={props.siteName} />
-    </>
+    </div>
   );
 }
 
@@ -147,6 +144,7 @@ function TrainPanel({
   pageCount,
   chunkCount,
   knowledge,
+  siteName,
 }: {
   siteId: string;
   domain: string | null;
@@ -155,6 +153,7 @@ function TrainPanel({
   pageCount: number;
   chunkCount: number;
   knowledge: KnowledgeItem[];
+  siteName: string;
 }) {
   return (
     <div className="space-y-6">
@@ -179,6 +178,8 @@ function TrainPanel({
       </section>
 
       <KnowledgePanel siteId={siteId} items={knowledge} />
+
+      <DeleteSite siteId={siteId} siteName={siteName} />
     </div>
   );
 }

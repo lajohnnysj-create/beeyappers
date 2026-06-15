@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Wordmark } from "@/app/wordmark";
 import { deleteSite } from "./actions";
 
 export function DeleteSite({
@@ -42,22 +43,13 @@ export function DeleteSite({
   }
 
   return (
-    <div className="mt-10 border-t border-slate-200 pt-6">
-      <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-red-100 bg-red-50/40 p-5 sm:flex-row sm:items-center">
-        <div>
-          <p className="text-sm font-semibold text-slate-900">Delete this site</p>
-          <p className="mt-0.5 text-sm text-slate-600">
-            Permanently removes the site and all its training data. Your account
-            stays.
-          </p>
-        </div>
-        <button
-          onClick={() => setOpen(true)}
-          className="shrink-0 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-600 hover:text-white"
-        >
-          Delete site
-        </button>
-      </div>
+    <div className="pt-2">
+      <button
+        onClick={() => setOpen(true)}
+        className="rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-600 hover:text-white"
+      >
+        Delete site
+      </button>
 
       {open && (
         <div
@@ -68,10 +60,14 @@ export function DeleteSite({
             className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-semibold text-slate-900">
+            <div className="mb-4 flex justify-center">
+              <Wordmark />
+            </div>
+
+            <h2 className="text-center text-lg font-semibold text-slate-900">
               Delete {siteName}?
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-center text-sm text-slate-600">
               This permanently deletes the site, its crawled pages, documents,
               FAQs, and chat history. This cannot be undone. Your account is not
               affected.
