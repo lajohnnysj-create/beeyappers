@@ -5,6 +5,9 @@ import { signOut } from "@/app/auth/actions";
 import { Wordmark } from "@/app/wordmark";
 import { NewSiteForm } from "./new-site-form";
 
+// Authenticated, per-user page: never cache or statically render it.
+export const dynamic = "force-dynamic";
+
 type Site = {
   id: string;
   name: string;
@@ -44,6 +47,7 @@ export default async function DashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
   const { data: sites } = await supabase
     .from("sites")
