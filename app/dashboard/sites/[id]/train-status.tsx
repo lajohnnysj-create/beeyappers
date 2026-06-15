@@ -133,7 +133,10 @@ export function TrainStatus({
       <div className="flex flex-1 flex-col">
         <dl className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
-            <dt className="text-xs font-medium text-slate-500">Pages trained</dt>
+            <dt className="flex items-center gap-1 text-xs font-medium text-slate-500">
+              Pages trained
+              <InfoTip text="Trains on up to 100 public pages found in your sitemap. Add any pages you want included there, your main pages like pricing and FAQ are prioritized automatically." />
+            </dt>
             <dd className="mt-0.5 text-lg font-semibold text-slate-900">
               {pageCount ?? 0}
               {(pageCount ?? 0) >= MAX_PAGES && (
@@ -179,6 +182,26 @@ export function TrainStatus({
         </div>
       </div>
     </div>
+  );
+}
+
+function InfoTip({ text }: { text: string }) {
+  return (
+    <span className="group relative inline-flex">
+      <button
+        type="button"
+        aria-label={text}
+        className="grid h-3.5 w-3.5 cursor-help place-items-center rounded-full border border-slate-400 text-[9px] font-bold leading-none text-slate-500 transition hover:border-slate-500 hover:text-slate-700"
+      >
+        i
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-0 z-20 mb-1.5 w-56 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-normal leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+      >
+        {text}
+      </span>
+    </span>
   );
 }
 
