@@ -38,9 +38,15 @@ function Avatar({ config, size }: { config: WidgetConfig; size: number }) {
 export function ChatWidget({
   widgetKey,
   config,
+  onClose,
+  pendingQuestion,
+  onQuestionConsumed,
 }: {
   widgetKey: string;
   config: WidgetConfig;
+  onClose?: () => void;
+  pendingQuestion?: string;
+  onQuestionConsumed?: () => void;
 }) {
   const [messages, setMessages] = useState<Msg[]>([
     { role: "assistant", content: config.greeting },
@@ -60,6 +66,10 @@ export function ChatWidget({
   }, [messages, busy]);
 
   function close() {
+    if (onClose) {
+      onClose();
+      return;
+    }
     try {
       window.parent.postMessage({ type: "bleviq-close" }, "*");
     } catch {
@@ -97,21 +107,17 @@ export function ChatWidget({
     sendText(input);
   }
 
-  // Receive a question typed in the launcher's chat bar and send it.
+  // A question typed in the launcher's chat bar is handed in via prop.
   const sendRef = useRef(sendText);
   sendRef.current = sendText;
   useEffect(() => {
-    function onMsg(e: MessageEvent) {
-      if (!e.data || e.data.type !== "bleviq-ask") return;
-      const q = typeof e.data.question === "string" ? e.data.question : "";
-      if (q) {
-        setFocused(true);
-        sendRef.current(q);
-      }
+    if (pendingQuestion) {
+      setFocused(true);
+      sendRef.current(pendingQuestion);
+      onQuestionConsumed?.();
     }
-    window.addEventListener("message", onMsg);
-    return () => window.removeEventListener("message", onMsg);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingQuestion]);
 
   function onKey(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -125,7 +131,7 @@ export function ChatWidget({
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
+        height: "100%",
         background: config.backgroundColor,
         color: config.textColor,
         fontFamily: font,
