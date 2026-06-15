@@ -179,7 +179,8 @@ export function PricingTable({ canceled = false }: { canceled?: boolean }) {
 
       <p className="mt-8 text-sm text-slate-500">
         14-day free trial on every plan. Card required, cancel anytime before it
-        ends and you won&apos;t be charged.
+        ends and you won&apos;t be charged. Reply limits are measured over a
+        rolling 30-day window.
       </p>
     </div>
   );
