@@ -7,14 +7,28 @@ import type { ActionState } from "@/lib/types";
 // Soft cap. Raise this (or make it per-account) when paid tiers ship.
 const MAX_SITES = 1;
 
+// Turn a URL or bare domain into a friendly default name (rename-able later).
+function deriveName(input: string): string {
+  let host = input;
+  try {
+    const u = new URL(/^https?:\/\//i.test(input) ? input : "https://" + input);
+    host = u.hostname;
+  } catch {
+    host = input;
+  }
+  return host.replace(/^www\./i, "") || input;
+}
+
 export async function createSite(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const name = String(formData.get("name") || "").trim();
   const domain = String(formData.get("domain") || "").trim();
+  const providedName = String(formData.get("name") || "").trim();
 
-  if (!name) return { error: "Give your site a name." };
+  if (!domain) return { error: "Add your website link to get started." };
+
+  const name = providedName || deriveName(domain);
 
   const supabase = createClient();
   const {
@@ -35,7 +49,7 @@ export async function createSite(
   const { error } = await supabase.from("sites").insert({
     user_id: user.id,
     name,
-    domain: domain || null,
+    domain,
   });
   if (error) return { error: error.message };
 
