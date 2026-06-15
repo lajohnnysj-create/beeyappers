@@ -5,11 +5,11 @@ import { mergeConfig } from "@/lib/widget-config";
 import { Wordmark } from "@/app/wordmark";
 import { SettingsMenu } from "@/app/dashboard/settings-menu";
 import { Workspace } from "./workspace";
+import { getEntitlementByUserId } from "@/lib/billing/entitlement";
+import { PLANS } from "@/lib/billing/plans";
 
 // Authenticated, per-user page: never cache or statically render it.
 export const dynamic = "force-dynamic";
-
-const MESSAGE_CAP = 1000;
 
 export default async function SiteWorkspacePage({
   params,
@@ -28,6 +28,12 @@ export default async function SiteWorkspacePage({
     .single();
 
   if (!site || !user) notFound();
+
+  const entitlement = await getEntitlementByUserId(user.id);
+  const planLabel = entitlement.plan ? PLANS[entitlement.plan].name : null;
+  // Show the active cap; fall back to the entry plan's cap so the usage meter
+  // has a sensible denominator before the user subscribes.
+  const cap = entitlement.active ? entitlement.messageCap : PLANS.basic.messageCap;
 
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -81,7 +87,11 @@ export default async function SiteWorkspacePage({
           <SettingsMenu
             email={user.email || ""}
             used={messagesUsed || 0}
-            cap={MESSAGE_CAP}
+            cap={cap}
+            planLabel={planLabel}
+            status={entitlement.status}
+            active={entitlement.active}
+            hasBilling={entitlement.hasBilling}
           />
         </div>
       </header>
