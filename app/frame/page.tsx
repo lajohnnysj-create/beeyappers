@@ -1,4 +1,6 @@
 import { createPublicClient } from "@/lib/supabase/public";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getEntitlementByUserId } from "@/lib/billing/entitlement";
 import { mergeConfig } from "@/lib/widget-config";
 import { WidgetFrame } from "../embed/widget-frame";
 
@@ -34,6 +36,21 @@ export default async function FramePage({
       .eq("widget_key", key)
       .single();
     if (data) config = mergeConfig(data.widget_config);
+
+    // Removing the "Powered by Bleviq" badge is a paid feature. If the site
+    // owner isn't on an active plan or trial, force branding on regardless of
+    // their saved setting. This is the source of truth (the dashboard toggle
+    // is just UI), so a canceled account can't keep branding hidden.
+    const admin = createAdminClient();
+    const { data: site } = await admin
+      .from("sites")
+      .select("user_id")
+      .eq("widget_key", key)
+      .maybeSingle();
+    if (site?.user_id) {
+      const ent = await getEntitlementByUserId(site.user_id);
+      if (!ent.active) config = { ...config, showBranding: true };
+    }
   }
 
   return (
