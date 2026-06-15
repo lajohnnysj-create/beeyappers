@@ -6,6 +6,7 @@ import { fetchPage } from "@/lib/crawl/fetch-page";
 import { extractContent } from "@/lib/crawl/extract";
 import { chunkText } from "@/lib/crawl/chunk";
 import { embedTexts, toVectorLiteral } from "@/lib/embed/openai";
+import { checkRateLimit } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // raise to 300 on Pro for larger sites
@@ -14,6 +15,8 @@ const MAX_PAGES = 40;
 const MAX_CHUNKS = 1000;
 const FETCH_CONCURRENCY = 8;
 const INSERT_BATCH = 200;
+const RETRAIN_LIMIT = 10; // re-trains allowed per site per hour
+const RETRAIN_WINDOW = 3600; // seconds
 
 type PageWork = { url: string; title: string; text: string };
 
@@ -80,6 +83,23 @@ export async function POST(req: Request) {
   }
 
   const admin = createAdminClient();
+
+  // Limit re-trains per site to curb abuse and runaway embedding cost.
+  const underLimit = await checkRateLimit(
+    admin,
+    `retrain:${siteId}`,
+    RETRAIN_LIMIT,
+    RETRAIN_WINDOW
+  );
+  if (!underLimit) {
+    return NextResponse.json(
+      {
+        error:
+          "You've re-trained this site too many times this hour. Please try again later.",
+      },
+      { status: 429 }
+    );
+  }
 
   try {
     await admin
