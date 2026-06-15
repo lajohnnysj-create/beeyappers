@@ -22,6 +22,7 @@ export type WidgetConfig = {
   launcherLabel: string;
   panelWidth: number;
   panelHeight: number;
+  showBranding: boolean; // show the "Powered by Bleviq" badge in the widget
 };
 
 export const FONT_OPTIONS: Record<string, string> = {
@@ -61,6 +62,7 @@ export const DEFAULT_CONFIG: WidgetConfig = {
   launcherLabel: "",
   panelWidth: 380,
   panelHeight: 560,
+  showBranding: true,
 };
 
 // Merge stored (possibly partial) config over defaults.
