@@ -8,7 +8,21 @@ export type KnowledgeItem = {
   type: string; // "document" | "faq"
   label: string | null;
   count: number;
+  content?: string | null; // present for FAQs: "Q: ...\nA: ..."
 };
+
+function typeLabel(type: string): string {
+  return type === "faq" ? "FAQ" : type === "document" ? "Document" : type;
+}
+
+function parseFaq(content?: string | null): { q: string; a: string } {
+  const c = content || "";
+  const i = c.indexOf("\nA: ");
+  if (c.startsWith("Q: ") && i !== -1) {
+    return { q: c.slice(3, i), a: c.slice(i + 4) };
+  }
+  return { q: "", a: c };
+}
 
 export function KnowledgePanel({
   siteId,
@@ -23,6 +37,53 @@ export function KnowledgePanel({
   const [answer, setAnswer] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Inline FAQ editing
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editQ, setEditQ] = useState("");
+  const [editA, setEditA] = useState("");
+  const [editBusy, setEditBusy] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  function startEdit(it: KnowledgeItem) {
+    const { q, a } = parseFaq(it.content);
+    setEditQ(q);
+    setEditA(a);
+    setEditError(null);
+    setEditingId((cur) => (cur === it.sourceId ? null : it.sourceId));
+  }
+
+  async function saveEdit(sourceId: string) {
+    if (!editQ.trim() || !editA.trim()) {
+      setEditError("Add both a question and an answer.");
+      return;
+    }
+    setEditBusy(true);
+    setEditError(null);
+    try {
+      const res = await fetch("/api/knowledge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "faq-update",
+          siteId,
+          sourceId,
+          question: editQ,
+          answer: editA,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) setEditError(data.error || "Could not save.");
+      else {
+        setEditingId(null);
+        router.refresh();
+      }
+    } catch {
+      setEditError("Network error.");
+    } finally {
+      setEditBusy(false);
+    }
+  }
 
   async function addFaq() {
     if (!question.trim() || !answer.trim()) {
@@ -194,31 +255,99 @@ export function KnowledgePanel({
 
       {items.length > 0 && (
         <ul className="mt-4 divide-y divide-slate-100 border-t border-slate-100">
-          {items.map((it) => (
-            <li key={it.sourceId} className="flex items-center justify-between gap-3 py-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <span
-                  className={
-                    "shrink-0 rounded-md px-2 py-0.5 text-xs font-medium capitalize " +
-                    (it.type === "faq"
-                      ? "bg-violet-50 text-violet-700"
-                      : "bg-sky-50 text-sky-700")
-                  }
-                >
-                  {it.type}
-                </span>
-                <span className="truncate text-sm text-slate-800">
-                  {it.label || "Untitled"}
-                </span>
-              </div>
-              <button
-                onClick={() => remove(it.sourceId)}
-                className="shrink-0 text-sm font-medium text-slate-400 hover:text-red-600"
-              >
-                Remove
-              </button>
-            </li>
-          ))}
+          {items.map((it) => {
+            const isFaq = it.type === "faq";
+            const editing = editingId === it.sourceId;
+            return (
+              <li key={it.sourceId} className="py-3">
+                <div className="flex items-center justify-between gap-3">
+                  {isFaq ? (
+                    <button
+                      onClick={() => startEdit(it)}
+                      className="group flex min-w-0 items-center gap-3 text-left"
+                    >
+                      <span className="shrink-0 rounded-md bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">
+                        {typeLabel(it.type)}
+                      </span>
+                      <span className="truncate text-sm text-slate-800 group-hover:text-brand-700">
+                        {it.label || "Untitled"}
+                      </span>
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className={
+                          "shrink-0 text-slate-400 transition-transform " +
+                          (editing ? "rotate-90" : "")
+                        }
+                        aria-hidden="true"
+                      >
+                        <path d="m9 18 6-6-6-6" />
+                      </svg>
+                    </button>
+                  ) : (
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="shrink-0 rounded-md bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700">
+                        {typeLabel(it.type)}
+                      </span>
+                      <span className="truncate text-sm text-slate-800">
+                        {it.label || "Untitled"}
+                      </span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => remove(it.sourceId)}
+                    className="shrink-0 text-sm font-medium text-slate-400 hover:text-red-600"
+                  >
+                    Remove
+                  </button>
+                </div>
+
+                {editing && (
+                  <div className="mt-3 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <label className="block">
+                      <span className="text-sm font-medium text-slate-700">Question</span>
+                      <input
+                        value={editQ}
+                        onChange={(e) => setEditQ(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-sm font-medium text-slate-700">Answer</span>
+                      <textarea
+                        value={editA}
+                        onChange={(e) => setEditA(e.target.value)}
+                        rows={3}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+                      />
+                    </label>
+                    {editError && <p className="text-sm text-red-600">{editError}</p>}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => saveEdit(it.sourceId)}
+                        disabled={editBusy}
+                        className="inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 disabled:opacity-60"
+                      >
+                        {editBusy ? "Saving..." : "Save changes"}
+                      </button>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>

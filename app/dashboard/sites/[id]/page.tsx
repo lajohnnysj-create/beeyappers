@@ -38,7 +38,7 @@ export default async function SiteWorkspacePage({
       supabase.from("chunks").select("*", { count: "exact", head: true }).eq("site_id", site.id),
       supabase
         .from("chunks")
-        .select("source_id, source_type, source_label")
+        .select("source_id, source_type, source_label, content")
         .eq("site_id", site.id)
         .in("source_type", ["document", "faq"]),
       supabase
@@ -52,7 +52,7 @@ export default async function SiteWorkspacePage({
   // Group manual knowledge chunks by source_id into single items.
   const kMap = new Map<
     string,
-    { sourceId: string; type: string; label: string | null; count: number }
+    { sourceId: string; type: string; label: string | null; count: number; content: string | null }
   >();
   for (const c of kRows ?? []) {
     if (!c.source_id) continue;
@@ -61,6 +61,7 @@ export default async function SiteWorkspacePage({
       type: c.source_type,
       label: c.source_label,
       count: 0,
+      content: c.source_type === "faq" ? (c.content ?? null) : null,
     };
     cur.count++;
     kMap.set(c.source_id, cur);
