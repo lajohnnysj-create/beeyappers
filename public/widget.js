@@ -46,6 +46,17 @@
     frame.style.opacity = "1";
   }
 
+  function sendViewport() {
+    try {
+      frame.contentWindow.postMessage(
+        { type: "bleviq:viewport", w: window.innerWidth, h: window.innerHeight },
+        origin
+      );
+    } catch (e) { /* ignore */ }
+  }
+  frame.addEventListener("load", sendViewport);
+  window.addEventListener("resize", sendViewport);
+
   window.addEventListener("message", function (e) {
     if (e.origin !== origin) return;
     var d = e.data;
