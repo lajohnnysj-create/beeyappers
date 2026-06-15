@@ -182,6 +182,8 @@ function TrainPanel({
             siteId={siteId}
             status={crawlStatus}
             lastCrawledAt={lastCrawledAt}
+            domain={domain}
+            pageCount={pageCount}
           />
         </div>
       </section>
