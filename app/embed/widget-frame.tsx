@@ -68,6 +68,33 @@ export function WidgetFrame({
     Math.min(config.panelHeight || 560, vh - 2 * MARGIN - GAP - X_SIZE - 4)
   );
 
+  // On phones, the open chat takes over the full screen so focusing the input
+  // scrolls inside the chat (not the host page) and clears the keyboard.
+  const isMobile = vw > 0 && vw <= 640;
+  const fullscreen = open && isMobile;
+
+  // Track the visual viewport so the panel shrinks to the area above the
+  // on-screen keyboard, keeping the input visible without scrolling the host.
+  const [vvh, setVvh] = useState(0);
+  useEffect(() => {
+    if (!fullscreen || typeof window === "undefined" || !window.visualViewport) {
+      setVvh(0);
+      return;
+    }
+    const vv = window.visualViewport;
+    const update = () => setVvh(vv.height);
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    };
+  }, [fullscreen]);
+
+  const panelWidth = fullscreen ? "100%" : panelW;
+  const panelHeight = fullscreen ? vvh || vh : panelH;
+
   // Report our exact footprint to the loader so it can size the iframe.
   useEffect(() => {
     const el = rootRef.current;
@@ -76,12 +103,15 @@ export function WidgetFrame({
       if (!el) return;
       try {
         window.parent.postMessage(
-          {
-            type: "bleviq:resize",
-            w: Math.ceil(el.offsetWidth),
-            h: Math.ceil(el.offsetHeight),
-            side: left ? "left" : "right",
-          },
+          fullscreen
+            ? { type: "bleviq:resize", full: true, side: left ? "left" : "right" }
+            : {
+                type: "bleviq:resize",
+                full: false,
+                w: Math.ceil(el.offsetWidth),
+                h: Math.ceil(el.offsetHeight),
+                side: left ? "left" : "right",
+              },
           "*"
         );
       } catch {
@@ -92,7 +122,7 @@ export function WidgetFrame({
     const ro = new ResizeObserver(post);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [left]);
+  }, [left, fullscreen]);
 
   function openChat(q?: string) {
     if (q) setPending(q);
@@ -109,38 +139,52 @@ export function WidgetFrame({
   return (
     <div
       ref={rootRef}
-      style={{
-        position: "fixed",
-        bottom: 0,
-        left: left ? 0 : "auto",
-        right: left ? "auto" : 0,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: left ? "flex-start" : "flex-end",
-        justifyContent: "flex-end",
-        ...pad,
-      }}
+      style={
+        fullscreen
+          ? {
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "stretch",
+              justifyContent: "flex-start",
+            }
+          : {
+              position: "fixed",
+              bottom: 0,
+              left: left ? 0 : "auto",
+              right: left ? "auto" : 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: left ? "flex-start" : "flex-end",
+              justifyContent: "flex-end",
+              ...pad,
+            }
+      }
     >
       {/* Panel stays mounted (preserves chat history); hidden when closed. */}
       <div
         style={{
           display: open ? "block" : "none",
-          width: panelW,
-          height: panelH,
-          marginBottom: GAP,
-          borderRadius: 16,
+          width: panelWidth,
+          height: panelHeight,
+          marginBottom: fullscreen ? 0 : GAP,
+          borderRadius: fullscreen ? 0 : 16,
           overflow: "hidden",
           isolation: "isolate",
           background: "transparent",
-          boxShadow: "0 10px 34px rgba(0,0,0,.22)",
+          boxShadow: fullscreen ? "none" : "0 10px 34px rgba(0,0,0,.22)",
           transformOrigin: left ? "bottom left" : "bottom right",
-          animation: "bvPop .28s cubic-bezier(.34,1.56,.64,1)",
+          animation: fullscreen ? "none" : "bvPop .28s cubic-bezier(.34,1.56,.64,1)",
         }}
       >
         <ChatWidget
           widgetKey={widgetKey}
           config={config}
-          radius={16}
+          radius={fullscreen ? 0 : 16}
           onClose={closeChat}
           pendingQuestion={pending}
           onQuestionConsumed={() => setPending(undefined)}
@@ -148,23 +192,25 @@ export function WidgetFrame({
       </div>
 
       {open ? (
-        <button
-          onClick={closeChat}
-          aria-label="Close chat"
-          style={{
-            width: X_SIZE,
-            height: X_SIZE,
-            borderRadius: "50%",
-            background: config.bubbleColor,
-            color: "#fff",
-            border: "none",
-            cursor: "pointer",
-            boxShadow: "0 4px 14px rgba(0,0,0,.25)",
-            fontSize: 22,
-          }}
-        >
-          {"\u2715"}
-        </button>
+        fullscreen ? null : (
+          <button
+            onClick={closeChat}
+            aria-label="Close chat"
+            style={{
+              width: X_SIZE,
+              height: X_SIZE,
+              borderRadius: "50%",
+              background: config.bubbleColor,
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              boxShadow: "0 4px 14px rgba(0,0,0,.25)",
+              fontSize: 22,
+            }}
+          >
+            {"\u2715"}
+          </button>
+        )
       ) : config.launcherStyle === "bar" ? (
         <BarLauncher config={config} left={left} onOpen={openChat} />
       ) : (
