@@ -4,7 +4,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
     <img
       src="/logo.png"
       alt="Bleviq"
-      className={`h-9 w-auto ${className}`}
+      className={`h-[72px] w-auto ${className}`}
     />
   );
 }
