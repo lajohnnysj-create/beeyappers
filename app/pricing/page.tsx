@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 import { Wordmark } from "@/app/wordmark";
 import { PricingTable } from "./pricing-table";
 
@@ -8,12 +9,17 @@ export const metadata = {
     "Simple plans for an AI chat widget trained on your site. Every plan starts with a 14-day free trial.",
 };
 
-export default function PricingPage({
+export default async function PricingPage({
   searchParams,
 }: {
   searchParams: { checkout?: string };
 }) {
   const canceled = searchParams.checkout === "cancel";
+
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -21,12 +27,21 @@ export default function PricingPage({
         <Link href="/" aria-label="Bleviq home">
           <Wordmark />
         </Link>
-        <Link
-          href="/login"
-          className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
-        >
-          Sign in
-        </Link>
+        {user ? (
+          <Link
+            href="/dashboard"
+            className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+          >
+            Dashboard
+          </Link>
+        ) : (
+          <Link
+            href="/login"
+            className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+          >
+            Sign in
+          </Link>
+        )}
       </header>
 
       <section className="mx-auto max-w-5xl px-6 pb-24 pt-8 text-center">
