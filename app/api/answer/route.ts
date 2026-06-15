@@ -15,6 +15,7 @@ const BURST_LIMIT = 20; // requests per minute, per IP per site (anti-flood)
 const BURST_WINDOW = 60;
 const HOURLY_LIMIT = 30; // requests per hour, per IP per site (sustained cap)
 const HOURLY_WINDOW = 3600;
+const MONTHLY_MESSAGE_CAP = 1000; // rolling 30-day answers per account
 const TOP_K = 8;
 
 type SiteRow = {
@@ -139,7 +140,23 @@ export async function POST(req: Request) {
     );
   }
 
-  // 5. Monthly token cap (the hard spend backstop).
+  // 5. Rolling 30-day message cap, per account (across all the owner's sites).
+  const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { count: msgsUsed } = await admin
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", site.user_id)
+    .eq("role", "assistant")
+    .gte("created_at", since30);
+  if ((msgsUsed ?? 0) >= MONTHLY_MESSAGE_CAP) {
+    return json(
+      { error: "This assistant has reached its monthly message limit." },
+      429,
+      headers
+    );
+  }
+
+  // 6. Monthly token cap (the hard spend backstop).
   const thisMonth = new Date().toISOString().slice(0, 7);
   const periodMonth = (site.period_start || "").slice(0, 7);
   const usedThisPeriod = periodMonth < thisMonth ? 0 : site.tokens_used_period;
