@@ -321,6 +321,16 @@ function BarLauncher({
           <input
             value={val}
             onChange={(e) => setVal(e.target.value)}
+            onPointerDown={(e) => {
+              // On touch, don't focus this fixed bottom-bar input: iOS scrolls
+              // the host page to lift it above the keyboard. Open the full
+              // panel instead (it doesn't autofocus, so it won't scroll).
+              // Mouse users keep inline typing in the bar.
+              if (e.pointerType !== "mouse") {
+                e.preventDefault();
+                onOpen();
+              }
+            }}
             onFocus={() => setExpanded(true)}
             onBlur={() => {
               if (!val.trim()) setExpanded(false);
