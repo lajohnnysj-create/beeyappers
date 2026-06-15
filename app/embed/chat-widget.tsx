@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { type WidgetConfig, resolveFont } from "@/lib/widget-config";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; suggestions?: string[] };
 
 // Pick readable foreground (dark or white) for a given hex background.
 function readable(bg: string): string {
@@ -32,6 +32,49 @@ function Avatar({ config, size }: { config: WidgetConfig; size: number }) {
         flexShrink: 0,
       }}
     />
+  );
+}
+
+function SuggestionChips({
+  items,
+  config,
+  disabled,
+  onPick,
+}: {
+  items: string[];
+  config: WidgetConfig;
+  disabled?: boolean;
+  onPick: (q: string) => void;
+}) {
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+      {items.map((q, i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => !disabled && onPick(q)}
+          disabled={disabled}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            border: "1px solid rgba(0,0,0,.10)",
+            background: "#ffffff",
+            color: "#1f2937",
+            fontSize: 13,
+            lineHeight: 1.3,
+            padding: "7px 11px",
+            borderRadius: 14,
+            cursor: disabled ? "default" : "pointer",
+            opacity: disabled ? 0.55 : 1,
+            textAlign: "left",
+          }}
+        >
+          <span style={{ color: config.bubbleColor, fontWeight: 700 }}>›</span>
+          {q}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -303,7 +346,15 @@ export function ChatWidget({
       const data = await res.json();
       const reply =
         data.answer || data.error || "Sorry, something went wrong. Please try again.";
-      setMessages((m) => [...m, { role: "assistant", content: reply }]);
+      const suggestions = Array.isArray(data.suggestions)
+        ? (data.suggestions as unknown[]).filter(
+            (s): s is string => typeof s === "string" && s.trim().length > 0
+          )
+        : undefined;
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: reply, suggestions },
+      ]);
     } catch {
       setMessages((m) => [
         ...m,
@@ -444,19 +495,29 @@ export function ChatWidget({
           ) : (
             <div key={i} ref={i === messages.length - 1 ? lastMsgRef : undefined} style={{ display: "flex", alignItems: "flex-start", gap: 8, animation: "bvFade .35s ease both" }}>
               <Avatar config={config} size={26} />
-              <div
-                style={{
-                  maxWidth: "82%",
-                  borderRadius: 18,
-                  borderBottomLeftRadius: 6,
-                  padding: "9px 13px",
-                  fontSize: 14,
-                  lineHeight: 1.45,
-                  background: config.assistantBubbleColor,
-                  color: config.textColor,
-                }}
-              >
-                <MessageContent text={m.content} config={config} />
+              <div style={{ maxWidth: "82%", display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                <div
+                  style={{
+                    maxWidth: "100%",
+                    borderRadius: 18,
+                    borderBottomLeftRadius: 6,
+                    padding: "9px 13px",
+                    fontSize: 14,
+                    lineHeight: 1.45,
+                    background: config.assistantBubbleColor,
+                    color: config.textColor,
+                  }}
+                >
+                  <MessageContent text={m.content} config={config} />
+                </div>
+                {m.suggestions && m.suggestions.length > 0 && (
+                  <SuggestionChips
+                    items={m.suggestions}
+                    config={config}
+                    disabled={busy}
+                    onPick={(q) => sendText(q)}
+                  />
+                )}
               </div>
             </div>
           )
