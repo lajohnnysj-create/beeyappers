@@ -11,8 +11,10 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 const MAX_QUESTION_CHARS = 1000;
-const RATE_LIMIT = 20; // requests
-const RATE_WINDOW = 60; // seconds, per IP per site
+const BURST_LIMIT = 20; // requests per minute, per IP per site (anti-flood)
+const BURST_WINDOW = 60;
+const HOURLY_LIMIT = 30; // requests per hour, per IP per site (sustained cap)
+const HOURLY_WINDOW = 3600;
 const TOP_K = 8;
 
 type SiteRow = {
@@ -110,17 +112,31 @@ export async function POST(req: Request) {
     return json({ error: "Origin not allowed" }, 403, headers);
   }
 
-  // 4. Per-IP rate limit.
+  // 4. Per-IP rate limits: a short burst cap to stop flooding, plus an
+  //    hourly cap so one visitor can't run up usage over a whole session.
   const ip = getClientIp(req);
   const ipHash = hashIp(ip);
-  const allowed = await checkRateLimit(
+  const burstOk = await checkRateLimit(
     admin,
     `answer:${site.id}:${ipHash}`,
-    RATE_LIMIT,
-    RATE_WINDOW
+    BURST_LIMIT,
+    BURST_WINDOW
   );
-  if (!allowed) {
-    return json({ error: "Too many requests. Slow down." }, 429, headers);
+  if (!burstOk) {
+    return json({ error: "Too many requests. Please slow down." }, 429, headers);
+  }
+  const hourlyOk = await checkRateLimit(
+    admin,
+    `answer:h:${site.id}:${ipHash}`,
+    HOURLY_LIMIT,
+    HOURLY_WINDOW
+  );
+  if (!hourlyOk) {
+    return json(
+      { error: "You've reached the message limit for now. Please try again later." },
+      429,
+      headers
+    );
   }
 
   // 5. Monthly token cap (the hard spend backstop).
