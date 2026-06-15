@@ -163,6 +163,45 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
+  if (body.action === "faq-update") {
+    const sourceId = String(body.sourceId || "");
+    const q = String(body.question || "").trim();
+    const a = String(body.answer || "").trim();
+    if (!sourceId) return NextResponse.json({ error: "Missing item" }, { status: 400 });
+    if (!q || !a) {
+      return NextResponse.json(
+        { error: "Both a question and an answer are required." },
+        { status: 400 }
+      );
+    }
+
+    // Confirm the FAQ exists and belongs to this user before re-embedding.
+    const { data: existing } = await admin
+      .from("chunks")
+      .select("id")
+      .eq("source_id", sourceId)
+      .eq("user_id", user.id)
+      .eq("source_type", "faq")
+      .maybeSingle();
+    if (!existing) return NextResponse.json({ error: "FAQ not found" }, { status: 404 });
+
+    const content = "Q: " + q + "\nA: " + a;
+    const [vec] = await embedTexts([content]);
+    const { error } = await admin
+      .from("chunks")
+      .update({
+        content,
+        token_count: Math.round(content.length / 4),
+        embedding: toVectorLiteral(vec),
+        source_label: q.slice(0, 140),
+      })
+      .eq("source_id", sourceId)
+      .eq("user_id", user.id)
+      .eq("source_type", "faq");
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  }
+
   if (body.action === "delete") {
     const sourceId = String(body.sourceId || "");
     if (!sourceId) return NextResponse.json({ error: "Missing item" }, { status: 400 });
