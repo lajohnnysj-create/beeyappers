@@ -1,12 +1,12 @@
 import { createPublicClient } from "@/lib/supabase/public";
 import { mergeConfig } from "@/lib/widget-config";
-import { ChatWidget } from "./chat-widget";
+import { WidgetFrame } from "../embed/widget-frame";
 
 export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function EmbedPage({
+export default async function FramePage({
   searchParams,
 }: {
   searchParams: { key?: string };
@@ -24,5 +24,11 @@ export default async function EmbedPage({
     if (data) config = mergeConfig(data.widget_config);
   }
 
-  return <ChatWidget widgetKey={key} config={config} />;
+  return (
+    <>
+      {/* The loader's iframe must be see-through outside the widget itself. */}
+      <style>{`html,body{background:transparent !important;margin:0;overflow:hidden}`}</style>
+      <WidgetFrame widgetKey={key} config={config} />
+    </>
+  );
 }
