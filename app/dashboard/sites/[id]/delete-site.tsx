@@ -85,7 +85,7 @@ export function DeleteSite({
                 onChange={(e) => setConfirm(e.target.value)}
                 autoFocus
                 placeholder="DELETE"
-                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
               />
             </label>
 
