@@ -19,6 +19,7 @@
 
   var Z = "2147483000";
   var open = false;
+  var ready = false;
   var FONT = "system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
   var cfg = {
     bubbleColor: "#2563eb",
@@ -261,11 +262,21 @@
       "position:fixed;bottom:20px;" + s + ":20px;" +
       (s === "left" ? "right:auto;" : "left:auto;") +
       "display:flex;flex-direction:column;align-items:" +
-      (s === "left" ? "flex-start" : "flex-end") + ";z-index:" + Z + ";";
+      (s === "left" ? "flex-start" : "flex-end") + ";z-index:" + Z + ";" +
+      "transition:opacity .25s ease, transform .25s ease;" +
+      (ready
+        ? "opacity:1;transform:translateY(0);pointer-events:auto;"
+        : "opacity:0;transform:translateY(8px);pointer-events:none;");
     clear(container);
     if (open) container.appendChild(closeButton());
     else if (cfg.launcherStyle === "bar") container.appendChild(barNode());
     else container.appendChild(bubbleNode());
+  }
+
+  function reveal() {
+    if (ready) return;
+    ready = true;
+    renderLauncher();
   }
 
   // The chatbox X (inside the iframe) asks the loader to close.
@@ -289,17 +300,21 @@
   fetch(origin + "/api/widget-config?key=" + encodeURIComponent(key))
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
-      if (!d || !d.config) return;
-      var c = d.config;
-      if (c.bubbleColor) cfg.bubbleColor = c.bubbleColor;
-      if (c.launcherPosition) cfg.launcherPosition = c.launcherPosition;
-      if (c.launcherStyle) cfg.launcherStyle = c.launcherStyle;
-      if (typeof c.launcherLabel === "string") cfg.launcherLabel = c.launcherLabel;
-      if (c.avatarUrl) cfg.avatarUrl = c.avatarUrl;
-      if (c.panelWidth) cfg.panelWidth = c.panelWidth;
-      if (c.panelHeight) cfg.panelHeight = c.panelHeight;
-      renderLauncher();
+      if (d && d.config) {
+        var c = d.config;
+        if (c.bubbleColor) cfg.bubbleColor = c.bubbleColor;
+        if (c.launcherPosition) cfg.launcherPosition = c.launcherPosition;
+        if (c.launcherStyle) cfg.launcherStyle = c.launcherStyle;
+        if (typeof c.launcherLabel === "string") cfg.launcherLabel = c.launcherLabel;
+        if (c.avatarUrl) cfg.avatarUrl = c.avatarUrl;
+        if (c.panelWidth) cfg.panelWidth = c.panelWidth;
+        if (c.panelHeight) cfg.panelHeight = c.panelHeight;
+      }
       applyFrame();
+      reveal();
     })
-    .catch(function () {});
+    .catch(function () { reveal(); });
+
+  // Fail-safe: never leave the launcher hidden if the config call hangs.
+  setTimeout(reveal, 4000);
 })();
