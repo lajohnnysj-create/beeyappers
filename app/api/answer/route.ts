@@ -243,9 +243,10 @@ export async function POST(req: Request) {
     const totalTokens = gen.totalTokens;
     let suggestions: string[] | undefined;
 
-    // The model emits NO_INFO when the context doesn't cover the question.
-    // Tolerate leading quotes/markdown/whitespace around the token.
-    if (/^[^a-z0-9]*no_info/i.test(answer.trim())) {
+    // The model returns answered:false when the context doesn't cover the
+    // question (an empty answer is treated the same). Swap in friendly copy
+    // plus questions the site CAN answer.
+    if (!gen.answered || !answer.trim()) {
       suggestions = await suggestAnswerableQuestions(pages, faqQuestions);
       answer = noInfoText(suggestions.length > 0);
     }
