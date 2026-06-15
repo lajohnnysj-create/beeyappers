@@ -237,13 +237,30 @@ export function ChatWidget({
   const [busy, setBusy] = useState(false);
   const [focused, setFocused] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const lastMsgRef = useRef<HTMLDivElement>(null);
   const font = resolveFont(config.fontFamily);
 
   const headerBg = config.headerColor;
   const headerFg = readable(headerBg);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
+    const sc = scrollRef.current;
+    if (!sc) return;
+    const last = messages[messages.length - 1];
+    // While sending / waiting, keep the newest content in view.
+    if (busy || !last || last.role === "user") {
+      sc.scrollTo({ top: sc.scrollHeight, behavior: "smooth" });
+      return;
+    }
+    // A new answer arrived: align its TOP near the top so it reads from the start.
+    const el = lastMsgRef.current;
+    if (el) {
+      const delta =
+        el.getBoundingClientRect().top - sc.getBoundingClientRect().top;
+      sc.scrollTo({ top: sc.scrollTop + delta - 12, behavior: "smooth" });
+    } else {
+      sc.scrollTo({ top: sc.scrollHeight, behavior: "smooth" });
+    }
   }, [messages, busy]);
 
   function close() {
@@ -393,7 +410,7 @@ export function ChatWidget({
         >
         {messages.map((m, i) =>
           m.role === "user" ? (
-            <div key={i} style={{ display: "flex", justifyContent: "flex-end", animation: "bvFade .35s ease both" }}>
+            <div key={i} ref={i === messages.length - 1 ? lastMsgRef : undefined} style={{ display: "flex", justifyContent: "flex-end", animation: "bvFade .35s ease both" }}>
               <div
                 style={{
                   maxWidth: "82%",
@@ -410,7 +427,7 @@ export function ChatWidget({
               </div>
             </div>
           ) : (
-            <div key={i} style={{ display: "flex", alignItems: "flex-end", gap: 8, animation: "bvFade .35s ease both" }}>
+            <div key={i} ref={i === messages.length - 1 ? lastMsgRef : undefined} style={{ display: "flex", alignItems: "flex-start", gap: 8, animation: "bvFade .35s ease both" }}>
               <Avatar config={config} size={26} />
               <div
                 style={{
@@ -430,7 +447,7 @@ export function ChatWidget({
           )
         )}
         {busy && (
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
             <Avatar config={config} size={26} />
             <div
               style={{
