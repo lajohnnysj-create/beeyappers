@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BrandingForm } from "./branding-form";
 import { KnowledgePanel, type KnowledgeItem } from "./knowledge-panel";
 import { TrainStatus } from "./train-status";
+import { DeleteSite } from "./delete-site";
 import { EmbedSnippet } from "@/app/dashboard/embed-snippet";
 import type { WidgetConfig } from "@/lib/widget-config";
 
@@ -49,7 +50,8 @@ export function Workspace(props: Props) {
   const [tab, setTab] = useState<Tab>("train");
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[200px_1fr]">
+    <>
+      <div className="grid gap-6 lg:grid-cols-[200px_1fr]">
       {/* Sidebar */}
       <nav className="lg:sticky lg:top-6 lg:self-start">
         <ul className="flex gap-1 lg:flex-col">
@@ -111,7 +113,10 @@ export function Workspace(props: Props) {
           <CodePanel widgetKey={props.widgetKey} crawlStatus={props.crawlStatus} />
         )}
       </div>
-    </div>
+      </div>
+
+      <DeleteSite siteId={props.siteId} siteName={props.siteName} />
+    </>
   );
 }
 
