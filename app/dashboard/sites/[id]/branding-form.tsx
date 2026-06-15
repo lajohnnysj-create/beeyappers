@@ -10,8 +10,43 @@ import {
   resolveFont,
 } from "@/lib/widget-config";
 
-const MAX_BYTES = 1_000_000; // 1 MB
-const OK_TYPES = ["image/png", "image/jpeg", "image/webp", "image/svg+xml", "image/x-icon"];
+const MAX_BYTES = 25_000_000; // 25 MB before compression
+const RASTER_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+const OK_TYPES = [...RASTER_TYPES, "image/svg+xml", "image/x-icon"];
+
+// Downscale + re-encode a raster image to a compact WEBP blob, in the browser.
+async function compressToWebp(
+  file: File,
+  maxSide: number,
+  quality: number
+): Promise<Blob> {
+  const dataUrl = await new Promise<string>((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result as string);
+    fr.onerror = () => rej(new Error("read failed"));
+    fr.readAsDataURL(file);
+  });
+  const img = await new Promise<HTMLImageElement>((res, rej) => {
+    const i = new Image();
+    i.onload = () => res(i);
+    i.onerror = () => rej(new Error("decode failed"));
+    i.src = dataUrl;
+  });
+  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+  const w = Math.max(1, Math.round(img.width * scale));
+  const h = Math.max(1, Math.round(img.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas unavailable");
+  ctx.drawImage(img, 0, 0, w, h);
+  const blob = await new Promise<Blob | null>((res) =>
+    canvas.toBlob(res, "image/webp", quality)
+  );
+  if (!blob) throw new Error("encode failed");
+  return blob;
+}
 
 function ColorRow({
   label,
@@ -59,19 +94,35 @@ export function BrandingForm({
   async function upload(file: File, kind: "logo" | "favicon") {
     setMsg(null);
     if (!OK_TYPES.includes(file.type)) {
-      setMsg({ error: "Use a PNG, JPG, WEBP, SVG, or ICO image." });
+      setMsg({ error: "Use a PNG, JPG, WEBP, GIF, SVG, or ICO image." });
       return;
     }
     if (file.size > MAX_BYTES) {
-      setMsg({ error: "Image must be under 1 MB." });
+      setMsg({ error: "Image must be under 25 MB." });
       return;
     }
+
     const supabase = createClient();
-    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+
+    // Raster images get downscaled and re-encoded to WEBP. Vector/ICO pass through.
+    let body: Blob = file;
+    let ext = (file.name.split(".").pop() || "png").toLowerCase();
+    let contentType = file.type;
+    if (RASTER_TYPES.includes(file.type)) {
+      try {
+        const maxSide = kind === "favicon" ? 128 : 512;
+        body = await compressToWebp(file, maxSide, 0.8);
+        ext = "webp";
+        contentType = "image/webp";
+      } catch {
+        body = file; // fall back to the original if the browser can't encode
+      }
+    }
+
     const path = `${userId}/${siteId}/${kind}.${ext}`;
     const { error } = await supabase.storage
       .from("widget-assets")
-      .upload(path, file, { upsert: true, cacheControl: "3600" });
+      .upload(path, body, { upsert: true, cacheControl: "3600", contentType });
     if (error) {
       setMsg({ error: "Upload failed: " + error.message });
       return;
