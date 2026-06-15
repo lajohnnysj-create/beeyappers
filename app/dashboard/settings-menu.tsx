@@ -11,7 +11,6 @@ export function SettingsMenu({
   planLabel,
   status,
   active,
-  hasBilling,
 }: {
   email: string;
   used: number;
@@ -19,7 +18,6 @@ export function SettingsMenu({
   planLabel: string | null;
   status: string;
   active: boolean;
-  hasBilling: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [portalBusy, setPortalBusy] = useState(false);
@@ -67,6 +65,12 @@ export function SettingsMenu({
     : status === "past_due"
       ? "Payment past due"
       : "No active plan";
+
+  // Only open the Stripe portal when there's a real subscription to manage.
+  // A stray customer with no subscription (abandoned checkout) goes to /pricing.
+  const canManage = ["trialing", "active", "past_due", "unpaid", "paused"].includes(
+    status
+  );
 
   return (
     <div className="relative" ref={ref}>
@@ -135,7 +139,7 @@ export function SettingsMenu({
               </>
             )}
 
-            {hasBilling ? (
+            {canManage ? (
               <button
                 type="button"
                 onClick={openPortal}
