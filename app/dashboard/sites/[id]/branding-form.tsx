@@ -1,13 +1,20 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  type ReactNode,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
+import { createPortal } from "react-dom";
 import { saveBranding } from "./actions";
 import { AvatarUploader } from "./avatar-uploader";
 import {
   type WidgetConfig,
-  FONT_OPTIONS,
-  FONT_LABELS,
+  FONTS,
   resolveFont,
+  googleFontsHref,
 } from "@/lib/widget-config";
 
 const AGENTS = Array.from({ length: 10 }, (_, i) => `/agent/${i + 1}.webp`);
@@ -445,17 +452,10 @@ export function BrandingForm({
         </Section>
 
         <Section icon={ICONS.type} title="Font" {...sectionProps("font")}>
-          <select
+          <FontSelect
             value={config.fontFamily}
-            onChange={(e) => set("fontFamily", e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
-          >
-            {Object.keys(FONT_OPTIONS).map((k) => (
-              <option key={k} value={k}>
-                {FONT_LABELS[k] || k}
-              </option>
-            ))}
-          </select>
+            onChange={(k) => set("fontFamily", k)}
+          />
         </Section>
 
         <Section icon={ICONS.bubble} title="Chat bubble" {...sectionProps("bubble")}>
@@ -766,6 +766,171 @@ function BarStyleIcon({ active }: { active: boolean }) {
       <rect x="24" y="16.5" width="26" height="7" rx="3.5" className="fill-white" />
       <circle cx="58" cy="20" r="4.5" className="fill-slate-900" />
     </svg>
+  );
+}
+
+/* ---------------- font dropdown ---------------- */
+// Custom listbox so each option (and the trigger) renders in its own typeface.
+// The popover is portaled to <body> because the section's expand animation
+// clips with overflow-hidden, which would crop a normal absolute dropdown.
+function FontSelect({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (key: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const optRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const selectedIndex = Math.max(0, FONTS.findIndex((f) => f.key === value));
+  const current = FONTS[selectedIndex] ?? FONTS[0];
+
+  // Load every Google font once so the list + preview show their real face.
+  useEffect(() => {
+    const href = googleFontsHref();
+    if (!href || typeof document === "undefined") return;
+    if (document.getElementById("bv-all-fonts")) return;
+    const link = document.createElement("link");
+    link.id = "bv-all-fonts";
+    link.rel = "stylesheet";
+    link.href = href;
+    document.head.appendChild(link);
+  }, []);
+
+  // Position the portaled popover under the trigger; track scroll/resize.
+  useEffect(() => {
+    if (!open) return;
+    const place = () => {
+      const r = btnRef.current?.getBoundingClientRect();
+      if (r) setRect({ top: r.bottom + 6, left: r.left, width: r.width });
+    };
+    place();
+    optRefs.current[selectedIndex]?.focus();
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
+  }, [open, selectedIndex]);
+
+  // Close on click outside the trigger and the (portaled) list.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (rootRef.current?.contains(t) || listRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
+  const choose = (k: string) => {
+    onChange(k);
+    setOpen(false);
+    btnRef.current?.focus();
+  };
+
+  const onListKeyDown = (e: ReactKeyboardEvent<HTMLUListElement>) => {
+    const i = optRefs.current.findIndex((el) => el === document.activeElement);
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      optRefs.current[Math.min(FONTS.length - 1, i + 1)]?.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      optRefs.current[Math.max(0, i - 1)]?.focus();
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      optRefs.current[0]?.focus();
+    } else if (e.key === "End") {
+      e.preventDefault();
+      optRefs.current[FONTS.length - 1]?.focus();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setOpen(false);
+      btnRef.current?.focus();
+    }
+  };
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="flex w-full items-center justify-between rounded-lg border border-slate-300 px-3 py-2 text-left text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+      >
+        <span style={{ fontFamily: resolveFont(current.key) }}>{current.label}</span>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      {open &&
+        rect &&
+        createPortal(
+          <ul
+            ref={listRef}
+            role="listbox"
+            aria-label="Font"
+            onKeyDown={onListKeyDown}
+            style={{ position: "fixed", top: rect.top, left: rect.left, width: rect.width }}
+            className="z-50 max-h-72 overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+          >
+            {FONTS.map((f, i) => {
+              const active = f.key === value;
+              return (
+                <li key={f.key} role="option" aria-selected={active}>
+                  <button
+                    ref={(el) => {
+                      optRefs.current[i] = el;
+                    }}
+                    type="button"
+                    onClick={() => choose(f.key)}
+                    className={
+                      "flex w-full items-center justify-between px-3 py-2 text-left text-[15px] outline-none transition hover:bg-slate-50 focus:bg-brand-50 " +
+                      (active ? "bg-brand-50 text-brand-700" : "text-slate-800")
+                    }
+                    style={{ fontFamily: resolveFont(f.key) }}
+                  >
+                    <span>{f.label}</span>
+                    {active && (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>,
+          document.body,
+        )}
+    </div>
   );
 }
 
