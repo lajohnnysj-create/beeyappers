@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { type WidgetConfig, resolveFont } from "@/lib/widget-config";
+import { type WidgetConfig, resolveFont, googleFontsHref } from "@/lib/widget-config";
 
 type Msg = { role: "user" | "assistant"; content: string; suggestions?: string[] };
 
@@ -283,6 +283,20 @@ export function ChatWidget({
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastMsgRef = useRef<HTMLDivElement>(null);
   const font = resolveFont(config.fontFamily);
+
+  // Load the selected Google font inside the widget iframe (the host page may
+  // not have it). Web-safe choices return null and skip the fetch.
+  useEffect(() => {
+    const href = googleFontsHref([config.fontFamily]);
+    if (!href || typeof document === "undefined") return;
+    const id = "bv-font-" + config.fontFamily;
+    if (document.getElementById(id)) return;
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = href;
+    document.head.appendChild(link);
+  }, [config.fontFamily]);
 
   const headerBg = config.headerColor;
   const headerFg = readable(headerBg);
