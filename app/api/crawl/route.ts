@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toOrigin, discoverUrls } from "@/lib/crawl/sitemap";
+import { isPublicHttpUrl } from "@/lib/crawl/safe-fetch";
 import { fetchPage } from "@/lib/crawl/fetch-page";
 import { extractContent } from "@/lib/crawl/extract";
 import { chunkText } from "@/lib/crawl/chunk";
@@ -78,6 +79,14 @@ export async function POST(req: Request) {
   if (!origin) {
     return NextResponse.json(
       { error: "Set a valid domain on this site first." },
+      { status: 400 }
+    );
+  }
+
+  // SSRF guard: refuse to crawl internal / non-public addresses up front.
+  if (!(await isPublicHttpUrl(origin))) {
+    return NextResponse.json(
+      { error: "That domain isn't a public website we can reach." },
       { status: 400 }
     );
   }
