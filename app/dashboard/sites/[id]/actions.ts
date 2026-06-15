@@ -12,6 +12,16 @@ export async function saveBranding(siteId: string, config: WidgetConfig) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Signed out. Refresh and sign in again." };
 
+  // Confirm ownership first. RLS already confines the write to the owner's row;
+  // this returns a clear error instead of a silent no-op if the site isn't
+  // the caller's.
+  const { data: owned } = await supabase
+    .from("sites")
+    .select("id")
+    .eq("id", siteId)
+    .single();
+  if (!owned) return { error: "Site not found." };
+
   // RLS confines this update to the owner's own site row.
   const { error } = await supabase
     .from("sites")
