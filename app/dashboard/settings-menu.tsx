@@ -84,7 +84,7 @@ export function SettingsMenu({
               />
             </div>
             <p className="mt-1.5 text-xs text-slate-400">
-              {remaining.toLocaleString()} left this month (rolling 30 days)
+              {remaining.toLocaleString()} left (rolling 30 days)
             </p>
           </div>
 
