@@ -1,18 +1,28 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { signOut } from "@/app/auth/actions";
 
 export function SettingsMenu({
   email,
   used,
   cap,
+  planLabel,
+  status,
+  active,
+  hasBilling,
 }: {
   email: string;
   used: number;
   cap: number;
+  planLabel: string | null;
+  status: string;
+  active: boolean;
+  hasBilling: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [portalBusy, setPortalBusy] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,10 +41,32 @@ export function SettingsMenu({
     };
   }, [open]);
 
+  async function openPortal() {
+    setPortalBusy(true);
+    try {
+      const res = await fetch("/api/billing/portal", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (data.url) {
+        window.location.href = data.url as string;
+        return;
+      }
+    } catch {
+      /* fall through */
+    }
+    setPortalBusy(false);
+  }
+
   const pct = cap > 0 ? Math.min(100, Math.round((used / cap) * 100)) : 0;
   const barColor =
     pct >= 90 ? "bg-red-500" : pct >= 70 ? "bg-amber-500" : "bg-brand-600";
   const remaining = Math.max(0, cap - used);
+
+  // Friendly plan label for the menu header.
+  const planText = active
+    ? `${planLabel}${status === "trialing" ? " · Trial" : ""}`
+    : status === "past_due"
+      ? "Payment past due"
+      : "No active plan";
 
   return (
     <div className="relative" ref={ref}>
@@ -71,21 +103,55 @@ export function SettingsMenu({
           </div>
 
           <div className="border-b border-slate-100 px-4 py-3">
-            <div className="flex items-baseline justify-between">
-              <span className="text-sm font-medium text-slate-700">Messages</span>
-              <span className="text-sm tabular-nums text-slate-500">
-                {used.toLocaleString()} / {cap.toLocaleString()}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-slate-700">Plan</span>
+              <span
+                className={
+                  "text-sm font-medium " +
+                  (active ? "text-slate-900" : "text-amber-600")
+                }
+              >
+                {planText}
               </span>
             </div>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-              <div
-                className={`h-full rounded-full transition-all ${barColor}`}
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <p className="mt-1.5 text-xs text-slate-400">
-              {remaining.toLocaleString()} left (rolling 30 days)
-            </p>
+
+            {active && (
+              <>
+                <div className="mt-3 flex items-baseline justify-between">
+                  <span className="text-xs text-slate-500">Messages</span>
+                  <span className="text-xs tabular-nums text-slate-500">
+                    {used.toLocaleString()} / {cap.toLocaleString()}
+                  </span>
+                </div>
+                <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className={`h-full rounded-full transition-all ${barColor}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <p className="mt-1.5 text-xs text-slate-400">
+                  {remaining.toLocaleString()} left (rolling 30 days)
+                </p>
+              </>
+            )}
+
+            {hasBilling ? (
+              <button
+                type="button"
+                onClick={openPortal}
+                disabled={portalBusy}
+                className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+              >
+                {portalBusy ? "Opening..." : "Manage billing"}
+              </button>
+            ) : (
+              <Link
+                href="/pricing"
+                className="mt-3 block w-full rounded-lg bg-brand-600 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
+              >
+                Choose a plan
+              </Link>
+            )}
           </div>
 
           <form action={signOut}>
