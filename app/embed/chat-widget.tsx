@@ -359,8 +359,16 @@ export function ChatWidget({
         <span>{focused ? "This chat is recorded." : ""}</span>
         <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <span style={{ fontSize: 10 }}>Powered by</span>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Bleviq" style={{ height: 13, width: "auto" }} />
+          <a
+            href="https://bleviq.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Bleviq"
+            style={{ display: "inline-flex", lineHeight: 0 }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Bleviq" style={{ height: 13, width: "auto" }} />
+          </a>
         </span>
       </div>
       </div>
