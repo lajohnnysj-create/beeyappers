@@ -62,14 +62,16 @@ export default async function DashboardPage() {
     return (
       <div className="min-h-screen">
         <Header email={user?.email} />
-        <main className="mx-auto flex max-w-md flex-col px-4 py-16">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-            Create your site
+        <main className="mx-auto flex min-h-[calc(100vh-80px)] max-w-2xl flex-col items-center justify-center px-4 pb-16 text-center">
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+            Let&apos;s get your website ready
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Add your website and Bleviq will train a chat assistant on it.
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600">
+            Add your website link and Bleviq will crawl your website to learn from
+            the public pages. You&apos;ll also be able to upload documents and add
+            FAQs to further train your AI.
           </p>
-          <div className="mt-6">
+          <div className="mt-8 w-full">
             <NewSiteForm />
           </div>
         </main>
