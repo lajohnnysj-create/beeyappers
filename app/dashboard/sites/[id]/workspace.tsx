@@ -159,11 +159,20 @@ function TrainPanel({
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-base font-semibold text-slate-900">Website</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Bleviq crawls {domain || "your site"} and learns its content.
-            </p>
+          <div className="flex items-start gap-3">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M3 12h18" />
+                <path d="M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" />
+              </svg>
+            </span>
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Website</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Bleviq crawls {domain || "your site"} and learns its content.
+              </p>
+            </div>
           </div>
           <StatusBadge status={crawlStatus} />
         </div>
@@ -194,14 +203,23 @@ function CodePanel({
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-        <h2 className="text-base font-semibold text-slate-900">Install the widget</h2>
-        <p className="mt-1 text-sm text-slate-600">
-          Paste this snippet into your site, just before the closing{" "}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">
-            &lt;/body&gt;
-          </code>{" "}
-          tag.
-        </p>
+        <div className="flex items-start gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m8 6-6 6 6 6m8-12 6 6-6 6" />
+            </svg>
+          </span>
+          <div>
+            <h2 className="text-base font-semibold text-slate-900">Install the widget</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Paste this snippet into your site, just before the closing{" "}
+              <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">
+                &lt;/body&gt;
+              </code>{" "}
+              tag.
+            </p>
+          </div>
+        </div>
         <div className="mt-4">
           <EmbedSnippet widgetKey={widgetKey} />
         </div>
