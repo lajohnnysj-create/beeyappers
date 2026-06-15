@@ -17,31 +17,18 @@ function readable(bg: string): string {
 }
 
 function Avatar({ config, size }: { config: WidgetConfig; size: number }) {
+  if (!config.avatarUrl) return null;
   const radius = Math.round(size * 0.32);
-  if (config.avatarUrl) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return (
-      <img
-        src={config.avatarUrl}
-        alt=""
-        style={{
-          height: size,
-          width: size,
-          borderRadius: radius,
-          objectFit: "cover",
-          flexShrink: 0,
-        }}
-      />
-    );
-  }
+  // eslint-disable-next-line @next/next/no-img-element
   return (
-    <span
+    <img
+      src={config.avatarUrl}
+      alt=""
       style={{
         height: size,
         width: size,
         borderRadius: radius,
-        background: config.bubbleColor,
-        display: "inline-block",
+        objectFit: "cover",
         flexShrink: 0,
       }}
     />
