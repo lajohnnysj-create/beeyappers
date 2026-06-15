@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState, type ReactNode } from "react";
 import { saveBranding } from "./actions";
 import {
   type WidgetConfig,
@@ -10,45 +9,165 @@ import {
   resolveFont,
 } from "@/lib/widget-config";
 
-const MAX_BYTES = 25_000_000; // 25 MB before compression
-const RASTER_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
-const OK_TYPES = [...RASTER_TYPES, "image/svg+xml", "image/x-icon"];
+const AGENTS = Array.from({ length: 10 }, (_, i) => `/agent/${i + 1}.webp`);
 
-// Downscale + re-encode a raster image to a compact WEBP blob, in the browser.
-async function compressToWebp(
-  file: File,
-  maxSide: number,
-  quality: number
-): Promise<Blob> {
-  const dataUrl = await new Promise<string>((res, rej) => {
-    const fr = new FileReader();
-    fr.onload = () => res(fr.result as string);
-    fr.onerror = () => rej(new Error("read failed"));
-    fr.readAsDataURL(file);
-  });
-  const img = await new Promise<HTMLImageElement>((res, rej) => {
-    const i = new Image();
-    i.onload = () => res(i);
-    i.onerror = () => rej(new Error("decode failed"));
-    i.src = dataUrl;
-  });
-  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-  const w = Math.max(1, Math.round(img.width * scale));
-  const h = Math.max(1, Math.round(img.height * scale));
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("canvas unavailable");
-  ctx.drawImage(img, 0, 0, w, h);
-  const blob = await new Promise<Blob | null>((res) =>
-    canvas.toBlob(res, "image/webp", quality)
+const PRESET_COLORS = [
+  "#2563eb",
+  "#4f46e5",
+  "#7c3aed",
+  "#db2777",
+  "#dc2626",
+  "#16a34a",
+  "#0f172a",
+  "#ffffff",
+];
+
+/* ---------------- icons ---------------- */
+const ICONS = {
+  avatar: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21a8 8 0 0 1 16 0" />
+    </svg>
+  ),
+  chat: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10Z" />
+    </svg>
+  ),
+  palette: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="13.5" cy="6.5" r="1.5" />
+      <circle cx="17.5" cy="10.5" r="1.5" />
+      <circle cx="8.5" cy="7.5" r="1.5" />
+      <circle cx="6.5" cy="12.5" r="1.5" />
+      <path d="M12 2a10 10 0 1 0 0 20 2 2 0 0 0 2-2c0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.2a1.5 1.5 0 0 1 1.5-1.5H17a4 4 0 0 0 4-4 9 9 0 0 0-9-9Z" />
+    </svg>
+  ),
+  type: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 7V5h16v2M9 19h6M12 5v14" />
+    </svg>
+  ),
+  bubble: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8 13a4 4 0 0 0 8 0" />
+    </svg>
+  ),
+};
+
+function Section({
+  icon,
+  title,
+  subtitle,
+  children,
+}: {
+  icon: ReactNode;
+  title: string;
+  subtitle?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+      <div className="flex items-center gap-3">
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-50 text-brand-600">
+          {icon}
+        </span>
+        <div>
+          <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
+          {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
+        </div>
+      </div>
+      <div className="mt-4">{children}</div>
+    </section>
   );
-  if (!blob) throw new Error("encode failed");
-  return blob;
 }
 
-function ColorRow({
+/* ---------------- avatar picker ---------------- */
+function AvatarChoice({
+  src,
+  index,
+  selected,
+  onSelect,
+}: {
+  src: string;
+  index: number;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const [err, setErr] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={
+        "relative aspect-square overflow-hidden rounded-xl border transition " +
+        (selected
+          ? "border-brand-500 ring-2 ring-brand-200"
+          : "border-slate-200 hover:border-slate-300")
+      }
+    >
+      {err ? (
+        <span className="grid h-full w-full place-items-center bg-slate-100 text-xs text-slate-400">
+          {index}
+        </span>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={"Agent " + index}
+          onError={() => setErr(true)}
+          className="h-full w-full object-cover"
+        />
+      )}
+      {selected && (
+        <span className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded-full bg-brand-600 text-white">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12l5 5L20 6" />
+          </svg>
+        </span>
+      )}
+    </button>
+  );
+}
+
+function AvatarPicker({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (v: string | null) => void;
+}) {
+  return (
+    <div className="grid grid-cols-5 gap-3 sm:grid-cols-6">
+      <button
+        type="button"
+        onClick={() => onChange(null)}
+        className={
+          "grid aspect-square place-items-center rounded-xl border text-xs font-medium text-slate-400 transition " +
+          (!value
+            ? "border-brand-500 ring-2 ring-brand-200"
+            : "border-slate-200 hover:border-slate-300")
+        }
+      >
+        None
+      </button>
+      {AGENTS.map((src, i) => (
+        <AvatarChoice
+          key={src}
+          src={src}
+          index={i + 1}
+          selected={value === src}
+          onSelect={() => onChange(src)}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ---------------- color field ---------------- */
+function ColorField({
   label,
   value,
   onChange,
@@ -57,26 +176,64 @@ function ColorRow({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const v = value.toLowerCase();
+  const isPreset = PRESET_COLORS.includes(v);
   return (
-    <label className="flex items-center justify-between gap-3 py-1.5">
-      <span className="text-sm text-slate-700">{label}</span>
-      <span className="flex items-center gap-2">
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-8 w-10 cursor-pointer rounded border border-slate-300"
-          aria-label={label}
-        />
-        <code className="w-16 text-xs text-slate-500">{value}</code>
-      </span>
-    </label>
+    <div>
+      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {PRESET_COLORS.map((c) => {
+          const active = v === c;
+          return (
+            <button
+              key={c}
+              type="button"
+              onClick={() => onChange(c)}
+              aria-label={c}
+              className={
+                "h-8 w-8 rounded-full border transition " +
+                (active
+                  ? "ring-2 ring-brand-500 ring-offset-2 border-white"
+                  : "border-slate-200 hover:scale-110")
+              }
+              style={{ background: c }}
+            />
+          );
+        })}
+        <label
+          className={
+            "relative grid h-8 w-8 cursor-pointer place-items-center rounded-full border text-white transition hover:scale-110 " +
+            (!isPreset
+              ? "ring-2 ring-brand-500 ring-offset-2 border-white"
+              : "border-slate-300")
+          }
+          style={{
+            background: !isPreset
+              ? value
+              : "conic-gradient(#ef4444,#f59e0b,#eab308,#22c55e,#06b6d4,#3b82f6,#a855f7,#ef4444)",
+          }}
+          title="Custom color"
+        >
+          {isPreset && (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          )}
+          <input
+            type="color"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="absolute inset-0 cursor-pointer opacity-0"
+          />
+        </label>
+      </div>
+    </div>
   );
 }
 
+/* ---------------- main form ---------------- */
 export function BrandingForm({
   siteId,
-  userId,
   initialConfig,
 }: {
   siteId: string;
@@ -91,47 +248,6 @@ export function BrandingForm({
     setConfig((c) => ({ ...c, [key]: val }));
   }
 
-  async function upload(file: File, kind: "logo" | "favicon") {
-    setMsg(null);
-    if (!OK_TYPES.includes(file.type)) {
-      setMsg({ error: "Use a PNG, JPG, WEBP, GIF, SVG, or ICO image." });
-      return;
-    }
-    if (file.size > MAX_BYTES) {
-      setMsg({ error: "Image must be under 25 MB." });
-      return;
-    }
-
-    const supabase = createClient();
-
-    // Raster images get downscaled and re-encoded to WEBP. Vector/ICO pass through.
-    let body: Blob = file;
-    let ext = (file.name.split(".").pop() || "png").toLowerCase();
-    let contentType = file.type;
-    if (RASTER_TYPES.includes(file.type)) {
-      try {
-        const maxSide = kind === "favicon" ? 128 : 512;
-        body = await compressToWebp(file, maxSide, 0.8);
-        ext = "webp";
-        contentType = "image/webp";
-      } catch {
-        body = file; // fall back to the original if the browser can't encode
-      }
-    }
-
-    const path = `${userId}/${siteId}/${kind}.${ext}`;
-    const { error } = await supabase.storage
-      .from("widget-assets")
-      .upload(path, body, { upsert: true, cacheControl: "3600", contentType });
-    if (error) {
-      setMsg({ error: "Upload failed: " + error.message });
-      return;
-    }
-    const { data } = supabase.storage.from("widget-assets").getPublicUrl(path);
-    const url = data.publicUrl + "?v=" + Date.now();
-    set(kind === "logo" ? "logoUrl" : "faviconUrl", url);
-  }
-
   async function save() {
     setSaving(true);
     setMsg(null);
@@ -141,101 +257,64 @@ export function BrandingForm({
   }
 
   return (
-    <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px]">
+    <div className="mt-2 grid gap-6 lg:grid-cols-[1fr_360px]">
       {/* Editor */}
       <div className="space-y-6">
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-          <h2 className="text-sm font-semibold text-slate-900">Text</h2>
-          <div className="mt-3 space-y-3">
+        <Section
+          icon={ICONS.avatar}
+          title="Avatar"
+          subtitle="Shown on the chat bubble, the header, and each reply."
+        >
+          <AvatarPicker
+            value={config.avatarUrl}
+            onChange={(v) => set("avatarUrl", v)}
+          />
+        </Section>
+
+        <Section icon={ICONS.chat} title="Assistant">
+          <div className="space-y-4">
             <label className="block">
-              <span className="text-sm text-slate-700">Assistant name</span>
+              <span className="text-sm font-medium text-slate-700">
+                AI assistant name
+              </span>
               <input
                 value={config.assistantName}
                 onChange={(e) => set("assistantName", e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+                placeholder="Assistant"
+                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
               />
             </label>
             <label className="block">
-              <span className="text-sm text-slate-700">Greeting message</span>
-              <input
+              <span className="text-sm font-medium text-slate-700">
+                Greeting message
+              </span>
+              <textarea
                 value={config.greeting}
                 onChange={(e) => set("greeting", e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+                rows={5}
+                placeholder="Hi! Ask me anything about this site."
+                className="mt-1.5 w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
               />
             </label>
           </div>
-        </section>
+        </Section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-          <h2 className="text-sm font-semibold text-slate-900">Images</h2>
-          <div className="mt-4 grid gap-5 sm:grid-cols-2">
-            <div>
-              <span className="text-sm font-medium text-slate-700">Logo</span>
-              <p className="text-xs text-slate-500">Shown in the chat header.</p>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
-                  {config.logoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={config.logoUrl} alt="Logo" className="h-full w-full object-contain" />
-                  ) : (
-                    <span className="text-[10px] text-slate-400">None</span>
-                  )}
-                </span>
-                <label className="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                  Upload logo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => e.target.files?.[0] && upload(e.target.files[0], "logo")}
-                  />
-                </label>
-              </div>
-            </div>
-            <div>
-              <span className="text-sm font-medium text-slate-700">Favicon</span>
-              <p className="text-xs text-slate-500">Used as the message icon.</p>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full border border-slate-200 bg-slate-50">
-                  {config.faviconUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={config.faviconUrl} alt="Favicon" className="h-full w-full object-cover" />
-                  ) : (
-                    <span className="text-[10px] text-slate-400">None</span>
-                  )}
-                </span>
-                <label className="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                  Upload favicon
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => e.target.files?.[0] && upload(e.target.files[0], "favicon")}
-                  />
-                </label>
-              </div>
-            </div>
+        <Section icon={ICONS.palette} title="Colors">
+          <div className="space-y-5">
+            <ColorField label="Accent" value={config.bubbleColor} onChange={(v) => set("bubbleColor", v)} />
+            <ColorField label="Header" value={config.headerColor} onChange={(v) => set("headerColor", v)} />
+            <ColorField label="Background" value={config.backgroundColor} onChange={(v) => set("backgroundColor", v)} />
+            <ColorField label="Visitor message" value={config.userBubbleColor} onChange={(v) => set("userBubbleColor", v)} />
+            <ColorField label="Bot message" value={config.assistantBubbleColor} onChange={(v) => set("assistantBubbleColor", v)} />
+            <ColorField label="Text" value={config.textColor} onChange={(v) => set("textColor", v)} />
           </div>
-        </section>
+        </Section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-          <h2 className="text-sm font-semibold text-slate-900">Colors</h2>
-          <div className="mt-2 sm:grid sm:grid-cols-2 sm:gap-x-6">
-            <ColorRow label="Launcher bubble" value={config.bubbleColor} onChange={(v) => set("bubbleColor", v)} />
-            <ColorRow label="Header" value={config.headerColor} onChange={(v) => set("headerColor", v)} />
-            <ColorRow label="Background" value={config.backgroundColor} onChange={(v) => set("backgroundColor", v)} />
-            <ColorRow label="Text" value={config.textColor} onChange={(v) => set("textColor", v)} />
-            <ColorRow label="Visitor bubble" value={config.userBubbleColor} onChange={(v) => set("userBubbleColor", v)} />
-            <ColorRow label="Bot bubble" value={config.assistantBubbleColor} onChange={(v) => set("assistantBubbleColor", v)} />
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-          <h2 className="text-sm font-semibold text-slate-900">Font</h2>
+        <Section icon={ICONS.type} title="Font">
           <select
             value={config.fontFamily}
             onChange={(e) => set("fontFamily", e.target.value)}
-            className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
           >
             {Object.keys(FONT_OPTIONS).map((k) => (
               <option key={k} value={k}>
@@ -243,78 +322,52 @@ export function BrandingForm({
               </option>
             ))}
           </select>
-        </section>
+        </Section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-          <h2 className="text-sm font-semibold text-slate-900">Launcher bubble</h2>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <Section icon={ICONS.bubble} title="Chat bubble">
+          <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
-              <span className="text-sm text-slate-700">Position</span>
+              <span className="text-sm font-medium text-slate-700">Position</span>
               <select
                 value={config.launcherPosition}
                 onChange={(e) =>
                   set("launcherPosition", e.target.value as WidgetConfig["launcherPosition"])
                 }
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
               >
                 <option value="bottom-right">Bottom right</option>
                 <option value="bottom-left">Bottom left</option>
               </select>
             </label>
             <label className="block">
-              <span className="text-sm text-slate-700">Icon</span>
-              <select
-                value={config.launcherIcon}
-                onChange={(e) =>
-                  set("launcherIcon", e.target.value as WidgetConfig["launcherIcon"])
-                }
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
-              >
-                <option value="default">Default chat icon</option>
-                <option value="emoji">Emoji</option>
-                <option value="favicon">Favicon image</option>
-              </select>
-            </label>
-            {config.launcherIcon === "emoji" && (
-              <label className="block">
-                <span className="text-sm text-slate-700">Emoji</span>
-                <input
-                  value={config.launcherEmoji}
-                  onChange={(e) => set("launcherEmoji", e.target.value)}
-                  maxLength={4}
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
-                />
-              </label>
-            )}
-            <label className="block">
-              <span className="text-sm text-slate-700">Label (optional)</span>
+              <span className="text-sm font-medium text-slate-700">Label (optional)</span>
               <input
                 value={config.launcherLabel}
                 onChange={(e) => set("launcherLabel", e.target.value)}
                 placeholder="e.g. Chat with us"
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
               />
             </label>
             <label className="block">
-              <span className="text-sm text-slate-700">Panel width (px)</span>
+              <span className="text-sm font-medium text-slate-700">Panel width (px)</span>
               <input
                 type="number"
                 value={config.panelWidth}
                 onChange={(e) => set("panelWidth", Number(e.target.value) || 380)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
               />
             </label>
             <label className="block">
-              <span className="text-sm text-slate-700">Panel height (px)</span>
+              <span className="text-sm font-medium text-slate-700">Panel height (px)</span>
               <input
                 type="number"
                 value={config.panelHeight}
                 onChange={(e) => set("panelHeight", Number(e.target.value) || 560)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
               />
             </label>
           </div>
-        </section>
+        </Section>
 
         <div className="flex items-center gap-3">
           <button
@@ -339,6 +392,36 @@ export function BrandingForm({
   );
 }
 
+/* ---------------- previews ---------------- */
+function AgentAvatar({
+  config,
+  size,
+}: {
+  config: WidgetConfig;
+  size: number;
+}) {
+  const px = { width: size, height: size };
+  if (config.avatarUrl) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return (
+      <img
+        src={config.avatarUrl}
+        alt=""
+        style={px}
+        className="shrink-0 rounded-full object-cover"
+      />
+    );
+  }
+  return (
+    <span
+      className="grid shrink-0 place-items-center rounded-full text-white"
+      style={{ ...px, background: config.bubbleColor }}
+    >
+      <span className="h-1/3 w-1/3 rounded-full bg-white" />
+    </span>
+  );
+}
+
 function LauncherPreview({ config }: { config: WidgetConfig }) {
   const left = config.launcherPosition === "bottom-left";
   return (
@@ -358,18 +441,12 @@ function LauncherPreview({ config }: { config: WidgetConfig }) {
         </span>
       ) : null}
       <span
-        className="grid h-14 w-14 place-items-center rounded-full text-2xl text-white shadow"
+        className="grid h-14 w-14 place-items-center overflow-hidden rounded-full text-2xl text-white shadow"
         style={{ background: config.bubbleColor }}
       >
-        {config.launcherIcon === "favicon" && config.faviconUrl ? (
+        {config.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={config.faviconUrl}
-            alt=""
-            className="h-8 w-8 rounded-full object-cover"
-          />
-        ) : config.launcherIcon === "emoji" ? (
-          <span>{config.launcherEmoji || "\uD83D\uDCAC"}</span>
+          <img src={config.avatarUrl} alt="" className="h-full w-full object-cover" />
         ) : (
           <span>{"\uD83D\uDCAC"}</span>
         )}
@@ -386,13 +463,10 @@ function Preview({ config }: { config: WidgetConfig }) {
       style={{ background: config.backgroundColor, fontFamily: font, height: 460 }}
     >
       <div
-        className="flex items-center gap-2 border-b border-black/5 px-4 py-3"
+        className="flex items-center gap-2.5 border-b border-black/5 px-4 py-3"
         style={{ background: config.headerColor }}
       >
-        {config.logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={config.logoUrl} alt="" className="h-6 w-auto" />
-        ) : null}
+        <AgentAvatar config={config} size={32} />
         <span className="text-sm font-semibold" style={{ color: config.textColor }}>
           {config.assistantName || "Assistant"}
         </span>
@@ -400,7 +474,7 @@ function Preview({ config }: { config: WidgetConfig }) {
 
       <div className="space-y-3 p-4" style={{ height: 320, overflow: "hidden" }}>
         <div className="flex items-start gap-2">
-          <Avatar config={config} />
+          <AgentAvatar config={config} size={24} />
           <div
             className="max-w-[80%] rounded-2xl px-3 py-2 text-sm"
             style={{ background: config.assistantBubbleColor, color: config.textColor }}
@@ -413,16 +487,16 @@ function Preview({ config }: { config: WidgetConfig }) {
             className="max-w-[80%] rounded-2xl px-3 py-2 text-sm text-white"
             style={{ background: config.userBubbleColor }}
           >
-            Do you have a link in bio tool?
+            Do you offer refunds?
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <Avatar config={config} />
+          <AgentAvatar config={config} size={24} />
           <div
             className="max-w-[80%] rounded-2xl px-3 py-2 text-sm"
             style={{ background: config.assistantBubbleColor, color: config.textColor }}
           >
-            Yes! It is part of the all-in-one platform.
+            Yes, within 30 days of purchase.
           </div>
         </div>
       </div>
@@ -441,26 +515,5 @@ function Preview({ config }: { config: WidgetConfig }) {
         </div>
       </div>
     </div>
-  );
-}
-
-function Avatar({ config }: { config: WidgetConfig }) {
-  if (config.faviconUrl) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return (
-      <img
-        src={config.faviconUrl}
-        alt=""
-        className="h-6 w-6 shrink-0 rounded-full object-cover"
-      />
-    );
-  }
-  return (
-    <span
-      className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-white"
-      style={{ background: config.bubbleColor }}
-    >
-      <span className="h-1.5 w-1.5 rounded-full bg-white" />
-    </span>
   );
 }
