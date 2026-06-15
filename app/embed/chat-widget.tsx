@@ -236,6 +236,7 @@ export function ChatWidget({
   const [hp, setHp] = useState("");
   const [busy, setBusy] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [atBottom, setAtBottom] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastMsgRef = useRef<HTMLDivElement>(null);
   const font = resolveFont(config.fontFamily);
@@ -262,6 +263,18 @@ export function ChatWidget({
       sc.scrollTo({ top: sc.scrollHeight, behavior: "smooth" });
     }
   }, [messages, busy]);
+
+  function onScroll() {
+    const sc = scrollRef.current;
+    if (!sc) return;
+    setAtBottom(sc.scrollHeight - sc.scrollTop - sc.clientHeight < 24);
+  }
+  function scrollToBottom() {
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }
 
   function close() {
     if (onClose) {
@@ -396,8 +409,10 @@ export function ChatWidget({
         }}
       >
         {/* Messages */}
+        <div style={{ position: "relative", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <div
           ref={scrollRef}
+          onScroll={onScroll}
           style={{
             flex: 1,
             minHeight: 0,
@@ -476,7 +491,35 @@ export function ChatWidget({
             </div>
           </div>
         )}
-      </div>
+        </div>
+
+        {!atBottom && (
+          <button
+            onClick={scrollToBottom}
+            aria-label="Scroll to latest"
+            style={{
+              position: "absolute",
+              bottom: 12,
+              right: 12,
+              width: 34,
+              height: 34,
+              borderRadius: "50%",
+              border: "1px solid rgba(0,0,0,.08)",
+              background: "#fff",
+              color: "#334155",
+              cursor: "pointer",
+              display: "grid",
+              placeItems: "center",
+              boxShadow: "0 4px 12px rgba(0,0,0,.16)",
+              animation: "bvFade .2s ease both",
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        )}
+        </div>
 
       {/* Input */}
       <div style={{ padding: "10px 14px 6px" }}>
