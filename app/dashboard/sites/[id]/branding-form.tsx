@@ -527,6 +527,16 @@ export function BrandingForm({
 }
 
 /* ---------------- previews ---------------- */
+function readable(bg: string): string {
+  const h = bg.replace("#", "");
+  if (h.length < 6) return "#0f172a";
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const L = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return L > 0.62 ? "#0f172a" : "#ffffff";
+}
+
 function AgentAvatar({
   config,
   size,
@@ -534,25 +544,21 @@ function AgentAvatar({
   config: WidgetConfig;
   size: number;
 }) {
-  const px = { width: size, height: size };
+  const radius = Math.round(size * 0.32);
   if (config.avatarUrl) {
     // eslint-disable-next-line @next/next/no-img-element
     return (
       <img
         src={config.avatarUrl}
         alt=""
-        style={px}
-        className="shrink-0 rounded-full object-cover"
+        style={{ width: size, height: size, borderRadius: radius, objectFit: "cover", flexShrink: 0 }}
       />
     );
   }
   return (
     <span
-      className="grid shrink-0 place-items-center rounded-full text-white"
-      style={{ ...px, background: config.bubbleColor }}
-    >
-      <span className="h-1/3 w-1/3 rounded-full bg-white" />
-    </span>
+      style={{ width: size, height: size, borderRadius: radius, background: config.bubbleColor, flexShrink: 0, display: "inline-block" }}
+    />
   );
 }
 
@@ -661,62 +667,72 @@ function BarStyleIcon({ active }: { active: boolean }) {
 
 function Preview({ config }: { config: WidgetConfig }) {
   const font = resolveFont(config.fontFamily);
+  const headerFg = readable(config.headerColor);
   return (
     <div
-      className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm"
-      style={{ background: config.backgroundColor, fontFamily: font, height: 460 }}
+      className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 shadow-sm"
+      style={{ background: config.backgroundColor, fontFamily: font, height: 480 }}
     >
       <div
-        className="flex items-center gap-2.5 border-b border-black/5 px-4 py-3"
+        className="flex items-center gap-2.5 px-4 py-3"
         style={{ background: config.headerColor }}
       >
-        <AgentAvatar config={config} size={32} />
-        <span className="text-sm font-semibold" style={{ color: config.textColor }}>
+        <AgentAvatar config={config} size={34} />
+        <span className="flex-1 text-sm font-bold" style={{ color: headerFg }}>
           {config.assistantName || "Assistant"}
         </span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={headerFg} strokeWidth="2.2" strokeLinecap="round" style={{ opacity: 0.85 }}>
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
       </div>
 
-      <div className="space-y-3 p-4" style={{ height: 320, overflow: "hidden" }}>
-        <div className="flex items-start gap-2">
+      <div className="flex-1 space-y-3 overflow-hidden p-4">
+        <div className="flex items-end gap-2">
           <AgentAvatar config={config} size={24} />
           <div
-            className="max-w-[80%] rounded-2xl px-3 py-2 text-sm"
-            style={{ background: config.assistantBubbleColor, color: config.textColor }}
+            className="max-w-[82%] px-3 py-2 text-sm"
+            style={{ background: config.assistantBubbleColor, color: config.textColor, borderRadius: 16, borderBottomLeftRadius: 5 }}
           >
             {config.greeting || "Hi! Ask me anything."}
           </div>
         </div>
         <div className="flex justify-end">
           <div
-            className="max-w-[80%] rounded-2xl px-3 py-2 text-sm text-white"
-            style={{ background: config.userBubbleColor }}
+            className="max-w-[82%] px-3 py-2 text-sm text-white"
+            style={{ background: config.userBubbleColor, borderRadius: 16, borderBottomRightRadius: 5 }}
           >
             Do you offer refunds?
           </div>
         </div>
-        <div className="flex items-start gap-2">
+        <div className="flex items-end gap-2">
           <AgentAvatar config={config} size={24} />
           <div
-            className="max-w-[80%] rounded-2xl px-3 py-2 text-sm"
-            style={{ background: config.assistantBubbleColor, color: config.textColor }}
+            className="max-w-[82%] px-3 py-2 text-sm"
+            style={{ background: config.assistantBubbleColor, color: config.textColor, borderRadius: 16, borderBottomLeftRadius: 5 }}
           >
             Yes, within 30 days of purchase.
           </div>
         </div>
       </div>
 
-      <div className="border-t border-black/5 p-3">
-        <div className="flex gap-2">
-          <div className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-400">
-            Type your question...
-          </div>
-          <div
-            className="rounded-lg px-4 py-2 text-sm font-medium text-white"
-            style={{ background: config.bubbleColor }}
-          >
-            Send
-          </div>
+      <div className="px-3 pt-2">
+        <div className="flex items-center gap-2 rounded-full px-3.5 py-1.5" style={{ background: "#f1f5f9" }}>
+          <span className="flex-1 text-sm text-slate-400">Type here...</span>
+          <span className="grid h-8 w-8 place-items-center rounded-full text-white" style={{ background: config.bubbleColor }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 19V5M5 12l7-7 7 7" />
+            </svg>
+          </span>
         </div>
+      </div>
+
+      <div className="flex items-center justify-between px-4 pb-2.5 pt-1.5 text-[11px]" style={{ color: "#64748b" }}>
+        <span>This chat is recorded.</span>
+        <span className="flex items-center gap-1">
+          <span className="text-[10px]">Powered by</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Bleviq" className="h-3 w-auto" />
+        </span>
       </div>
     </div>
   );
