@@ -33,7 +33,10 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted":
-        await syncSubscription(event.data.object as Stripe.Subscription);
+        await syncSubscription(
+          event.data.object as Stripe.Subscription,
+          event.created
+        );
         break;
       default:
         // Other events are acknowledged but ignored.
@@ -47,7 +50,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
-async function syncSubscription(sub: Stripe.Subscription) {
+async function syncSubscription(sub: Stripe.Subscription, eventCreated: number) {
   const admin = createAdminClient();
   const customerId =
     typeof sub.customer === "string" ? sub.customer : sub.customer.id;
@@ -65,6 +68,19 @@ async function syncSubscription(sub: Stripe.Subscription) {
     userId = data?.user_id ?? null;
   }
   if (!userId) return; // Can't map to a user; nothing to do.
+
+  // Ordering guard: Stripe does not guarantee delivery order, and retries can
+  // land a stale event after a newer one. Never let an older event overwrite
+  // newer state (e.g. a late "updated:active" resurrecting a "deleted:canceled"
+  // account). Apply only if this event is at least as new as the last applied.
+  const { data: current } = await admin
+    .from("subscriptions")
+    .select("last_event_ts")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (current?.last_event_ts != null && eventCreated < current.last_event_ts) {
+    return; // stale, out-of-order delivery
+  }
 
   const priceId = sub.items.data[0]?.price.id;
   const mapped = priceId ? planFromPriceId(priceId) : null;
@@ -84,6 +100,7 @@ async function syncSubscription(sub: Stripe.Subscription) {
       status: sub.status,
       current_period_end: periodEnd,
       cancel_at_period_end: sub.cancel_at_period_end ?? false,
+      last_event_ts: eventCreated,
     },
     { onConflict: "user_id" }
   );
