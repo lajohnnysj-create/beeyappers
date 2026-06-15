@@ -337,7 +337,9 @@ function BarLauncher({
               border: "none",
               outline: "none",
               background: "transparent",
-              fontSize: 14,
+              // 16px minimum stops iOS Safari from zooming when this field is
+              // focused (it expands on tap before the panel opens).
+              fontSize: 16,
               color: "#0f172a",
               width: expanded ? 210 : 74,
               boxSizing: "border-box",
