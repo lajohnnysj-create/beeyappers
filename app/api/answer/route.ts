@@ -204,11 +204,24 @@ export async function POST(req: Request) {
 
     const context = chunks.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n");
 
+    // Page list the assistant can link to (favor shallow, nav-level URLs).
+    const { data: pageRows } = await admin
+      .from("pages")
+      .select("url, title")
+      .eq("site_id", site.id)
+      .limit(200);
+    const pages = (pageRows ?? [])
+      .map((p) => ({ title: (p.title || p.url) as string, url: p.url as string }))
+      .filter((p) => /^https?:\/\//i.test(p.url))
+      .sort((a, b) => a.url.length - b.url.length)
+      .slice(0, 30);
+
     // 7. Generate the answer with guardrails.
     const { answer, totalTokens } = await generateAnswer(
       site.system_prompt,
       context,
-      question
+      question,
+      pages
     );
 
     // 8. Account for spend and log the exchange (best-effort).
