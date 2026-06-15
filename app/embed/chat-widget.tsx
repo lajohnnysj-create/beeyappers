@@ -61,6 +61,7 @@ export function ChatWidget({
   const [input, setInput] = useState("");
   const [hp, setHp] = useState("");
   const [busy, setBusy] = useState(false);
+  const [focused, setFocused] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const font = resolveFont(config.fontFamily);
 
@@ -273,6 +274,7 @@ export function ChatWidget({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
+            onFocus={() => setFocused(true)}
             placeholder="Type here..."
             style={{
               flex: 1,
@@ -321,7 +323,7 @@ export function ChatWidget({
           color: "#64748b",
         }}
       >
-        <span>This chat is recorded.</span>
+        <span>{focused ? "This chat is recorded." : ""}</span>
         <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <span style={{ fontSize: 10 }}>Powered by</span>
           {/* eslint-disable-next-line @next/next/no-img-element */}
