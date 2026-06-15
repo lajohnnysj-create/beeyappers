@@ -1,19 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/billing/stripe";
 import { getOrCreateCustomer } from "@/lib/billing/customer";
 import { priceIdFor } from "@/lib/billing/stripe-prices";
 import { isPlanKey } from "@/lib/billing/plans";
+import { checkRateLimit } from "@/lib/security/rate-limit";
+import { isSameOrigin } from "@/lib/security/same-origin";
 
 export const dynamic = "force-dynamic";
 
+// Per-user throttle so a session can't spin up a pile of Checkout Sessions /
+// customers. Generous enough to never hit in normal use.
+const RL_LIMIT = 10;
+const RL_WINDOW = 60; // seconds
+
 export async function POST(req: NextRequest) {
+  if (!isSameOrigin(req)) {
+    return NextResponse.json({ error: "Bad origin" }, { status: 403 });
+  }
+
   const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  }
+
+  const ok = await checkRateLimit(
+    createAdminClient(),
+    `billing:checkout:${user.id}`,
+    RL_LIMIT,
+    RL_WINDOW
+  );
+  if (!ok) {
+    return NextResponse.json(
+      { error: "Too many requests. Please slow down." },
+      { status: 429 }
+    );
   }
 
   let plan: unknown;
