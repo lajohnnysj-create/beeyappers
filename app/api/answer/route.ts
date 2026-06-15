@@ -244,8 +244,8 @@ export async function POST(req: Request) {
     let suggestions: string[] | undefined;
 
     // The model emits NO_INFO when the context doesn't cover the question.
-    // Swap in friendly copy and offer questions it can actually answer.
-    if (answer.trim().toUpperCase().startsWith("NO_INFO")) {
+    // Tolerate leading quotes/markdown/whitespace around the token.
+    if (/^[^a-z0-9]*no_info/i.test(answer.trim())) {
       suggestions = await suggestAnswerableQuestions(pages, faqQuestions);
       answer = noInfoText(suggestions.length > 0);
     }
