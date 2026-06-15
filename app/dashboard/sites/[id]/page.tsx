@@ -6,6 +6,9 @@ import { Wordmark } from "@/app/wordmark";
 import { SettingsMenu } from "@/app/dashboard/settings-menu";
 import { Workspace } from "./workspace";
 
+// Authenticated, per-user page: never cache or statically render it.
+export const dynamic = "force-dynamic";
+
 const MESSAGE_CAP = 1000;
 
 export default async function SiteWorkspacePage({
