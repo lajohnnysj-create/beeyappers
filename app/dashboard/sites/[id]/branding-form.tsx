@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { saveBranding } from "./actions";
+import { AvatarUploader } from "./avatar-uploader";
 import {
   type WidgetConfig,
   FONT_OPTIONS,
@@ -102,7 +103,7 @@ function AvatarChoice({
       type="button"
       onClick={onSelect}
       className={
-        "relative aspect-square overflow-hidden rounded-xl border transition " +
+        "relative aspect-square overflow-hidden rounded-lg border transition " +
         (selected
           ? "border-brand-500 ring-2 ring-brand-200"
           : "border-slate-200 hover:border-slate-300")
@@ -133,19 +134,24 @@ function AvatarChoice({
 }
 
 function AvatarPicker({
+  siteId,
+  userId,
   value,
   onChange,
 }: {
+  siteId: string;
+  userId: string;
   value: string | null;
   onChange: (v: string | null) => void;
 }) {
+  const isCustom = !!value && !AGENTS.includes(value);
   return (
     <div className="grid grid-cols-5 gap-3 sm:grid-cols-6">
       <button
         type="button"
         onClick={() => onChange(null)}
         className={
-          "grid aspect-square place-items-center rounded-xl border text-xs font-medium text-slate-400 transition " +
+          "grid aspect-square place-items-center rounded-lg border text-xs font-medium text-slate-400 transition " +
           (!value
             ? "border-brand-500 ring-2 ring-brand-200"
             : "border-slate-200 hover:border-slate-300")
@@ -162,6 +168,13 @@ function AvatarPicker({
           onSelect={() => onChange(src)}
         />
       ))}
+      <AvatarUploader
+        siteId={siteId}
+        userId={userId}
+        value={value}
+        isCustom={isCustom}
+        onChange={(url) => onChange(url)}
+      />
     </div>
   );
 }
@@ -191,10 +204,10 @@ function ColorField({
               onClick={() => onChange(c)}
               aria-label={c}
               className={
-                "h-8 w-8 rounded-full border transition " +
+                "h-9 w-9 rounded-lg border transition " +
                 (active
-                  ? "ring-2 ring-brand-500 ring-offset-2 border-white"
-                  : "border-slate-200 hover:scale-110")
+                  ? "border-slate-900 ring-2 ring-brand-500"
+                  : "border-slate-200 hover:border-slate-400")
               }
               style={{ background: c }}
             />
@@ -202,23 +215,26 @@ function ColorField({
         })}
         <label
           className={
-            "relative grid h-8 w-8 cursor-pointer place-items-center rounded-full border text-white transition hover:scale-110 " +
+            "relative grid h-9 w-9 cursor-pointer place-items-center rounded-lg border transition " +
             (!isPreset
-              ? "ring-2 ring-brand-500 ring-offset-2 border-white"
-              : "border-slate-300")
+              ? "border-slate-900 ring-2 ring-brand-500"
+              : "border-dashed border-slate-300 hover:border-brand-400")
           }
-          style={{
-            background: !isPreset
-              ? value
-              : "conic-gradient(#ef4444,#f59e0b,#eab308,#22c55e,#06b6d4,#3b82f6,#a855f7,#ef4444)",
-          }}
+          style={!isPreset ? { background: value } : undefined}
           title="Custom color"
         >
-          {isPreset && (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-          )}
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={!isPreset ? "white" : "currentColor"}
+            strokeWidth="2"
+            strokeLinecap="round"
+            className={!isPreset ? "" : "text-slate-400"}
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
           <input
             type="color"
             value={value}
@@ -234,6 +250,7 @@ function ColorField({
 /* ---------------- main form ---------------- */
 export function BrandingForm({
   siteId,
+  userId,
   initialConfig,
 }: {
   siteId: string;
@@ -266,6 +283,8 @@ export function BrandingForm({
           subtitle="Shown on the chat bubble, the header, and each reply."
         >
           <AvatarPicker
+            siteId={siteId}
+            userId={userId}
             value={config.avatarUrl}
             onChange={(v) => set("avatarUrl", v)}
           />
