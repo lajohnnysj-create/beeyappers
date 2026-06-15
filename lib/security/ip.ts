@@ -1,11 +1,16 @@
 import "server-only";
 import { createHash } from "crypto";
 
-// Best-effort client IP from proxy headers (Vercel sets x-forwarded-for).
+// Best-effort client IP. Prefer x-real-ip (set by the Vercel edge to the true
+// client IP) over x-forwarded-for, whose leftmost entry a client can forge by
+// sending its own header. The per-account message cap is the real spend
+// backstop; this just makes the per-IP limits harder to slip past.
 export function getClientIp(req: Request): string {
+  const real = req.headers.get("x-real-ip");
+  if (real) return real.trim();
   const xff = req.headers.get("x-forwarded-for");
   if (xff) return xff.split(",")[0].trim();
-  return req.headers.get("x-real-ip") || "0.0.0.0";
+  return "0.0.0.0";
 }
 
 // One-way hash so we never store raw visitor IPs.
