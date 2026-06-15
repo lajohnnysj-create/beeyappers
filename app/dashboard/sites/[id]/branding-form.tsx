@@ -395,7 +395,6 @@ export function BrandingForm({
         <Section
           icon={ICONS.avatar}
           title="Avatar"
-          subtitle="Shown on the chat bubble, the header, and each reply."
           {...sectionProps("avatar")}
         >
           <AvatarPicker
