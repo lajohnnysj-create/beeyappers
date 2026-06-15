@@ -503,6 +503,43 @@ export function BrandingForm({
           </div>
         </Section>
 
+        <Section
+          icon={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+            </svg>
+          }
+          title="Settings"
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-slate-800">Bleviq branding</p>
+              <p className="mt-0.5 text-xs text-slate-500">
+                Show a small &ldquo;Powered by Bleviq&rdquo; badge in your widget.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={config.showBranding}
+              aria-label="Bleviq branding"
+              onClick={() => set("showBranding", !config.showBranding)}
+              className={
+                "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition " +
+                (config.showBranding ? "bg-brand-600" : "bg-slate-300")
+              }
+            >
+              <span
+                className={
+                  "inline-block h-5 w-5 transform rounded-full bg-white shadow transition " +
+                  (config.showBranding ? "translate-x-[22px]" : "translate-x-0.5")
+                }
+              />
+            </button>
+          </div>
+        </Section>
+
         <div className="flex items-center gap-3">
           <button
             onClick={save}
@@ -740,11 +777,13 @@ function Preview({ config }: { config: WidgetConfig }) {
 
       <div className="flex items-center justify-between px-4 pb-2.5 pt-1.5 text-[11px]" style={{ color: "#64748b" }}>
         <span>This chat is recorded.</span>
-        <span className="flex items-center gap-1">
-          <span className="text-[10px]">Powered by</span>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Bleviq" className="h-3 w-auto" />
-        </span>
+        {config.showBranding && (
+          <span className="flex items-center gap-0.5">
+            <span className="text-[10px]">Powered by</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Bleviq" className="h-3 w-auto" />
+          </span>
+        )}
       </div>
     </div>
   );
