@@ -7,11 +7,11 @@ import { extractContent } from "@/lib/crawl/extract";
 import { chunkText } from "@/lib/crawl/chunk";
 import { embedTexts, toVectorLiteral } from "@/lib/embed/openai";
 import { checkRateLimit } from "@/lib/security/rate-limit";
+import { MAX_PAGES } from "@/lib/crawl/limits";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // raise to 300 on Pro for larger sites
 
-const MAX_PAGES = 90;
 const MAX_CHUNKS = 1000;
 const FETCH_CONCURRENCY = 8;
 const INSERT_BATCH = 200;
