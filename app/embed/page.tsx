@@ -10,6 +10,14 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
+// Map CSS px 1:1 to device px inside the iframe, so the 16px chat input is a
+// true 16px on iOS and never triggers focus-zoom. Pinch-zoom stays enabled
+// (no maximumScale / user-scalable) to keep it accessible.
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default async function EmbedPage({
   searchParams,
 }: {
