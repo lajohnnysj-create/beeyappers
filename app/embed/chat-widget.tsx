@@ -300,6 +300,9 @@ export function ChatWidget({
 
   const headerBg = config.headerColor;
   const headerFg = readable(headerBg);
+  // The footer sits on the panel background; pick the matching logo + muted
+  // text color so "Powered by" stays legible on light or dark themes.
+  const panelIsDark = readable(config.backgroundColor) === "#ffffff";
 
   useEffect(() => {
     const sc = scrollRef.current;
@@ -672,7 +675,7 @@ export function ChatWidget({
           gap: 8,
           padding: "6px 16px 10px",
           fontSize: 11,
-          color: "#64748b",
+          color: panelIsDark ? "rgba(255,255,255,0.6)" : "#64748b",
         }}
       >
         <span>{focused ? "This chat is recorded." : ""}</span>
@@ -687,7 +690,11 @@ export function ChatWidget({
               style={{ display: "inline-flex", lineHeight: 0 }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Bleviq" style={{ height: 13, width: "auto" }} />
+              <img
+                src={panelIsDark ? "/logowhite-small.png" : "/logoblack-small.png"}
+                alt="Bleviq"
+                style={{ height: 13, width: "auto" }}
+              />
             </a>
           </span>
         )}
