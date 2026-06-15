@@ -46,7 +46,7 @@ export const DEFAULT_CONFIG: WidgetConfig = {
   greeting: "Hi! Ask me anything about this site.",
   logoUrl: null,
   faviconUrl: null,
-  avatarUrl: null,
+  avatarUrl: "/agent/1.webp",
   bubbleColor: "#2563eb",
   headerColor: "#ffffff",
   backgroundColor: "#ffffff",
