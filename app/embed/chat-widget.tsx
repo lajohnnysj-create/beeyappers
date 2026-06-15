@@ -201,7 +201,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
   }
 
   return (
-    <div style={{ marginBottom: -6 }}>
+    <div style={{ marginBottom: links.length ? 0 : -6 }}>
       {blocks}
       {links.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
