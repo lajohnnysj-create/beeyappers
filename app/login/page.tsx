@@ -108,7 +108,7 @@ export default function LoginPage() {
           </button>
 
           {oauthError && (
-            <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
               {oauthError}
             </p>
           )}
@@ -176,7 +176,7 @@ export default function LoginPage() {
               </div>
 
               {state?.error && (
-                <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
                   {state.error}
                 </p>
               )}
