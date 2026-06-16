@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Wordmark } from "@/app/wordmark";
-import { MarketingFooter } from "@/app/marketing-footer";
+import { SiteHeader, SiteFooter } from "@/app/site-nav";
 import { PricingTable } from "./pricing-table";
 import { BleviqWidget } from "@/app/bleviq-widget";
 
@@ -25,26 +23,7 @@ export default async function PricingPage({
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
-        <Link href="/" aria-label="Bleviq home">
-          <Wordmark />
-        </Link>
-        {user ? (
-          <Link
-            href="/dashboard"
-            className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
-          >
-            Dashboard
-          </Link>
-        ) : (
-          <Link
-            href="/login"
-            className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
-          >
-            Sign in
-          </Link>
-        )}
-      </header>
+      <SiteHeader signedIn={!!user} />
 
       <section className="mx-auto max-w-5xl px-6 pb-24 pt-8 text-center">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
@@ -58,7 +37,7 @@ export default async function PricingPage({
         <PricingTable canceled={canceled} />
       </section>
 
-      <MarketingFooter />
+      <SiteFooter />
       <BleviqWidget />
     </div>
   );
