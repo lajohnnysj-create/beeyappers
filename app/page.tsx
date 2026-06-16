@@ -1,15 +1,17 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/server";
 import { SiteHeader, SiteFooter } from "@/app/site-nav";
 import { HomeHero } from "@/app/home-hero";
 import { BleviqWidget } from "@/app/bleviq-widget";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "24/7 AI Chatbot that Works While you Sleep | Bleviq",
   description:
     "Bleviq learns your website and answers your visitors' questions 24/7. Set it up in minutes with one line of code. 14-day free trial.",
-};
+  path: "/",
+});
 
 const STEPS = [
   {
