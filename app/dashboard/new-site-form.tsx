@@ -3,6 +3,7 @@
 import { useFormState, useFormStatus } from "react-dom";
 import { createSite } from "./actions";
 import type { ActionState } from "@/lib/types";
+import { FIELD_LIMITS } from "@/lib/field-limits";
 
 function GoButton() {
   const { pending } = useFormStatus();
@@ -29,6 +30,7 @@ export function NewSiteForm() {
           inputMode="url"
           required
           autoFocus
+          maxLength={FIELD_LIMITS.domain}
           aria-label="Your website address"
           placeholder="yourwebsite.com"
           className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
