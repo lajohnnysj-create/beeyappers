@@ -44,8 +44,8 @@ export const PLANS: Record<PlanKey, Plan> = {
       "8,000 AI replies",
       "GPT-4-class intelligence",
       "Everything in Basic",
-      "No Bleviq branding",
       "Priority support",
+      "No Bleviq branding",
     ],
   },
 };
