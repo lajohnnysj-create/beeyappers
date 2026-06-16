@@ -7,7 +7,7 @@ import { HomeHero } from "@/app/home-hero";
 import { PLANS, PLAN_ORDER } from "@/lib/billing/plans";
 
 export const metadata: Metadata = {
-  title: "Bleviq — an AI chatbot trained on your website",
+  title: "24/7 AI Chatbot that Works While you Sleep | Bleviq",
   description:
     "Bleviq reads your website and answers your visitors' questions in your own words, 24/7. Set it up in minutes with one line of code. 14-day free trial.",
 };
