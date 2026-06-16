@@ -195,7 +195,7 @@ export default async function Home() {
 
       {/* How it works */}
       <section className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-5xl px-6 py-20">
+        <div className="mx-auto max-w-6xl px-6 py-20">
           <h2 className="font-display text-center text-3xl font-bold tracking-tight text-slate-900">
             Live in a few steps
           </h2>
@@ -219,12 +219,12 @@ export default async function Home() {
                   {s.title}
                 </h3>
                 <p className="mt-2 text-slate-600">{s.body}</p>
-                <div className="mt-5 overflow-hidden rounded-xl border border-slate-900/5 bg-white shadow-lg ring-1 ring-black/5">
+                <div className="relative mt-5 overflow-hidden rounded-xl border border-slate-900/5 bg-white shadow-lg ring-1 ring-black/5 transition duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl group-hover:ring-black/10">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={s.img}
-                    alt=""
-                    className="block w-full transition-transform duration-500 group-hover:scale-[1.04]"
+                  <img src={s.img} alt="" className="block w-full" />
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 left-0 w-1/3 -translate-x-[160%] -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-[900ms] ease-out group-hover:translate-x-[420%]"
                   />
                 </div>
               </div>
