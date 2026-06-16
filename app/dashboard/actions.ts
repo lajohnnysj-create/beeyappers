@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/types";
+import { FIELD_LIMITS } from "@/lib/field-limits";
 
 // Soft cap. Raise this (or make it per-account) when paid tiers ship.
 const MAX_SITES = 1;
@@ -23,12 +24,12 @@ export async function createSite(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const domain = String(formData.get("domain") || "").trim();
-  const providedName = String(formData.get("name") || "").trim();
+  const domain = String(formData.get("domain") || "").trim().slice(0, FIELD_LIMITS.domain);
+  const providedName = String(formData.get("name") || "").trim().slice(0, FIELD_LIMITS.siteName);
 
   if (!domain) return { error: "Add your website link to get started." };
 
-  const name = providedName || deriveName(domain);
+  const name = (providedName || deriveName(domain)).slice(0, FIELD_LIMITS.siteName);
 
   const supabase = createClient();
   const {
