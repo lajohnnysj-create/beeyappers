@@ -26,7 +26,7 @@ const STEPS = [
     title: "Bleviq learns it",
     body: "Our AI learns your website and trains your chatbot.",
     card: "border-sky-100 bg-sky-50",
-    badge: "bg-sky-500",
+    badge: "bg-sky-700",
     img: "/card2.webp",
   },
   {
@@ -34,7 +34,7 @@ const STEPS = [
     title: "Add knowledge",
     body: "Provide additional information for your chatbot.",
     card: "border-teal-100 bg-teal-50",
-    badge: "bg-teal-600",
+    badge: "bg-teal-700",
     img: "/card3.webp",
   },
   {
@@ -42,7 +42,7 @@ const STEPS = [
     title: "Customize to your branding",
     body: "Match your colors, fonts, and avatar so it feels like you.",
     card: "border-amber-100 bg-amber-50",
-    badge: "bg-amber-500",
+    badge: "bg-amber-700",
     img: "/card4.webp",
   },
   {
@@ -50,7 +50,7 @@ const STEPS = [
     title: "Drop in the widget",
     body: "Copy one script tag onto your site.",
     card: "border-rose-100 bg-rose-50",
-    badge: "bg-rose-500",
+    badge: "bg-rose-700",
     img: "/card5.webp",
   },
   {
@@ -58,7 +58,7 @@ const STEPS = [
     title: "Voila!",
     body: "The chat bubble is now live on your website!",
     card: "border-emerald-100 bg-emerald-50",
-    badge: "bg-emerald-600",
+    badge: "bg-emerald-700",
     img: "/card6.webp",
   },
 ];
@@ -244,7 +244,7 @@ export default async function Home() {
                 <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
                 <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                <span className="ml-3 hidden flex-1 truncate rounded bg-white px-2 py-0.5 text-[11px] text-slate-400 sm:block">
+                <span className="ml-3 hidden flex-1 truncate rounded bg-white px-2 py-0.5 text-[11px] text-slate-500 sm:block">
                   bleviq.com/dashboard
                 </span>
               </div>
@@ -315,7 +315,7 @@ export default async function Home() {
       </section>
 
       {/* Features */}
-      <section className="relative isolate overflow-hidden">
+      <section className="relative isolate overflow-hidden bg-slate-950">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/homepagesplash2.webp"
@@ -354,7 +354,7 @@ export default async function Home() {
 
       {/* CTA */}
       <section className="mx-auto max-w-5xl px-6 py-20">
-        <div className="relative isolate overflow-hidden rounded-3xl px-8 py-20 text-center shadow-2xl sm:py-24">
+        <div className="relative isolate overflow-hidden rounded-3xl bg-slate-950 px-8 py-20 text-center shadow-2xl sm:py-24">
           {/* Background image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

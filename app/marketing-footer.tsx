@@ -28,7 +28,7 @@ export function MarketingFooter() {
             </Link>
           </nav>
         </div>
-        <p className="mt-6 text-xs text-slate-400">
+        <p className="mt-6 text-xs text-slate-500">
           © {year} MRLA Media LLC. Bleviq is a product of MRLA Media LLC.
         </p>
       </div>
