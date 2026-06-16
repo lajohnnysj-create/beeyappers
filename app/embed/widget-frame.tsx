@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { type WidgetConfig } from "@/lib/widget-config";
+import { type WidgetConfig, DEFAULT_LABELS, type WidgetLabels } from "@/lib/widget-config";
 import { FIELD_LIMITS } from "@/lib/field-limits";
 import { ChatWidget } from "./chat-widget";
 
@@ -52,9 +52,13 @@ function ChatIcon({
 export function WidgetFrame({
   widgetKey,
   config,
+  labels = DEFAULT_LABELS,
+  lang = "",
 }: {
   widgetKey: string;
   config: WidgetConfig;
+  labels?: WidgetLabels;
+  lang?: string;
 }) {
   const left = config.launcherPosition === "bottom-left";
   const [open, setOpen] = useState(false);
@@ -216,6 +220,8 @@ export function WidgetFrame({
         <ChatWidget
           widgetKey={widgetKey}
           config={config}
+          labels={labels}
+          lang={lang}
           radius={fullscreen ? 0 : 16}
           onClose={closeChat}
           pendingQuestion={pending}
@@ -244,7 +250,7 @@ export function WidgetFrame({
           </button>
         )
       ) : config.launcherStyle === "bar" ? (
-        <BarLauncher config={config} left={left} onOpen={openChat} />
+        <BarLauncher config={config} labels={labels} left={left} onOpen={openChat} />
       ) : (
         <BubbleLauncher config={config} left={left} onOpen={() => openChat()} />
       )}
@@ -324,10 +330,12 @@ function BubbleLauncher({
 
 function BarLauncher({
   config,
+  labels,
   left,
   onOpen,
 }: {
   config: WidgetConfig;
+  labels: WidgetLabels;
   left: boolean;
   onOpen: (q?: string) => void;
 }) {
@@ -419,7 +427,7 @@ function BarLauncher({
                 submit();
               }
             }}
-            placeholder={config.launcherLabel || "Ask AI"}
+            placeholder={config.launcherLabel || labels.askAI}
             aria-label="Ask a question"
             maxLength={FIELD_LIMITS.chatMessage}
             style={{
@@ -437,7 +445,7 @@ function BarLauncher({
           />
           <button
             onClick={submit}
-            aria-label="Send"
+            aria-label={labels.send}
             style={{
               width: 30,
               height: 30,

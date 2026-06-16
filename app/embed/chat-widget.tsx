@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { type WidgetConfig, resolveFont, googleFontsHref } from "@/lib/widget-config";
+import {
+  type WidgetConfig,
+  type WidgetLabels,
+  DEFAULT_LABELS,
+  resolveFont,
+  googleFontsHref,
+} from "@/lib/widget-config";
 import { FIELD_LIMITS } from "@/lib/field-limits";
 
 type Msg = { role: "user" | "assistant"; content: string; suggestions?: string[] };
@@ -261,6 +267,8 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
 export function ChatWidget({
   widgetKey,
   config,
+  labels = DEFAULT_LABELS,
+  lang = "",
   radius,
   onClose,
   pendingQuestion,
@@ -268,6 +276,8 @@ export function ChatWidget({
 }: {
   widgetKey: string;
   config: WidgetConfig;
+  labels?: WidgetLabels;
+  lang?: string;
   radius?: number;
   onClose?: () => void;
   pendingQuestion?: string;
@@ -400,6 +410,7 @@ export function ChatWidget({
           hp,
           history,
           conversationId: convoIdRef.current,
+          lang,
         }),
       });
       const data = await res.json();
@@ -665,7 +676,7 @@ export function ChatWidget({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
-            placeholder="Type here..."
+            placeholder={labels.placeholder}
             maxLength={FIELD_LIMITS.chatMessage}
             style={{
               flex: 1,
@@ -680,7 +691,7 @@ export function ChatWidget({
           <button
             onClick={send}
             disabled={busy}
-            aria-label="Send"
+            aria-label={labels.send}
             style={{
               height: 36,
               width: 36,
@@ -733,7 +744,7 @@ export function ChatWidget({
               marginTop: 5,
             }}
           >
-            <span style={{ fontSize: 10 }}>Powered by</span>
+            <span style={{ fontSize: 10 }}>{labels.poweredBy}</span>
             <a
               href="https://bleviq.com"
               target="_blank"
