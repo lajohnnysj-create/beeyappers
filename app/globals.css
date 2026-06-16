@@ -75,6 +75,20 @@ body {
   animation: bv-cursor-move 11s ease-in-out infinite;
 }
 
+/* Gentle idle float for step badges */
+@keyframes bv-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+.bv-float {
+  animation: bv-float 3s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

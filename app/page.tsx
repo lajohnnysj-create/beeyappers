@@ -194,14 +194,19 @@ export default async function Home() {
             From website to working chat widget in about the time it takes to
             grab a coffee.
           </p>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {STEPS.map((s) => (
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            {STEPS.map((s, i) => (
               <div
                 key={s.n}
-                className={`rounded-2xl border p-6 shadow-card ${s.card}`}
+                className={`group rounded-2xl border p-6 shadow-card transition duration-300 hover:-translate-y-2 hover:shadow-xl ${s.card} ${
+                  i === STEPS.length - 1
+                    ? "md:col-span-2 md:w-[calc(50%-0.75rem)] md:justify-self-center"
+                    : ""
+                }`}
               >
                 <div
-                  className={`grid h-11 w-11 place-items-center rounded-full text-base font-bold text-white ${s.badge}`}
+                  className={`bv-float grid h-11 w-11 place-items-center rounded-full text-base font-bold text-white ${s.badge}`}
+                  style={{ animationDelay: `${i * 0.3}s` }}
                 >
                   {s.n}
                 </div>
@@ -211,7 +216,11 @@ export default async function Home() {
                 <p className="mt-2 text-slate-600">{s.body}</p>
                 <div className="mt-5 overflow-hidden rounded-xl border border-slate-900/5 bg-white shadow-lg ring-1 ring-black/5">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={s.img} alt="" className="block w-full" />
+                  <img
+                    src={s.img}
+                    alt=""
+                    className="block w-full transition-transform duration-500 group-hover:scale-[1.04]"
+                  />
                 </div>
               </div>
             ))}
