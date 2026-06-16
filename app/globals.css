@@ -17,6 +17,19 @@ body {
   outline-offset: 2px;
 }
 
+/* Dashboard form controls render at 16px so iOS Safari does not zoom in on
+   focus. `.dash-root` (app/dashboard/layout.tsx) is display:contents, so it adds
+   no layout box; it only scopes this rule to the dashboard. The class selector
+   out-specifies Tailwind's text-sm/text-xs on these elements. */
+.dash-root {
+  display: contents;
+}
+.dash-root input,
+.dash-root textarea,
+.dash-root select {
+  font-size: 16px;
+}
+
 /* Indeterminate training bar */
 @keyframes bv-bar {
   0% {
