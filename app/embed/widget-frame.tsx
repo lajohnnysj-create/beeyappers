@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { type WidgetConfig } from "@/lib/widget-config";
+import { FIELD_LIMITS } from "@/lib/field-limits";
 import { ChatWidget } from "./chat-widget";
 
 const SHADOW = 36; // transparent room for the open panel's drop shadow
@@ -420,6 +421,7 @@ function BarLauncher({
             }}
             placeholder={config.launcherLabel || "Ask AI"}
             aria-label="Ask a question"
+            maxLength={FIELD_LIMITS.chatMessage}
             style={{
               border: "none",
               outline: "none",

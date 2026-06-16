@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { type WidgetConfig, resolveFont, googleFontsHref } from "@/lib/widget-config";
+import { FIELD_LIMITS } from "@/lib/field-limits";
 
 type Msg = { role: "user" | "assistant"; content: string; suggestions?: string[] };
 
@@ -665,6 +666,7 @@ export function ChatWidget({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
             placeholder="Type here..."
+            maxLength={FIELD_LIMITS.chatMessage}
             style={{
               flex: 1,
               border: "none",
