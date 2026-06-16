@@ -276,6 +276,23 @@ function ColorField({
 }) {
   const v = value.toLowerCase();
   const isPreset = PRESET_COLORS.includes(v);
+
+  // HEX is the most-reached-for format, so surface a text field right here and
+  // people never need the OS color palette. Keep a local draft so partial
+  // typing ("#b91") isn't reformatted mid-keystroke; commit only a valid 3- or
+  // 6-digit hex. Re-sync when the value changes elsewhere (e.g. preset clicks).
+  const [hexDraft, setHexDraft] = useState(value);
+  useEffect(() => setHexDraft(value), [value]);
+
+  function commitHex(raw: string) {
+    let h = raw.trim();
+    if (!h.startsWith("#")) h = "#" + h;
+    if (/^#[0-9a-fA-F]{3}$/.test(h)) {
+      h = "#" + h.slice(1).split("").map((c) => c + c).join("");
+    }
+    if (/^#[0-9a-fA-F]{6}$/.test(h)) onChange(h.toLowerCase());
+  }
+
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200">
       <button
@@ -312,51 +329,80 @@ function ColorField({
           </svg>
         </span>
       </button>
-      {open && (
-        <div className="border-t border-slate-100 px-4 py-3">
-          <div className="flex flex-wrap gap-2">
-            {PRESET_COLORS.map((c) => {
-              const active = v === c;
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => onChange(c)}
-                  aria-label={c}
-                  aria-pressed={active}
-                  className={
-                    "h-8 w-8 rounded-lg border transition " +
-                    (active
-                      ? "border-slate-900 ring-2 ring-brand-500"
-                      : "border-slate-200 hover:border-slate-400")
-                  }
-                  style={{ background: c }}
-                />
-              );
-            })}
-          </div>
-          <label
+      <div
+        className="grid transition-[grid-template-rows] duration-300 ease-out"
+        style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
+      >
+        <div className="overflow-hidden" {...(open ? {} : { inert: true })}>
+          <div
             className={
-              "relative mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition " +
-              (!isPreset
-                ? "border-brand-500 text-brand-700"
-                : "border-slate-300 text-slate-700 hover:bg-slate-50")
+              "border-t border-slate-100 px-4 py-3 transition-opacity duration-200 " +
+              (open ? "opacity-100 delay-100" : "opacity-0")
             }
           >
-            <span
-              className="h-4 w-4 rounded border border-slate-300"
-              style={{ background: value }}
-            />
-            Custom
-            <input
-              type="color"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              className="absolute inset-0 cursor-pointer opacity-0"
-            />
-          </label>
+            <div className="flex flex-wrap gap-2">
+              {PRESET_COLORS.map((c) => {
+                const active = v === c;
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => onChange(c)}
+                    aria-label={c}
+                    aria-pressed={active}
+                    className={
+                      "h-8 w-8 rounded-lg border transition " +
+                      (active
+                        ? "border-slate-900 ring-2 ring-brand-500"
+                        : "border-slate-200 hover:border-slate-400")
+                    }
+                    style={{ background: c }}
+                  />
+                );
+              })}
+            </div>
+
+            {/* HEX is the primary control; the swatch opens the OS picker for
+                anyone who wants it. */}
+            <div className="mt-3 flex items-center gap-2">
+              <label
+                className={
+                  "relative inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border transition " +
+                  (!isPreset
+                    ? "border-brand-500"
+                    : "border-slate-300 hover:bg-slate-50")
+                }
+                aria-label="Open color picker"
+                title="Open color picker"
+              >
+                <span
+                  className="h-5 w-5 rounded border border-slate-300"
+                  style={{ background: value }}
+                />
+                <input
+                  type="color"
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  className="absolute inset-0 cursor-pointer opacity-0"
+                />
+              </label>
+              <input
+                type="text"
+                value={hexDraft}
+                onChange={(e) => {
+                  setHexDraft(e.target.value);
+                  commitHex(e.target.value);
+                }}
+                spellCheck={false}
+                maxLength={7}
+                aria-label={`${label} hex value`}
+                placeholder="#000000"
+                className="w-28 rounded-lg border border-slate-300 px-2.5 py-1.5 font-mono text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+              />
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
