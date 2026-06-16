@@ -60,12 +60,12 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col bg-white lg:flex-row">
       {/* Visual: full-height panel on desktop, top banner on mobile */}
-      <div className="relative h-48 w-full shrink-0 sm:h-60 lg:h-auto lg:w-1/2">
+      <div className="relative h-48 w-full shrink-0 overflow-hidden sm:h-60 lg:h-auto lg:w-1/2">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/login-background.webp"
           alt=""
-          className="h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
 
