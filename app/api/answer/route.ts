@@ -36,6 +36,7 @@ type SiteRow = {
   monthly_token_cap: number;
   tokens_used_period: number;
   period_start: string;
+  collect_leads: boolean | null;
 };
 
 // Owner-only retrieval/generation trace. Gated behind the cron secret so it is
@@ -114,12 +115,14 @@ export async function POST(req: Request) {
   let history: ChatTurn[] = [];
   let clientConvoId = "";
   let lang = "";
+  let leadCapturedHint = false;
   try {
     const body = await req.json();
     widgetKey = String(body.widgetKey || "");
     question = String(body.question || "").trim();
     honeypot = String(body.hp || "");
     lang = String(body.lang || "").slice(0, 35);
+    leadCapturedHint = body.leadCaptured === true;
     // Client-generated id that threads every turn of one chat into a single
     // conversation. Only accept a well-formed UUID; anything else falls back to
     // the legacy "new row per message" behavior (client_id stays null).
@@ -164,7 +167,7 @@ export async function POST(req: Request) {
     .from("sites")
     .select(
       "id, user_id, is_active, system_prompt, allowed_origins, " +
-        "monthly_token_cap, tokens_used_period, period_start"
+        "monthly_token_cap, tokens_used_period, period_start, collect_leads"
     )
     .eq("widget_key", widgetKey)
     .single<SiteRow>();
@@ -332,6 +335,21 @@ export async function POST(req: Request) {
 
     const context = chunks.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n");
 
+    // Lead capture: only let the model offer the form when the owner has it on
+    // and this conversation hasn't already captured a lead. The DB flag is
+    // authoritative; the client hint just covers the gap before it's written.
+    let leadCaptured = leadCapturedHint;
+    if (!leadCaptured && clientConvoId) {
+      const { data: conv } = await admin
+        .from("conversations")
+        .select("lead_captured_at")
+        .eq("site_id", site.id)
+        .eq("client_id", clientConvoId)
+        .maybeSingle();
+      if (conv?.lead_captured_at) leadCaptured = true;
+    }
+    const canCollectLead = site.collect_leads !== false && !leadCaptured;
+
     // 7. Generate the answer with guardrails.
     const gen = await generateAnswer(
       site.system_prompt,
@@ -339,8 +357,10 @@ export async function POST(req: Request) {
       question,
       pages,
       history,
-      lang
+      lang,
+      canCollectLead
     );
+    const collectInfo = canCollectLead && gen.collectInfo;
     let answer = gen.answer;
     const totalTokens = gen.totalTokens;
     let suggestions: string[] | undefined;
@@ -424,7 +444,11 @@ export async function POST(req: Request) {
       debugTrace(
         req,
         { question, rewritten, queries, chunks, answered: gen.answered, rawAnswer: gen.answer },
-        suggestions ? { answer, suggestions } : { answer }
+        {
+          answer,
+          ...(suggestions ? { suggestions } : {}),
+          ...(collectInfo ? { collectInfo: true } : {}),
+        }
       ),
       200,
       headers
