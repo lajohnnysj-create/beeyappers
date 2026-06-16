@@ -158,6 +158,14 @@ export function SettingsMenu({
             )}
           </div>
 
+          <Link
+            href="/dashboard/account"
+            onClick={() => setOpen(false)}
+            className="block w-full border-b border-slate-100 px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+          >
+            Account settings
+          </Link>
+
           <form action={signOut}>
             <button
               type="submit"
