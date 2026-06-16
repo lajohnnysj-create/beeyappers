@@ -48,10 +48,18 @@ const STEPS = [
   {
     n: "05",
     title: "Drop in the widget",
-    body: "Copy one script tag onto your site. The chat bubble is live.",
+    body: "Copy one script tag onto your site.",
     card: "border-rose-100 bg-rose-50",
     badge: "bg-rose-500",
     img: "/card5.webp",
+  },
+  {
+    n: "06",
+    title: "Voila!",
+    body: "The chat bubble is now live on your website!",
+    card: "border-emerald-100 bg-emerald-50",
+    badge: "bg-emerald-600",
+    img: "/card6.webp",
   },
 ];
 
@@ -199,11 +207,7 @@ export default async function Home() {
             {STEPS.map((s, i) => (
               <div
                 key={s.n}
-                className={`group rounded-2xl border p-6 shadow-card transition duration-300 hover:-translate-y-2 hover:shadow-xl ${s.card} ${
-                  i === STEPS.length - 1
-                    ? "md:col-span-2 md:w-[calc(50%-0.75rem)] md:justify-self-center"
-                    : ""
-                }`}
+                className={`group rounded-2xl border p-6 shadow-card transition duration-300 hover:-translate-y-2 hover:shadow-xl ${s.card}`}
               >
                 <div
                   className={`bv-float grid h-11 w-11 place-items-center rounded-full text-base font-bold text-white ${s.badge}`}
