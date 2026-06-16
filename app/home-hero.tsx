@@ -69,7 +69,7 @@ export function HomeHero() {
             24/7 AI Chatbot that works while you sleep
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-slate-200 [text-shadow:0_1px_14px_rgba(0,0,0,0.55)]">
-            Easily train your AI Chatbot in minutes
+            Easily train your AI Agent in minutes
             <br />
             and start <RotatingWord /> with your visitors.
           </p>
@@ -92,8 +92,22 @@ export function HomeHero() {
 
             <Link
               href="/login?email=1&mode=signup"
-              className="flex w-full items-center justify-center rounded-xl border border-white/25 bg-white/5 px-5 py-3.5 text-base font-semibold text-white transition-colors hover:bg-white/10"
+              className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-white/25 bg-white/5 px-5 py-3.5 text-base font-semibold text-white transition-colors hover:bg-white/10"
             >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
               Continue with Email
             </Link>
           </div>
