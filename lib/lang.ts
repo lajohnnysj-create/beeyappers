@@ -18,3 +18,27 @@ export function languageName(code: string): string {
     return code;
   }
 }
+
+// Right-to-left scripts. The base-code set is small and stable, so a lookup is
+// more reliable than feature-detecting Intl.Locale textInfo across browsers.
+const RTL_LANGS = new Set([
+  "ar", // Arabic
+  "he", // Hebrew
+  "iw", // Hebrew (legacy code)
+  "fa", // Persian / Farsi
+  "ur", // Urdu
+  "ps", // Pashto
+  "sd", // Sindhi
+  "yi", // Yiddish
+  "dv", // Divehi / Maldivian
+  "ckb", // Central Kurdish (Sorani)
+  "ug", // Uyghur
+  "syr", // Syriac
+  "nqo", // N'Ko
+  "prs", // Dari
+  "arc", // Aramaic
+]);
+
+export function isRtlLang(input?: string | null): boolean {
+  return RTL_LANGS.has(baseLang(input));
+}
