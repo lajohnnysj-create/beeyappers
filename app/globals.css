@@ -45,6 +45,23 @@ body {
   animation: bv-word-in 0.45s ease forwards;
 }
 
+/* Playful icon wiggle on card hover */
+@keyframes bv-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+.group:hover .bv-wiggle {
+  animation: bv-wiggle 0.45s ease-in-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

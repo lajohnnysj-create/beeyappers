@@ -53,14 +53,14 @@ const STEPS = [
 const FEATURES = [
   {
     title: "Grounded in your content",
-    body: "Answers come from your own pages, FAQs, and documents, not generic guesses.",
+    body: "Answers come from your own pages, FAQs, and documents.",
     icon: "target",
     tint: "from-indigo-500 to-violet-500",
   },
   {
-    title: "Knows when it doesn't know",
-    body: "Instead of making something up, it tells visitors it isn't sure and points them onward.",
-    icon: "help",
+    title: "Always on",
+    body: "It answers visitors around the clock, even while you sleep.",
+    icon: "clock",
     tint: "from-sky-500 to-cyan-500",
   },
   {
@@ -116,12 +116,11 @@ function FeatureIcon({ name }: { name: string }) {
           <circle cx="12" cy="12" r="2" />
         </Glyph>
       );
-    case "help":
+    case "clock":
       return (
         <Glyph>
           <circle cx="12" cy="12" r="10" />
-          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-          <path d="M12 17h.01" />
+          <polyline points="12 6 12 12 16 14" />
         </Glyph>
       );
     case "file":
@@ -229,10 +228,10 @@ export default async function Home() {
             {FEATURES.map((f) => (
               <div
                 key={f.title}
-                className="rounded-2xl border border-white/10 bg-white/[0.08] p-6 shadow-lg backdrop-blur-md"
+                className="group rounded-2xl border border-white/10 bg-white/[0.08] p-6 shadow-lg backdrop-blur-md transition duration-200 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.12]"
               >
                 <div
-                  className={`grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br text-white shadow-md ${f.tint}`}
+                  className={`bv-wiggle grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br text-white shadow-md ${f.tint}`}
                 >
                   <FeatureIcon name={f.icon} />
                 </div>
