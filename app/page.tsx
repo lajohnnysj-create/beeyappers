@@ -24,7 +24,7 @@ const STEPS = [
   {
     n: "02",
     title: "Bleviq learns it",
-    body: "Our AI learns your website and trains your chatbot on responses.",
+    body: "Our AI learns your website and trains your chatbot.",
     card: "border-sky-100 bg-sky-50",
     badge: "bg-sky-500",
     img: "/card2.webp",
