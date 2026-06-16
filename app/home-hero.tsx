@@ -79,7 +79,7 @@ export function HomeHero() {
 
       <div className="mx-auto w-full max-w-5xl px-6 py-20 lg:py-24">
         <div className="mx-auto max-w-xl text-center sm:mx-0 sm:text-left">
-          <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-5xl">
+          <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-5xl lg:text-[52px]">
             24/7 AI Chatbot that works while you sleep
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-slate-200 [text-shadow:0_1px_14px_rgba(0,0,0,0.55)]">
