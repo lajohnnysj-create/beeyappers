@@ -1,5 +1,4 @@
-import { MarketingHeader } from "@/app/marketing-header";
-import { MarketingFooter } from "@/app/marketing-footer";
+import { SiteHeader, SiteFooter } from "@/app/site-nav";
 
 export function LegalShell({
   signedIn,
@@ -14,7 +13,7 @@ export function LegalShell({
 }) {
   return (
     <div className="min-h-screen bg-slate-50">
-      <MarketingHeader signedIn={signedIn} />
+      <SiteHeader signedIn={signedIn} />
       <main className="mx-auto max-w-3xl px-6 py-16">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">
           {title}
@@ -24,7 +23,7 @@ export function LegalShell({
           {children}
         </div>
       </main>
-      <MarketingFooter />
+      <SiteFooter />
     </div>
   );
 }
