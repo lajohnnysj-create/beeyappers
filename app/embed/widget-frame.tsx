@@ -246,7 +246,7 @@ export function WidgetFrame({
       ) : config.launcherStyle === "bar" ? (
         <BarLauncher config={config} left={left} onOpen={openChat} />
       ) : (
-        <BubbleLauncher config={config} left={left} onOpen={() => openChat()} />
+        <BubbleLauncher config={config} left={left} isMobile={isMobile} onOpen={() => openChat()} />
       )}
 
       <style>{`@keyframes bvPop{0%{opacity:0;transform:translateY(12px) scale(.94)}100%{opacity:1;transform:translateY(0) scale(1)}}`}</style>
@@ -257,19 +257,25 @@ export function WidgetFrame({
 function BubbleLauncher({
   config,
   left,
+  isMobile,
   onOpen,
 }: {
   config: WidgetConfig;
   left: boolean;
+  isMobile: boolean;
   onOpen: () => void;
 }) {
+  // The launcher reads a touch smaller on a phone screen, so bump it up there.
+  const size = isMobile ? 84 : BUBBLE_SIZE;
+  const avatarSize = isMobile ? 58 : 50;
+  const iconSize = isMobile ? 40 : 34;
   const btn = (
     <button
       onClick={onOpen}
       aria-label="Open chat"
       style={{
-        width: BUBBLE_SIZE,
-        height: BUBBLE_SIZE,
+        width: size,
+        height: size,
         borderRadius: left ? "24px 24px 24px 10px" : "24px 24px 10px 24px",
         background: config.bubbleColor,
         border: "none",
@@ -286,10 +292,10 @@ function BubbleLauncher({
         <img
           src={config.avatarUrl}
           alt=""
-          style={{ width: 50, height: 50, borderRadius: 16, objectFit: "cover" }}
+          style={{ width: avatarSize, height: avatarSize, borderRadius: 16, objectFit: "cover" }}
         />
       ) : (
-        <ChatIcon fill={readable(config.bubbleColor)} dot={config.bubbleColor} size={34} />
+        <ChatIcon fill={readable(config.bubbleColor)} dot={config.bubbleColor} size={iconSize} />
       )}
     </button>
   );
