@@ -187,7 +187,7 @@ export default async function Home() {
       {/* How it works */}
       <section className="border-t border-slate-200 bg-white">
         <div className="mx-auto max-w-5xl px-6 py-20">
-          <h2 className="text-center text-3xl font-bold tracking-tight text-slate-900">
+          <h2 className="font-display text-center text-3xl font-bold tracking-tight text-slate-900">
             Live in five steps
           </h2>
           <p className="mx-auto mt-3 max-w-md text-center text-slate-600">
@@ -210,7 +210,7 @@ export default async function Home() {
                 >
                   {s.n}
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-slate-900">
+                <h3 className="mt-4 font-display text-lg font-semibold text-slate-900">
                   {s.title}
                 </h3>
                 <p className="mt-2 text-slate-600">{s.body}</p>
@@ -277,7 +277,7 @@ export default async function Home() {
 
           {/* Copy */}
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-slate-900">
               Easy-to-use dashboard, powered by AI
             </h2>
             <p className="mt-4 text-lg text-slate-600">
@@ -321,7 +321,7 @@ export default async function Home() {
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-slate-950 via-slate-950/30 to-slate-950" />
 
         <div className="mx-auto max-w-5xl px-6 py-20 lg:py-24">
-          <h2 className="text-center text-3xl font-bold tracking-tight text-white">
+          <h2 className="font-display text-center text-3xl font-bold tracking-tight text-white">
             Everything your chatbot needs
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-center text-slate-300">
@@ -339,7 +339,7 @@ export default async function Home() {
                 >
                   <FeatureIcon name={f.icon} />
                 </div>
-                <h3 className="mt-4 font-semibold text-white">{f.title}</h3>
+                <h3 className="mt-4 font-display font-semibold text-white">{f.title}</h3>
                 <p className="mt-2 text-sm text-slate-300">{f.body}</p>
               </div>
             ))}
@@ -349,18 +349,43 @@ export default async function Home() {
 
       {/* CTA */}
       <section className="mx-auto max-w-5xl px-6 pb-24 pt-4">
-        <div className="rounded-3xl bg-brand-600 px-8 py-14 text-center text-white">
-          <h2 className="text-2xl font-bold sm:text-3xl">
+        <div className="relative isolate overflow-hidden rounded-3xl px-8 py-20 text-center shadow-2xl sm:py-24">
+          {/* Background image */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/homepagesplash3.webp"
+            alt=""
+            className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+          />
+          {/* Darkening scrims for legibility */}
+          <div className="absolute inset-0 -z-10 bg-slate-950/72" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-t from-slate-950/85 via-slate-950/45 to-slate-950/65" />
+
+          <h2 className="font-display text-3xl font-bold tracking-tight text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-4xl">
             Give your site a 24/7 answer desk
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-white/80">
+          <p className="mx-auto mt-4 max-w-md text-base text-white/85">
             Train your assistant today and watch it start answering in minutes.
           </p>
           <Link
             href="/login"
-            className="mt-6 inline-block rounded-lg bg-white px-5 py-3 font-medium text-brand-700 transition hover:bg-brand-50"
+            className="group mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-base font-semibold text-slate-900 shadow-lg transition duration-200 hover:-translate-y-0.5 hover:shadow-xl"
           >
             Start your free trial
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden="true"
+              className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+            >
+              <path
+                d="M4 10h12m0 0-4.5-4.5M16 10l-4.5 4.5"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </Link>
         </div>
       </section>
