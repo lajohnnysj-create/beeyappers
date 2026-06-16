@@ -1,5 +1,6 @@
 "use server";
 
+import { createHash } from "crypto";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -88,7 +89,24 @@ export async function deleteAccount(confirmText: string) {
   const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
   if (delErr) return { error: delErr.message };
 
-  // 4) Clear cookies for the deleted session, then off they go.
+  // 4) Leave a privacy-safe tombstone so we can later answer "was this account
+  // intentionally deleted, and when" without retaining any PII. It stores only
+  // a one-way hash of the user id, a timestamp, and a non-identifying churn
+  // flag — never email, name, or content. By design this table has no FK to
+  // auth.users and is NOT touched by delete_my_account(), so it outlives the
+  // account. Best-effort: the account is already gone, so never block on it.
+  try {
+    const userHash = createHash("sha256").update(user.id).digest("hex");
+    await admin.from("account_deletions").insert({
+      user_hash: userHash,
+      reason: "user_requested",
+      had_subscription: !!subId,
+    });
+  } catch {
+    /* tombstone is best-effort; deletion already succeeded */
+  }
+
+  // 5) Clear cookies for the deleted session, then off they go.
   try {
     await supabase.auth.signOut();
   } catch {
