@@ -75,15 +75,15 @@ export default function LoginPage() {
           <Link
             href="/"
             aria-label="Bleviq home"
-            className="inline-block w-fit"
+            className="mx-auto block w-fit"
           >
             <Wordmark />
           </Link>
 
-          <h1 className="mt-6 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="mt-6 text-center text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             24/7 AI Chatbox that works while you sleep.
           </h1>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-center text-sm text-slate-600">
             Sign in to train and manage your assistant.
           </p>
 
