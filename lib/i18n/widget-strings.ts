@@ -14,6 +14,12 @@ export type WidgetStrings = {
   send: string;
   poweredBy: string;
   askAI: string;
+  leadName: string;
+  leadEmail: string;
+  leadPhone: string;
+  leadSubmit: string;
+  leadSent: string;
+  leadError: string;
 };
 
 const TRANSLATE_MODEL = "gpt-4o-mini";
@@ -42,6 +48,12 @@ function coalesce(
     send: pick("send"),
     poweredBy: pick("poweredBy"),
     askAI: pick("askAI"),
+    leadName: pick("leadName"),
+    leadEmail: pick("leadEmail"),
+    leadPhone: pick("leadPhone"),
+    leadSubmit: pick("leadSubmit"),
+    leadSent: pick("leadSent"),
+    leadError: pick("leadError"),
   };
 }
 
