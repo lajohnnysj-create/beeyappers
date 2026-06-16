@@ -46,7 +46,7 @@ export function CrawlButton({ siteId }: { siteId: string }) {
       {busy && (
         <span className="text-xs text-slate-500">This can take a minute.</span>
       )}
-      {error && <span className="text-xs text-red-600">{error}</span>}
+      {error && <span role="alert" className="text-xs text-red-600">{error}</span>}
     </div>
   );
 }

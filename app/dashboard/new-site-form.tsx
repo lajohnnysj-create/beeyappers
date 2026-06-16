@@ -29,13 +29,14 @@ export function NewSiteForm() {
           inputMode="url"
           required
           autoFocus
+          aria-label="Your website address"
           placeholder="yourwebsite.com"
-          className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
+          className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
         />
         <GoButton />
       </div>
       {state?.error && (
-        <p className="mt-3 text-sm text-red-600">{state.error}</p>
+        <p role="alert" className="mt-3 text-sm text-red-600">{state.error}</p>
       )}
     </form>
   );

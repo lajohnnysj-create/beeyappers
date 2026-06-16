@@ -98,7 +98,7 @@ export function SettingsMenu({
       {open && (
         <div className="absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
           <div className="border-b border-slate-100 px-4 py-3">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
               Account
             </p>
             <p className="mt-0.5 truncate text-sm font-medium text-slate-900">
@@ -133,7 +133,7 @@ export function SettingsMenu({
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <p className="mt-1.5 text-xs text-slate-400">
+                <p className="mt-1.5 text-xs text-slate-500">
                   {remaining.toLocaleString()} left (rolling 30 days)
                 </p>
               </>
