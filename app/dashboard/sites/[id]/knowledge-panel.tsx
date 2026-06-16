@@ -302,7 +302,7 @@ export function KnowledgePanel({
                   )}
                   <button
                     onClick={() => remove(it.sourceId)}
-                    className="shrink-0 text-sm font-medium text-slate-400 hover:text-red-600"
+                    className="shrink-0 text-sm font-medium text-slate-600 hover:text-red-600"
                   >
                     Remove
                   </button>

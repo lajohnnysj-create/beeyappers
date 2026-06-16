@@ -1021,7 +1021,7 @@ function Preview({ config }: { config: WidgetConfig }) {
 
       <div className="px-3 pt-2">
         <div className="flex items-center gap-2 rounded-full px-3.5 py-1.5" style={{ background: "#f1f5f9" }}>
-          <span className="flex-1 text-sm text-slate-400">Type here...</span>
+          <span className="flex-1 text-sm text-slate-600">Type here...</span>
           <span className="grid h-8 w-8 place-items-center rounded-full text-white" style={{ background: config.bubbleColor }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 19V5M5 12l7-7 7 7" />
