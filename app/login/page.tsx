@@ -94,15 +94,8 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white lg:flex-row">
-      {/* Visual: full-height panel on desktop, top banner on mobile */}
-      <div className="relative h-48 w-full shrink-0 overflow-hidden sm:h-60 lg:h-auto lg:w-1/3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/login-background.webp"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      </div>
+      {/* Brand panel: full-height on desktop, top banner on mobile */}
+      <div className="h-32 w-full shrink-0 bg-gradient-to-br from-brand-500 to-brand-700 sm:h-40 lg:h-auto lg:w-1/3" />
 
       {/* Form: app-style sheet on mobile (rounded, pulled up over the image) */}
       <div className="relative z-10 -mt-8 flex flex-1 flex-col rounded-t-[2rem] bg-white px-6 pb-10 pt-9 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] lg:mt-0 lg:rounded-none lg:px-12 lg:py-0 lg:shadow-none">
