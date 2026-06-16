@@ -43,6 +43,7 @@ export default async function SiteWorkspacePage({
     { count: chunkCount },
     { data: kRows },
     { count: messagesUsed },
+    { data: leadRows },
   ] = await Promise.all([
       supabase.from("pages").select("*", { count: "exact", head: true }).eq("site_id", site.id),
       supabase.from("chunks").select("*", { count: "exact", head: true }).eq("site_id", site.id),
@@ -57,6 +58,12 @@ export default async function SiteWorkspacePage({
         .eq("user_id", user.id)
         .eq("role", "assistant")
         .gte("created_at", since30),
+      supabase
+        .from("leads")
+        .select("id, name, email, phone, message, created_at")
+        .eq("site_id", site.id)
+        .order("created_at", { ascending: false })
+        .limit(200),
     ]);
 
   // Group manual knowledge chunks by source_id into single items.
@@ -121,6 +128,7 @@ export default async function SiteWorkspacePage({
           chunkCount={chunkCount || 0}
           config={mergeConfig(site.widget_config)}
           knowledge={knowledge}
+          leads={leadRows ?? []}
           canRetrain={entitlement.active}
           canRemoveBranding={entitlement.active}
         />
