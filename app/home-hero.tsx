@@ -64,7 +64,7 @@ export function HomeHero() {
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#070713] via-[#070713]/40 to-transparent" />
 
       <div className="mx-auto w-full max-w-5xl px-6 py-20 lg:py-24">
-        <div className="max-w-xl">
+        <div className="mx-auto max-w-xl text-center sm:mx-0 sm:text-left">
           <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-5xl">
             24/7 AI Chatbot that works while you sleep
           </h1>
@@ -74,7 +74,7 @@ export function HomeHero() {
             and start <RotatingWord /> with your visitors.
           </p>
 
-          <div className="mt-8 flex max-w-sm flex-col gap-3">
+          <div className="mx-auto mt-8 flex max-w-sm flex-col gap-3 sm:mx-0">
             <button
               type="button"
               onClick={handleGoogle}
