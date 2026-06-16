@@ -1031,7 +1031,7 @@ function Preview({ config }: { config: WidgetConfig }) {
   return (
     <div
       className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 shadow-sm"
-      style={{ background: config.backgroundColor, fontFamily: font, height: 480 }}
+      style={{ background: config.backgroundColor, fontFamily: font, height: 560 }}
     >
       <div
         className="flex items-center gap-2.5 px-4 py-3"
