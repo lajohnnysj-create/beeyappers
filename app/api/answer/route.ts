@@ -113,11 +113,13 @@ export async function POST(req: Request) {
   let honeypot = "";
   let history: ChatTurn[] = [];
   let clientConvoId = "";
+  let lang = "";
   try {
     const body = await req.json();
     widgetKey = String(body.widgetKey || "");
     question = String(body.question || "").trim();
     honeypot = String(body.hp || "");
+    lang = String(body.lang || "").slice(0, 35);
     // Client-generated id that threads every turn of one chat into a single
     // conversation. Only accept a well-formed UUID; anything else falls back to
     // the legacy "new row per message" behavior (client_id stays null).
@@ -316,7 +318,7 @@ export async function POST(req: Request) {
       .slice(0, 20);
 
     if (chunks.length === 0) {
-      const suggestions = await suggestAnswerableQuestions(faqQuestions, contentSamples);
+      const suggestions = await suggestAnswerableQuestions(faqQuestions, contentSamples, lang);
       return json(
         debugTrace(
           req,
@@ -336,7 +338,8 @@ export async function POST(req: Request) {
       context,
       question,
       pages,
-      history
+      history,
+      lang
     );
     let answer = gen.answer;
     const totalTokens = gen.totalTokens;
@@ -347,7 +350,7 @@ export async function POST(req: Request) {
     // X" line, which we keep; we only fall back to the generic copy when the
     // model gave nothing. Either way we attach questions the site CAN answer.
     if (!gen.answered || !answer.trim()) {
-      suggestions = await suggestAnswerableQuestions(faqQuestions, contentSamples);
+      suggestions = await suggestAnswerableQuestions(faqQuestions, contentSamples, lang);
       if (!answer.trim()) {
         answer = noInfoText(suggestions.length > 0);
       }
