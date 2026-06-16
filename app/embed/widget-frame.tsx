@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { type WidgetConfig, DEFAULT_LABELS, type WidgetLabels } from "@/lib/widget-config";
+import { isRtlLang } from "@/lib/lang";
 import { FIELD_LIMITS } from "@/lib/field-limits";
 import { ChatWidget } from "./chat-widget";
 
@@ -61,6 +62,7 @@ export function WidgetFrame({
   lang?: string;
 }) {
   const left = config.launcherPosition === "bottom-left";
+  const rtl = isRtlLang(lang);
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState<string | undefined>(undefined);
   const [vw, setVw] = useState(1280);
@@ -250,7 +252,7 @@ export function WidgetFrame({
           </button>
         )
       ) : config.launcherStyle === "bar" ? (
-        <BarLauncher config={config} labels={labels} left={left} onOpen={openChat} />
+        <BarLauncher config={config} labels={labels} rtl={rtl} left={left} onOpen={openChat} />
       ) : (
         <BubbleLauncher config={config} left={left} onOpen={() => openChat()} />
       )}
@@ -331,11 +333,13 @@ function BubbleLauncher({
 function BarLauncher({
   config,
   labels,
+  rtl,
   left,
   onOpen,
 }: {
   config: WidgetConfig;
   labels: WidgetLabels;
+  rtl: boolean;
   left: boolean;
   onOpen: (q?: string) => void;
 }) {
@@ -429,6 +433,7 @@ function BarLauncher({
             }}
             placeholder={config.launcherLabel || labels.askAI}
             aria-label="Ask a question"
+            dir={rtl ? "rtl" : "ltr"}
             maxLength={FIELD_LIMITS.chatMessage}
             style={{
               border: "none",
