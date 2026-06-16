@@ -1,8 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { MarketingHeader } from "@/app/marketing-header";
-import { MarketingFooter } from "@/app/marketing-footer";
+import { SiteHeader, SiteFooter } from "@/app/site-nav";
 import { HomeHero } from "@/app/home-hero";
 import { BleviqWidget } from "@/app/bleviq-widget";
 
@@ -189,7 +188,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <MarketingHeader signedIn={signedIn} />
+      <SiteHeader signedIn={signedIn} />
 
       <HomeHero />
 
@@ -395,7 +394,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <MarketingFooter />
+      <SiteFooter />
       <BleviqWidget />
     </div>
   );
