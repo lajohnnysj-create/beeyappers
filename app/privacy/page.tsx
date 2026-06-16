@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { LegalShell } from "@/app/legal-shell";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | Bleviq",
+export const metadata: Metadata = pageMetadata({
+  title: "Privacy Policy | Bleviq AI Chatbot for Your Website",
   description:
-    "How Bleviq (a product of MRLA Media LLC) collects, uses, and protects information.",
-};
+    "How Bleviq, the AI chatbot you train on your website, collects, uses, and protects data. Covers retention, your rights, and visitor conversations.",
+  path: "/privacy",
+});
 
 export default async function PrivacyPage() {
   const supabase = createClient();
