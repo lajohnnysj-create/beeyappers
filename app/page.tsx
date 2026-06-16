@@ -54,28 +54,113 @@ const FEATURES = [
   {
     title: "Grounded in your content",
     body: "Answers come from your own pages, FAQs, and documents, not generic guesses.",
+    icon: "target",
+    tint: "from-indigo-500 to-violet-500",
   },
   {
     title: "Knows when it doesn't know",
     body: "Instead of making something up, it tells visitors it isn't sure and points them onward.",
+    icon: "help",
+    tint: "from-sky-500 to-cyan-500",
   },
   {
     title: "Add FAQs & documents",
     body: "Top up its knowledge with answers and files that aren't published on your site.",
+    icon: "file",
+    tint: "from-teal-500 to-emerald-500",
   },
   {
     title: "Make it yours",
     body: "Set the colors, fonts, and avatar. On a paid plan, remove Bleviq branding entirely.",
+    icon: "palette",
+    tint: "from-amber-500 to-orange-500",
   },
   {
     title: "One-line install",
     body: "A single script tag drops the widget onto any site, no framework required.",
+    icon: "code",
+    tint: "from-rose-500 to-pink-500",
   },
   {
     title: "Built-in guardrails",
     body: "Rate limiting and usage caps keep behavior safe, abuse out, and costs predictable.",
+    icon: "shield",
+    tint: "from-fuchsia-500 to-purple-500",
   },
 ];
+
+function Glyph({ children }: { children: React.ReactNode }) {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {children}
+    </svg>
+  );
+}
+
+function FeatureIcon({ name }: { name: string }) {
+  switch (name) {
+    case "target":
+      return (
+        <Glyph>
+          <circle cx="12" cy="12" r="10" />
+          <circle cx="12" cy="12" r="6" />
+          <circle cx="12" cy="12" r="2" />
+        </Glyph>
+      );
+    case "help":
+      return (
+        <Glyph>
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+          <path d="M12 17h.01" />
+        </Glyph>
+      );
+    case "file":
+      return (
+        <Glyph>
+          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+          <path d="M14 2v5h5" />
+          <path d="M16 13H8" />
+          <path d="M16 17H8" />
+        </Glyph>
+      );
+    case "palette":
+      return (
+        <Glyph>
+          <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+          <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+          <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+          <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10a2 2 0 0 0 2-2 2 2 0 0 0-.5-1.3 2 2 0 0 1-.5-1.2 1.5 1.5 0 0 1 1.5-1.5H16a4 4 0 0 0 4-4c0-4.42-4.48-8-8-8Z" />
+        </Glyph>
+      );
+    case "code":
+      return (
+        <Glyph>
+          <path d="m16 18 6-6-6-6" />
+          <path d="m8 6-6 6 6 6" />
+        </Glyph>
+      );
+    case "shield":
+      return (
+        <Glyph>
+          <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+          <path d="m9 12 2 2 4-4" />
+        </Glyph>
+      );
+    default:
+      return null;
+  }
+}
 
 export default async function Home() {
   const supabase = createClient();
@@ -122,24 +207,40 @@ export default async function Home() {
       </section>
 
       {/* Features */}
-      <section className="mx-auto max-w-5xl px-6 py-20">
-        <h2 className="text-center text-3xl font-bold tracking-tight text-slate-900">
-          Answers your visitors can trust
-        </h2>
-        <p className="mx-auto mt-3 max-w-lg text-center text-slate-600">
-          A chatbot is only useful if it&rsquo;s right. Bleviq stays close to
-          what your business actually says.
-        </p>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card"
-            >
-              <h3 className="font-semibold text-slate-900">{f.title}</h3>
-              <p className="mt-2 text-sm text-slate-600">{f.body}</p>
-            </div>
-          ))}
+      <section className="relative isolate overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/homepagesplash2.webp"
+          alt=""
+          className="absolute inset-0 -z-20 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 -z-10 bg-slate-950/80" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-slate-950 via-slate-950/30 to-slate-950" />
+
+        <div className="mx-auto max-w-5xl px-6 py-20 lg:py-24">
+          <h2 className="text-center text-3xl font-bold tracking-tight text-white">
+            Answers your visitors can trust
+          </h2>
+          <p className="mx-auto mt-3 max-w-lg text-center text-slate-300">
+            A chatbot is only useful if it&rsquo;s right. Bleviq stays close to
+            what your business actually says.
+          </p>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((f) => (
+              <div
+                key={f.title}
+                className="rounded-2xl border border-white/10 bg-white/[0.08] p-6 shadow-lg backdrop-blur-md"
+              >
+                <div
+                  className={`grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br text-white shadow-md ${f.tint}`}
+                >
+                  <FeatureIcon name={f.icon} />
+                </div>
+                <h3 className="mt-4 font-semibold text-white">{f.title}</h3>
+                <p className="mt-2 text-sm text-slate-300">{f.body}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
