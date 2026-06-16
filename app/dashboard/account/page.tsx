@@ -9,6 +9,7 @@ import { PLANS } from "@/lib/billing/plans";
 import { ResetPasswordForm } from "./reset-password-form";
 import { DeleteAccount } from "./delete-account";
 import { TranscriptEmailsSetting } from "./transcript-emails-setting";
+import { CollectLeadsSetting } from "./collect-leads-setting";
 
 // Authenticated, per-user page: never cache or statically render it.
 export const dynamic = "force-dynamic";
@@ -39,7 +40,7 @@ export default async function AccountSettingsPage() {
   // Sites the user owns, for the transcript-email toggles (RLS-confined).
   const { data: sites } = await supabase
     .from("sites")
-    .select("id, name, email_transcripts")
+    .select("id, name, email_transcripts, collect_leads")
     .eq("user_id", user.id)
     .order("created_at", { ascending: true });
 
