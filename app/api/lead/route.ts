@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getClientIp, hashIp } from "@/lib/security/ip";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { sendEmail } from "@/lib/email/resend";
+import { renderLeadEmail } from "@/lib/email/lead";
 import { leadError, isEmail, LEAD_LIMITS } from "@/lib/lead";
 
 export const runtime = "nodejs";
@@ -39,14 +40,6 @@ export async function OPTIONS(req: Request) {
 
 function json(body: unknown, status: number, headers: HeadersInit) {
   return NextResponse.json(body, { status, headers });
-}
-
-function esc(s: string): string {
-  return String(s ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }
 
 function clamp(v: unknown, max: number): string {
@@ -171,30 +164,19 @@ export async function POST(req: Request) {
     const { data: owner } = await admin.auth.admin.getUserById(site.user_id);
     const to = owner?.user?.email;
     if (to) {
-      const rows: string[] = [];
-      if (name) rows.push(`<strong>Name:</strong> ${esc(name)}`);
-      if (email) rows.push(`<strong>Email:</strong> ${esc(email)}`);
-      if (phone) rows.push(`<strong>Phone:</strong> ${esc(phone)}`);
-      if (message) rows.push(`<strong>They asked:</strong> ${esc(message)}`);
-      const html = `
-        <div style="font-family:system-ui,sans-serif;font-size:15px;color:#0f172a">
-          <p>You have a new lead from <strong>${esc(site.name || "your site")}</strong>.</p>
-          <p>${rows.join("<br>")}</p>
-          <p><a href="${DASHBOARD}${site.id}">View it in your dashboard</a></p>
-        </div>`;
-      const text =
-        `New lead from ${site.name || "your site"}\n\n` +
-        [
-          name && `Name: ${name}`,
-          email && `Email: ${email}`,
-          phone && `Phone: ${phone}`,
-          message && `They asked: ${message}`,
-        ]
-          .filter(Boolean)
-          .join("\n");
+      const { subject, html, text } = renderLeadEmail({
+        siteName: site.name || "your site",
+        domain: site.domain ?? null,
+        name: name || null,
+        email: email || null,
+        phone: phone || null,
+        message: message || null,
+        receivedAt: new Date().toISOString(),
+        dashboardUrl: `${DASHBOARD}${site.id}`,
+      });
       await sendEmail({
         to,
-        subject: `New lead from ${site.name || "your site"}`,
+        subject,
         html,
         text,
         ...(email && isEmail(email) ? { replyTo: email } : {}),
