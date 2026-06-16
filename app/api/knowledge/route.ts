@@ -79,10 +79,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const parts = chunkText(text).slice(0, MAX_DOC_CHUNKS);
-    if (parts.length === 0) {
-      return NextResponse.json({ error: "Nothing to add." }, { status: 422 });
-    }
+    // chunkText drops short fragments, which is right for crawled pages but
+    // wrong for a file the user deliberately uploaded. The text already cleared
+    // the 20-char floor above, so if chunking yields nothing (a short doc),
+    // keep it as a single chunk instead of rejecting it.
+    let parts = chunkText(text).slice(0, MAX_DOC_CHUNKS);
+    if (parts.length === 0) parts = [text];
 
     const vectors = await embedTexts(parts);
     const sourceId = randomUUID();
