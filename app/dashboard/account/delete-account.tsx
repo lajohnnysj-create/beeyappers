@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Wordmark } from "@/app/wordmark";
 import { deleteAccount } from "./actions";
+import { FIELD_LIMITS } from "@/lib/field-limits";
 
 export function DeleteAccount() {
   const [open, setOpen] = useState(false);
@@ -91,6 +92,7 @@ export function DeleteAccount() {
                 onChange={(e) => setConfirm(e.target.value)}
                 autoFocus
                 placeholder="DELETE"
+                maxLength={FIELD_LIMITS.confirmWord}
                 className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
               />
             </label>
