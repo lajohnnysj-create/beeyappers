@@ -1,6 +1,8 @@
 // Shared by the dashboard editor, the embed page, and the public config API.
 // No server-only imports: safe on both client and server.
 
+import { FIELD_LIMITS, clampLen } from "./field-limits";
+
 export type WidgetConfig = {
   assistantName: string;
   greeting: string;
@@ -90,7 +92,14 @@ export const DEFAULT_CONFIG: WidgetConfig = {
 // Merge stored (possibly partial) config over defaults.
 export function mergeConfig(raw: unknown): WidgetConfig {
   const r = (raw && typeof raw === "object" ? raw : {}) as Partial<WidgetConfig>;
-  return { ...DEFAULT_CONFIG, ...r };
+  const merged = { ...DEFAULT_CONFIG, ...r };
+  // Defense in depth: cap user-entered text so an oversized value (one that
+  // bypassed the dashboard's maxLength) can't bloat storage or break the
+  // widget's layout.
+  merged.assistantName = clampLen(merged.assistantName, FIELD_LIMITS.assistantName);
+  merged.greeting = clampLen(merged.greeting, FIELD_LIMITS.greeting);
+  merged.launcherLabel = clampLen(merged.launcherLabel, FIELD_LIMITS.launcherLabel);
+  return merged;
 }
 
 export function resolveFont(key: string): string {
