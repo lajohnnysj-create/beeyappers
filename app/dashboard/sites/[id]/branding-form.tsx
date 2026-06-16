@@ -738,7 +738,7 @@ function AgentAvatar({
 
 function PreviewChatIcon({ fill, dot }: { fill: string; dot: string }) {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
         d="M5 4h14a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-6l-5 4v-4H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"
         fill={fill}
@@ -781,10 +781,12 @@ function BubbleLauncher({ config, left }: { config: WidgetConfig; left: boolean 
         </span>
       ) : null}
       <span
-        className="grid h-14 w-14 place-items-center text-white shadow-lg"
+        className="grid place-items-center text-white shadow-lg"
         style={{
+          width: 72,
+          height: 72,
           background: config.bubbleColor,
-          borderRadius: left ? "20px 20px 20px 8px" : "20px 20px 8px 20px",
+          borderRadius: left ? "24px 24px 24px 10px" : "24px 24px 10px 24px",
         }}
       >
         {config.avatarUrl ? (
@@ -792,7 +794,7 @@ function BubbleLauncher({ config, left }: { config: WidgetConfig; left: boolean 
           <img
             src={config.avatarUrl}
             alt=""
-            className="h-9 w-9 rounded-[13px] object-cover"
+            style={{ width: 50, height: 50, borderRadius: 16, objectFit: "cover" }}
           />
         ) : (
           <PreviewChatIcon fill={readable(config.bubbleColor)} dot={config.bubbleColor} />
