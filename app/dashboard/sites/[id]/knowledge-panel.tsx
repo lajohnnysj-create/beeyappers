@@ -3,6 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FIELD_LIMITS } from "@/lib/field-limits";
+import { TrainingWidget } from "./train-status";
+
+function Spinner() {
+  return (
+    <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.25" strokeWidth="3" />
+      <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export type KnowledgeItem = {
   sourceId: string;
@@ -38,6 +48,7 @@ export function KnowledgePanel({
   const [answer, setAnswer] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   // Inline FAQ editing
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -133,15 +144,20 @@ export function KnowledgePanel({
   }
 
   async function remove(sourceId: string) {
+    setRemovingId(sourceId);
     try {
       const res = await fetch("/api/knowledge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "delete", siteId, sourceId }),
       });
-      if (res.ok) router.refresh();
+      if (res.ok) {
+        router.refresh(); // row disappears on refresh; spinner shows until then
+      } else {
+        setRemovingId(null);
+      }
     } catch {
-      /* ignore */
+      setRemovingId(null);
     }
   }
 
@@ -163,11 +179,13 @@ export function KnowledgePanel({
       </div>
 
       {busy && (
-        <p className="mt-3 text-sm text-slate-500">Adding to your knowledge base...</p>
+        <div className="mt-4">
+          <TrainingWidget message="Adding to your knowledge base..." />
+        </div>
       )}
       {error && <p role="alert" className="mt-3 text-sm text-red-600">{error}</p>}
 
-      {mode === "none" && (
+      {!busy && mode === "none" && (
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 transition hover:border-brand-300 hover:bg-brand-50/50">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-600">
@@ -212,7 +230,7 @@ export function KnowledgePanel({
         </div>
       )}
 
-      {mode === "faq" && (
+      {!busy && mode === "faq" && (
         <div className="mt-4 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <label className="block">
             <span className="text-sm font-medium text-slate-700">Question</span>
@@ -305,9 +323,17 @@ export function KnowledgePanel({
                   )}
                   <button
                     onClick={() => remove(it.sourceId)}
-                    className="shrink-0 text-sm font-medium text-slate-600 hover:text-red-600"
+                    disabled={removingId === it.sourceId}
+                    className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-slate-600 transition hover:text-red-600 disabled:cursor-default disabled:opacity-70 disabled:hover:text-slate-600"
                   >
-                    Remove
+                    {removingId === it.sourceId ? (
+                      <>
+                        <Spinner />
+                        Removing...
+                      </>
+                    ) : (
+                      "Remove"
+                    )}
                   </button>
                 </div>
 
