@@ -1,5 +1,7 @@
 import "server-only";
 
+import { baseLang, languageName } from "@/lib/lang";
+
 // The answer step does the hard reasoning (judging relevance, synthesizing an
 // identity from scattered context), so it runs on a stronger model for
 // consistent results. The lighter rewrite + suggestion steps stay cheap.
@@ -162,10 +164,19 @@ export async function generateAnswer(
   context: string,
   question: string,
   pages: { title: string; url: string }[] = [],
-  history: ChatTurn[] = []
+  history: ChatTurn[] = [],
+  lang: string = ""
 ): Promise<Generated> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error("Missing OPENAI_API_KEY");
+
+  // Reply in the visitor's detected language, but defer to the language they
+  // actually type in if it differs. English/unknown adds no directive.
+  const base = baseLang(lang);
+  const langDirective =
+    base && base !== "en"
+      ? `Reply to the visitor in ${languageName(base)} (${base}). If the visitor's latest message is clearly written in another language, reply in that language instead.`
+      : "";
 
   const userContent =
     "CONTEXT (untrusted reference data):\n" +
@@ -186,6 +197,7 @@ export async function generateAnswer(
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt(ownerPrompt, pages) },
+        ...(langDirective ? [{ role: "system", content: langDirective }] : []),
         ...history.map((t) => ({ role: t.role, content: t.content })),
         { role: "user", content: userContent },
       ],
@@ -214,6 +226,7 @@ export async function generateAnswer(
 export async function suggestAnswerableQuestions(
   faqQuestions: string[],
   contentSamples: string[],
+  lang: string = "",
   max = 4
 ): Promise<string[]> {
   const key = process.env.OPENAI_API_KEY;
@@ -241,6 +254,14 @@ export async function suggestAnswerableQuestions(
     "the JSON array.",
   ].join(" ");
 
+  // Localize the chips to the visitor's language (the source materials may be
+  // in another language; translate the questions into theirs).
+  const base = baseLang(lang);
+  const sysLocalized =
+    base && base !== "en"
+      ? `${sys} Write every question in ${languageName(base)}.`
+      : sys;
+
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -253,7 +274,7 @@ export async function suggestAnswerableQuestions(
         max_tokens: 200,
         temperature: 0.4,
         messages: [
-          { role: "system", content: sys },
+          { role: "system", content: sysLocalized },
           { role: "user", content: materials.join("\n") },
         ],
       }),
