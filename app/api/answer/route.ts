@@ -249,8 +249,27 @@ export async function POST(req: Request) {
       .map((r) => String(r.source_label || "").trim())
       .filter(Boolean);
 
+    // A broad sample of the site's ACTUAL indexed content. Suggestions are
+    // grounded in this (plus FAQs) so the widget never offers a question the
+    // assistant can't actually answer. Spread across chunks for topic variety.
+    const { data: sampleRows } = await admin
+      .from("chunks")
+      .select("content")
+      .eq("site_id", site.id)
+      .limit(80);
+    const contentSamples = (sampleRows ?? [])
+      .map((r) =>
+        String(r.content || "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 240)
+      )
+      .filter((s) => s.length > 0)
+      .filter((_, i) => i % 4 === 0)
+      .slice(0, 20);
+
     if (chunks.length === 0) {
-      const suggestions = await suggestAnswerableQuestions(pages, faqQuestions);
+      const suggestions = await suggestAnswerableQuestions(faqQuestions, contentSamples);
       return json(
         { answer: noInfoText(suggestions.length > 0), suggestions },
         200,
@@ -276,7 +295,7 @@ export async function POST(req: Request) {
     // question (an empty answer is treated the same). Swap in friendly copy
     // plus questions the site CAN answer.
     if (!gen.answered || !answer.trim()) {
-      suggestions = await suggestAnswerableQuestions(pages, faqQuestions);
+      suggestions = await suggestAnswerableQuestions(faqQuestions, contentSamples);
       answer = noInfoText(suggestions.length > 0);
     }
 
