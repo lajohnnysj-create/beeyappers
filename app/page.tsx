@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MarketingHeader } from "@/app/marketing-header";
 import { MarketingFooter } from "@/app/marketing-footer";
 import { HomeHero } from "@/app/home-hero";
+import { BleviqWidget } from "@/app/bleviq-widget";
 
 export const metadata: Metadata = {
   title: "24/7 AI Chatbot that Works While you Sleep | Bleviq",
@@ -391,6 +392,7 @@ export default async function Home() {
       </section>
 
       <MarketingFooter />
+      <BleviqWidget />
     </div>
   );
 }
