@@ -1,0 +1,98 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+
+const WORDS = ["chatting", "talking", "vibing", "chilling", "hanging"];
+
+function RotatingWord() {
+  const [i, setI] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setI((n) => (n + 1) % WORDS.length), 2200);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <span className="relative inline-block align-baseline">
+      <span
+        key={WORDS[i]}
+        className="animate-bv-word-in inline-block rounded-md border border-indigo-300/40 bg-indigo-400/10 px-2 py-0.5 font-semibold text-indigo-200"
+      >
+        {WORDS[i]}
+      </span>
+    </span>
+  );
+}
+
+export function HomeHero() {
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function handleGoogle() {
+    setGoogleLoading(true);
+    const supabase = createClient();
+    const redirectTo = `${window.location.origin}/auth/callback`;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo },
+    });
+    // On success the browser is already navigating to Google.
+    if (error) setGoogleLoading(false);
+  }
+
+  return (
+    <section className="relative isolate flex min-h-[560px] items-center overflow-hidden bg-[#070713] lg:min-h-[640px]">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/herosplash.webp"
+        alt=""
+        className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+      />
+      {/* Contrast scrims: darken the left where the text sits, and the bottom
+          so the section blends into the page below. */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#070713] via-[#070713]/85 to-[#070713]/25" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#070713] via-transparent to-transparent" />
+
+      <div className="mx-auto w-full max-w-5xl px-6 py-20 lg:py-24">
+        <div className="max-w-xl">
+          <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl">
+            24/7 AI Chatbot that works while you sleep
+          </h1>
+          <p className="mt-5 text-lg leading-relaxed text-slate-300">
+            Easily train your AI Chatbot in minutes and start{" "}
+            <RotatingWord /> with your visitors.
+          </p>
+
+          <div className="mt-8 flex max-w-sm flex-col gap-3">
+            <button
+              type="button"
+              onClick={handleGoogle}
+              disabled={googleLoading}
+              className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-white px-5 py-3.5 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-100 disabled:opacity-70"
+            >
+              <svg width="20" height="20" viewBox="0 0 18 18" aria-hidden="true">
+                <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z" />
+                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z" />
+                <path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z" />
+                <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.47.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
+              </svg>
+              {googleLoading ? "Redirecting\u2026" : "Continue with Google"}
+            </button>
+
+            <Link
+              href="/login?email=1&mode=signup"
+              className="flex w-full items-center justify-center rounded-xl border border-white/25 bg-white/5 px-5 py-3.5 text-base font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              Continue with Email
+            </Link>
+          </div>
+
+          <p className="mt-3 text-sm text-slate-400">
+            Free 14-day trial. Credit card required.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}

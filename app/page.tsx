@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { MarketingHeader } from "@/app/marketing-header";
 import { MarketingFooter } from "@/app/marketing-footer";
+import { HomeHero } from "@/app/home-hero";
 import { PLANS, PLAN_ORDER } from "@/lib/billing/plans";
 
 export const metadata: Metadata = {
@@ -67,80 +68,7 @@ export default async function Home() {
     <div className="min-h-screen bg-slate-50">
       <MarketingHeader signedIn={signedIn} />
 
-      {/* Hero */}
-      <section>
-        <div className="mx-auto grid max-w-5xl items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-24">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
-              <span className="h-1.5 w-1.5 rounded-full bg-honey" />
-              14-day free trial
-            </span>
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-              An AI chatbot that actually knows your website
-            </h1>
-            <p className="mt-4 text-lg text-slate-600">
-              Bleviq reads your site, then answers your visitors&rsquo;
-              questions in your own words, day and night. Set it up in minutes
-              with a single line of code.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/login"
-                className="rounded-lg bg-brand-600 px-5 py-3 font-medium text-white transition hover:bg-brand-700"
-              >
-                Start free trial
-              </Link>
-              <Link
-                href="/pricing"
-                className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-medium text-slate-700 transition hover:bg-slate-50"
-              >
-                See pricing
-              </Link>
-            </div>
-            <p className="mt-3 text-xs text-slate-500">
-              No charge for 14 days. Cancel anytime.
-            </p>
-          </div>
-
-          {/* Signature: the product itself */}
-          <div className="mx-auto w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card">
-            <div className="flex items-center gap-3 bg-brand-600 px-4 py-3 text-white">
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-white/20 text-sm font-semibold">
-                B
-              </div>
-              <div>
-                <p className="text-sm font-semibold leading-tight">
-                  Ask us anything
-                </p>
-                <p className="text-[11px] text-white/70">
-                  Typically replies instantly
-                </p>
-              </div>
-            </div>
-            <div className="space-y-3 bg-slate-50 px-4 py-5">
-              <div className="ml-auto max-w-[80%] rounded-2xl rounded-br-sm bg-brand-600 px-3 py-2 text-sm text-white">
-                Do you offer same-day appointments?
-              </div>
-              <div className="max-w-[88%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm text-slate-700 shadow-sm">
-                Yes. We keep same-day slots open every morning. You can book one
-                on our Appointments page, or call the front desk and we&rsquo;ll
-                fit you in.
-              </div>
-            </div>
-            <div className="flex items-center gap-2 border-t border-slate-200 px-3 py-2.5">
-              <div className="flex-1 rounded-full bg-slate-100 px-3 py-2 text-xs text-slate-400">
-                Type your message&hellip;
-              </div>
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-brand-600 text-sm text-white">
-                &rarr;
-              </div>
-            </div>
-            <p className="bg-white pb-3 text-center text-[10px] text-slate-400">
-              Powered by Bleviq
-            </p>
-          </div>
-        </div>
-      </section>
+      <HomeHero />
 
       {/* How it works */}
       <section className="border-t border-slate-200 bg-white">

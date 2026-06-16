@@ -30,6 +30,21 @@ body {
   animation: bv-bar 1.3s ease-in-out infinite;
 }
 
+/* Hero rotating word entrance */
+@keyframes bv-word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-bv-word-in {
+  animation: bv-word-in 0.45s ease forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
