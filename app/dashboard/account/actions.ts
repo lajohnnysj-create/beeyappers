@@ -80,16 +80,44 @@ export async function deleteAccount(confirmText: string) {
     }
   }
 
-  // 2) Purge the user's data (storage + sites cascade) as the user.
+  // The service-role client handles storage cleanup and the auth-user delete.
+  const admin = createAdminClient();
+
+  // 2) Remove the user's uploaded assets via the Storage API. Direct SQL
+  // DELETE on storage.objects is blocked by Supabase, so this can no longer
+  // live inside delete_my_account(). Files live under `${userId}/${siteId}/…`,
+  // so enumerate the user's sites first, then clear each. Best-effort: don't
+  // block account deletion if a file lingers.
+  try {
+    const { data: ownSites } = await supabase
+      .from("sites")
+      .select("id")
+      .eq("user_id", user.id);
+    for (const s of ownSites ?? []) {
+      const prefix = `${user.id}/${s.id}`;
+      const { data: files } = await admin.storage
+        .from("widget-assets")
+        .list(prefix);
+      if (files && files.length) {
+        await admin.storage
+          .from("widget-assets")
+          .remove(files.map((f) => `${prefix}/${f.name}`));
+      }
+    }
+  } catch {
+    /* non-fatal: proceed even if some storage objects linger */
+  }
+
+  // 3) Purge the user's data: sites, which cascades pages, chunks,
+  // conversations, and messages. Runs as the user via SECURITY DEFINER.
   const { error: purgeErr } = await supabase.rpc("delete_my_account");
   if (purgeErr) return { error: purgeErr.message };
 
-  // 3) Delete the auth user (cascades the subscriptions row).
-  const admin = createAdminClient();
+  // 4) Delete the auth user (cascades the subscriptions row).
   const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
   if (delErr) return { error: delErr.message };
 
-  // 4) Leave a privacy-safe tombstone so we can later answer "was this account
+  // 5) Leave a privacy-safe tombstone so we can later answer "was this account
   // intentionally deleted, and when" without retaining any PII. It stores only
   // a one-way hash of the user id, a timestamp, and a non-identifying churn
   // flag — never email, name, or content. By design this table has no FK to
@@ -106,7 +134,7 @@ export async function deleteAccount(confirmText: string) {
     /* tombstone is best-effort; deletion already succeeded */
   }
 
-  // 5) Clear cookies for the deleted session, then off they go.
+  // 6) Clear cookies for the deleted session, then off they go.
   try {
     await supabase.auth.signOut();
   } catch {
