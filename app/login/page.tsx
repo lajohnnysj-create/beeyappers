@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import Link from "next/link";
 import { signIn, signUp } from "@/app/auth/actions";
 import { createClient } from "@/lib/supabase/client";
 import { Wordmark } from "@/app/wordmark";
@@ -25,7 +26,7 @@ export default function LoginPage() {
   const action = mode === "signin" ? signIn : signUp;
   const [state, formAction] = useFormState<ActionState, FormData>(action, null);
 
-  // Surface an error handed back by the OAuth callback (?error=...).
+  const [showEmail, setShowEmail] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -57,27 +58,41 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex justify-center">
-          <Wordmark className="text-lg" />
-        </div>
+    <div className="flex min-h-screen flex-col bg-white lg:flex-row">
+      {/* Visual: full-height panel on desktop, top banner on mobile */}
+      <div className="relative h-48 w-full shrink-0 sm:h-60 lg:h-auto lg:w-1/2">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/login-background.webp"
+          alt=""
+          className="h-full w-full object-cover"
+        />
+      </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h1 className="text-xl font-semibold text-slate-900">
-            {mode === "signin" ? "Sign in" : "Create your account"}
+      {/* Form: app-style sheet on mobile (rounded, pulled up over the image) */}
+      <div className="relative z-10 -mt-8 flex flex-1 flex-col rounded-t-[2rem] bg-white px-6 pb-10 pt-9 shadow-[0_-8px_30px_rgba(15,23,42,0.08)] lg:mt-0 lg:rounded-none lg:px-12 lg:py-0 lg:shadow-none">
+        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col lg:justify-center lg:py-12">
+          <Link
+            href="/"
+            aria-label="Bleviq home"
+            className="inline-block w-fit"
+          >
+            <Wordmark />
+          </Link>
+
+          <h1 className="mt-6 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            24/7 AI Chatbox that works while you sleep.
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            {mode === "signin"
-              ? "Welcome back."
-              : "Start training a chat widget on your site."}
+          <p className="mt-2 text-sm text-slate-600">
+            Sign in to train and manage your assistant.
           </p>
 
+          {/* Continue with Google */}
           <button
             type="button"
             onClick={handleGoogle}
             disabled={googleLoading}
-            className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-lg border border-slate-300 bg-white px-4 py-2.5 font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60"
+            className="mt-8 flex w-full items-center justify-center gap-2.5 rounded-lg border border-slate-300 bg-white px-4 py-2.5 font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
               <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z" />
@@ -94,67 +109,97 @@ export default function LoginPage() {
             </p>
           )}
 
-          <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
-            <span className="h-px flex-1 bg-slate-200" />
-            or
-            <span className="h-px flex-1 bg-slate-200" />
-          </div>
-
-          <form action={formAction} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-brand-600"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                minLength={6}
-                autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-brand-600"
-              />
-            </div>
-
-            {state?.error && (
-              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-                {state.error}
-              </p>
-            )}
-            {state?.ok && (
-              <p className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700">
-                {state.ok}
-              </p>
-            )}
-
-            <SubmitButton label={mode === "signin" ? "Sign in" : "Sign up"} />
-          </form>
-        </div>
-
-        <p className="mt-4 text-center text-sm text-slate-600">
-          {mode === "signin" ? "No account yet?" : "Already have an account?"}{" "}
+          {/* Reveals the email/password fields */}
           <button
             type="button"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            className="font-medium text-brand-600 hover:text-brand-700"
+            onClick={() => setShowEmail((v) => !v)}
+            aria-expanded={showEmail}
+            className="mt-4 flex w-full items-center justify-center gap-1.5 text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
           >
-            {mode === "signin" ? "Create one" : "Sign in"}
+            Sign in or sign up with email ID
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`transition-transform ${showEmail ? "rotate-180" : ""}`}
+              aria-hidden="true"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </button>
-        </p>
+
+          {showEmail && (
+            <form action={formAction} className="mt-5 space-y-4">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-slate-700"
+                >
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-brand-600"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-slate-700"
+                >
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={6}
+                  autoComplete={
+                    mode === "signin" ? "current-password" : "new-password"
+                  }
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-brand-600"
+                />
+              </div>
+
+              {state?.error && (
+                <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {state.error}
+                </p>
+              )}
+              {state?.ok && (
+                <p className="rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-700">
+                  {state.ok}
+                </p>
+              )}
+
+              <SubmitButton label={mode === "signin" ? "Sign in" : "Sign up"} />
+
+              <p className="text-center text-sm text-slate-600">
+                {mode === "signin"
+                  ? "No account yet?"
+                  : "Already have an account?"}{" "}
+                <button
+                  type="button"
+                  onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+                  className="font-medium text-brand-600 hover:text-brand-700"
+                >
+                  {mode === "signin" ? "Create one" : "Sign in"}
+                </button>
+              </p>
+            </form>
+          )}
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
