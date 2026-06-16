@@ -4,7 +4,21 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-const WORDS = ["chatting", "talking", "vibing", "chilling", "hanging"];
+const WORDS: { word: string; pill: string }[] = [
+  { word: "chatting", pill: "border-indigo-400/40 bg-indigo-400/10 text-indigo-300" },
+  { word: "talking", pill: "border-sky-400/40 bg-sky-400/10 text-sky-300" },
+  { word: "vibing", pill: "border-fuchsia-400/40 bg-fuchsia-400/10 text-fuchsia-300" },
+  { word: "chilling", pill: "border-cyan-400/40 bg-cyan-400/10 text-cyan-300" },
+  { word: "hanging", pill: "border-rose-400/40 bg-rose-400/10 text-rose-300" },
+  { word: "engaging", pill: "border-emerald-400/40 bg-emerald-400/10 text-emerald-300" },
+  { word: "bonding", pill: "border-violet-400/40 bg-violet-400/10 text-violet-300" },
+  { word: "laughing", pill: "border-amber-400/40 bg-amber-400/10 text-amber-300" },
+  { word: "yapping", pill: "border-lime-400/40 bg-lime-400/10 text-lime-300" },
+  { word: "joking", pill: "border-orange-400/40 bg-orange-400/10 text-orange-300" },
+];
+
+// Widest word reserves the slot so the sentence never reflows as words swap.
+const WIDEST = WORDS.reduce((a, b) => (b.word.length > a.length ? b.word : a), "");
 
 function RotatingWord() {
   const [i, setI] = useState(0);
@@ -14,21 +28,21 @@ function RotatingWord() {
     return () => clearInterval(id);
   }, []);
 
-  const pill =
-    "rounded-md border border-indigo-300/40 bg-indigo-400/10 px-2 py-0.5 font-semibold text-indigo-200";
+  const base = "rounded-md border px-2 py-0.5 font-semibold";
+  const { word, pill } = WORDS[i];
 
   return (
     <span className="relative mx-1 inline-grid align-middle">
       {/* Invisible sizer reserves the width of the widest word so the rest of
           the sentence never shifts as words swap. */}
-      <span aria-hidden className={`invisible [grid-area:1/1] ${pill}`}>
-        chatting
+      <span aria-hidden className={`invisible [grid-area:1/1] ${base}`}>
+        {WIDEST}
       </span>
       <span
-        key={WORDS[i]}
-        className={`animate-bv-word-in flex items-center justify-center [grid-area:1/1] ${pill}`}
+        key={word}
+        className={`animate-bv-word-in flex items-center justify-center [grid-area:1/1] ${base} ${pill}`}
       >
-        {WORDS[i]}
+        {word}
       </span>
     </span>
   );
