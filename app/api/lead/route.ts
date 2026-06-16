@@ -128,25 +128,42 @@ export async function POST(req: Request) {
     return json({ error: "Too many requests. Please slow down." }, 429, headers);
   }
 
+  // The widget's conversationId is the conversation's client_id; its primary
+  // key (id) is a separate server-generated value. Resolve the real row so the
+  // FK insert succeeds and the captured flag lands on the right conversation.
+  let realConvoId: string | null = null;
+  if (convoId) {
+    const { data: conv } = await admin
+      .from("conversations")
+      .select("id")
+      .eq("site_id", site.id)
+      .eq("client_id", convoId)
+      .maybeSingle();
+    realConvoId = conv?.id ?? null;
+  }
+
   // Store the lead (authoritative record, even if the email later fails).
-  await admin.from("leads").insert({
+  const { error: insertErr } = await admin.from("leads").insert({
     site_id: site.id,
     user_id: site.user_id,
-    conversation_id: convoId || null,
+    conversation_id: realConvoId,
     name: name || null,
     email: email || null,
     phone: phone || null,
     message: message || null,
   });
+  if (insertErr) {
+    console.error("lead insert failed:", insertErr.message);
+    return json({ error: "Could not save. Please try again." }, 500, headers);
+  }
 
   // Flag the conversation so the form never shows again and the model stops
-  // trying to collect. Scoped to this site so a visitor can't touch another's.
-  if (convoId) {
+  // trying to collect.
+  if (realConvoId) {
     await admin
       .from("conversations")
       .update({ lead_captured_at: new Date().toISOString() })
-      .eq("id", convoId)
-      .eq("site_id", site.id);
+      .eq("id", realConvoId);
   }
 
   // Email the owner (best-effort; the lead is already saved).
