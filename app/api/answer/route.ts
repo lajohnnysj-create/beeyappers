@@ -7,11 +7,12 @@ import { generateAnswer, suggestAnswerableQuestions, type ChatTurn } from "@/lib
 import { getClientIp, hashIp } from "@/lib/security/ip";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { getEntitlementByUserId } from "@/lib/billing/entitlement";
+import { FIELD_LIMITS } from "@/lib/field-limits";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
-const MAX_QUESTION_CHARS = 1000;
+const MAX_QUESTION_CHARS = FIELD_LIMITS.chatMessage;
 const BURST_LIMIT = 20; // requests per minute, per IP per site (anti-flood)
 const BURST_WINDOW = 60;
 const HOURLY_LIMIT = 30; // requests per hour, per IP per site (sustained cap)
