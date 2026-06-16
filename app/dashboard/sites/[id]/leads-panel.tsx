@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { deleteLead, setLeadAnswered } from "./actions";
+
 export type LeadItem = {
   id: string;
   name: string | null;
@@ -7,6 +10,7 @@ export type LeadItem = {
   phone: string | null;
   message: string | null;
   created_at: string;
+  answered_at: string | null;
 };
 
 function fmt(iso: string): string {
@@ -20,7 +24,138 @@ function fmt(iso: string): string {
   }
 }
 
+function LeadRow({
+  lead,
+  onRemove,
+}: {
+  lead: LeadItem;
+  onRemove: (id: string) => void;
+}) {
+  const [answered, setAnswered] = useState(!!lead.answered_at);
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function toggleAnswered() {
+    if (busy) return;
+    const next = !answered;
+    setAnswered(next); // optimistic
+    setBusy(true);
+    const res = await setLeadAnswered(lead.id, next);
+    setBusy(false);
+    if (res?.error) setAnswered(!next); // revert on failure
+  }
+
+  async function confirmDelete() {
+    if (busy) return;
+    setBusy(true);
+    const res = await deleteLead(lead.id);
+    if (res?.error) {
+      setBusy(false);
+      setConfirming(false);
+      return;
+    }
+    onRemove(lead.id);
+  }
+
+  return (
+    <li
+      className={`rounded-xl border p-4 transition-colors ${
+        answered ? "border-slate-200 bg-slate-50" : "border-slate-200"
+      }`}
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <span className="flex items-center gap-2">
+          <span className="font-semibold text-slate-900">
+            {lead.name || "Visitor"}
+          </span>
+          {answered && (
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
+              Answered
+            </span>
+          )}
+        </span>
+        <span className="text-xs text-slate-500" suppressHydrationWarning>
+          {fmt(lead.created_at)}
+        </span>
+      </div>
+
+      <div className="mt-2 flex flex-col gap-1 text-sm">
+        {lead.email && (
+          <a
+            href={`mailto:${lead.email}`}
+            className="text-brand-700 hover:underline"
+          >
+            {lead.email}
+          </a>
+        )}
+        {lead.phone && (
+          <a
+            href={`tel:${lead.phone}`}
+            className="text-brand-700 hover:underline"
+          >
+            {lead.phone}
+          </a>
+        )}
+      </div>
+
+      {lead.message && (
+        <p className="mt-2 text-sm text-slate-600">
+          <span className="font-medium text-slate-700">Asked: </span>
+          {lead.message}
+        </p>
+      )}
+
+      <div className="mt-3 flex items-center gap-4 border-t border-slate-100 pt-3 text-sm">
+        <button
+          type="button"
+          onClick={toggleAnswered}
+          disabled={busy}
+          className="font-medium text-slate-600 hover:text-slate-900 disabled:opacity-50"
+        >
+          {answered ? "Mark unanswered" : "Mark answered"}
+        </button>
+
+        {confirming ? (
+          <span className="flex items-center gap-2">
+            <span className="text-slate-500">Delete?</span>
+            <button
+              type="button"
+              onClick={confirmDelete}
+              disabled={busy}
+              className="font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+            >
+              Yes, delete
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirming(false)}
+              disabled={busy}
+              className="text-slate-500 hover:text-slate-700 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirming(true)}
+            className="font-medium text-red-600 hover:text-red-700"
+          >
+            Delete
+          </button>
+        )}
+      </div>
+    </li>
+  );
+}
+
 export function LeadsPanel({ leads }: { leads: LeadItem[] }) {
+  const [items, setItems] = useState(leads);
+
+  function onRemove(id: string) {
+    setItems((prev) => prev.filter((l) => l.id !== id));
+  }
+
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
       <h2 className="text-lg font-semibold text-slate-900">Leads</h2>
@@ -29,7 +164,7 @@ export function LeadsPanel({ leads }: { leads: LeadItem[] }) {
         emailed to you.
       </p>
 
-      {leads.length === 0 ? (
+      {items.length === 0 ? (
         <div className="mt-6 rounded-xl border border-dashed border-slate-300 px-4 py-10 text-center">
           <p className="text-sm font-medium text-slate-700">No leads yet</p>
           <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">
@@ -38,50 +173,17 @@ export function LeadsPanel({ leads }: { leads: LeadItem[] }) {
           </p>
         </div>
       ) : (
-        <ul className="mt-5 space-y-3">
-          {leads.map((l) => (
-            <li
-              key={l.id}
-              className="rounded-xl border border-slate-200 p-4"
-            >
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <span className="font-semibold text-slate-900">
-                  {l.name || "Visitor"}
-                </span>
-                <span
-                  className="text-xs text-slate-500"
-                  suppressHydrationWarning
-                >
-                  {fmt(l.created_at)}
-                </span>
-              </div>
-              <div className="mt-2 flex flex-col gap-1 text-sm">
-                {l.email && (
-                  <a
-                    href={`mailto:${l.email}`}
-                    className="text-brand-700 hover:underline"
-                  >
-                    {l.email}
-                  </a>
-                )}
-                {l.phone && (
-                  <a
-                    href={`tel:${l.phone}`}
-                    className="text-brand-700 hover:underline"
-                  >
-                    {l.phone}
-                  </a>
-                )}
-              </div>
-              {l.message && (
-                <p className="mt-2 text-sm text-slate-600">
-                  <span className="font-medium text-slate-700">Asked: </span>
-                  {l.message}
-                </p>
-              )}
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="mt-5 space-y-3">
+            {items.map((l) => (
+              <LeadRow key={l.id} lead={l} onRemove={onRemove} />
+            ))}
+          </ul>
+          <p className="mt-4 text-xs text-slate-500">
+            Showing the 50 most recent. Every lead is also emailed to you, so
+            nothing is lost when older ones roll off this list.
+          </p>
+        </>
       )}
     </section>
   );
