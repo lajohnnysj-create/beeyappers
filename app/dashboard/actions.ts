@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/types";
 import { FIELD_LIMITS } from "@/lib/field-limits";
+import { siteUrlError } from "@/lib/validate-url";
 
 // Soft cap. Raise this (or make it per-account) when paid tiers ship.
 const MAX_SITES = 1;
@@ -28,6 +29,9 @@ export async function createSite(
   const providedName = String(formData.get("name") || "").trim().slice(0, FIELD_LIMITS.siteName);
 
   if (!domain) return { error: "Add your website link to get started." };
+
+  const urlErr = siteUrlError(domain);
+  if (urlErr) return { error: urlErr };
 
   const name = (providedName || deriveName(domain)).slice(0, FIELD_LIMITS.siteName);
 

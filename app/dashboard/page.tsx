@@ -71,7 +71,7 @@ export default async function DashboardPage() {
             Let&apos;s get your website ready
           </h1>
           <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600">
-            Add your website link and Bleviq will crawl your website to learn from
+            Add your link and Bleviq will crawl your website to learn from
             the public pages. You&apos;ll also be able to upload documents and add
             FAQs to further train your AI.
           </p>
