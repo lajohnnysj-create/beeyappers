@@ -24,15 +24,29 @@ const STEPS = [
     n: "02",
     title: "Bleviq learns it",
     body: "Our AI learns your website and trains your chatbot on responses.",
+    card: "border-sky-100 bg-sky-50",
+    badge: "bg-sky-500",
+  },
+  {
+    n: "03",
+    title: "Add knowledge",
+    body: "Provide additional information for your chatbot.",
     card: "border-teal-100 bg-teal-50",
     badge: "bg-teal-600",
   },
   {
-    n: "03",
-    title: "Drop in the widget",
-    body: "Copy one script tag onto your site. The chat bubble is live.",
+    n: "04",
+    title: "Customize to your branding",
+    body: "Match your colors, fonts, and avatar so it feels like you.",
     card: "border-amber-100 bg-amber-50",
     badge: "bg-amber-500",
+  },
+  {
+    n: "05",
+    title: "Drop in the widget",
+    body: "Copy one script tag onto your site. The chat bubble is live.",
+    card: "border-rose-100 bg-rose-50",
+    badge: "bg-rose-500",
   },
 ];
 
@@ -80,7 +94,7 @@ export default async function Home() {
       <section className="border-t border-slate-200 bg-white">
         <div className="mx-auto max-w-5xl px-6 py-20">
           <h2 className="text-center text-3xl font-bold tracking-tight text-slate-900">
-            Live in three steps
+            Live in five steps
           </h2>
           <p className="mx-auto mt-3 max-w-md text-center text-slate-600">
             From website to working chat widget in about the time it takes to
