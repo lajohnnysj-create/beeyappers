@@ -188,27 +188,33 @@ export async function generateAnswer(
 // suggestions are actually answerable. Falls back to raw FAQ questions if the
 // model call or JSON parse fails, and to [] when the site has no knowledge.
 export async function suggestAnswerableQuestions(
-  pages: { title: string; url: string }[],
   faqQuestions: string[],
+  contentSamples: string[],
   max = 4
 ): Promise<string[]> {
   const key = process.env.OPENAI_API_KEY;
   const fallback = faqQuestions.slice(0, max);
 
-  const topics = [
-    ...faqQuestions.map((q) => `FAQ: ${q}`),
-    ...pages.map((p) => `Page: ${p.title}`),
+  // Ground suggestions in what the site can ACTUALLY answer: its FAQ entries
+  // (always answerable) and excerpts of its real indexed content. Page titles
+  // are deliberately not used as a source here, because a title is not proof
+  // the content behind it made it into the knowledge base.
+  const materials = [
+    ...faqQuestions.map((q) => `FAQ question (answerable): ${q}`),
+    ...contentSamples.map((c) => `Content excerpt: ${c}`),
   ].slice(0, 40);
-  if (topics.length === 0) return [];
+  if (materials.length === 0) return [];
   if (!key) return fallback;
 
   const sys = [
-    "You write short example questions a website visitor could tap to ask the",
-    "site's assistant. You are given the site's FAQ questions and page titles.",
-    `Output ONLY a JSON array of ${max} short, natural questions (max 8 words`,
-    "each) that these materials clearly answer. Favor broadly useful topics",
-    "like pricing, what the product does, how to get started, and contact.",
-    "No preamble, no markdown fences, just the JSON array.",
+    "You write short example questions a visitor could tap to ask this site's",
+    "assistant. You are given the site's FAQ questions and excerpts from its",
+    `actual content. Output ONLY a JSON array of up to ${max} short, natural`,
+    "questions (max 8 words each) that are clearly and directly answered by the",
+    "materials provided. Every question MUST be answerable from those materials.",
+    "Do NOT invent topics (such as pricing, trials, refunds, or contact) unless",
+    "the materials actually cover them. No preamble, no markdown fences, just",
+    "the JSON array.",
   ].join(" ");
 
   try {
@@ -224,7 +230,7 @@ export async function suggestAnswerableQuestions(
         temperature: 0.4,
         messages: [
           { role: "system", content: sys },
-          { role: "user", content: topics.join("\n") },
+          { role: "user", content: materials.join("\n") },
         ],
       }),
     });
