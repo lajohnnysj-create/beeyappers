@@ -436,22 +436,36 @@ function BarLauncher({
       <div
         style={{
           fontSize: 11,
+          lineHeight: 1.45,
           color: "#64748b",
           background: "#fff",
-          borderRadius: 9999,
+          borderRadius: 14,
           boxShadow: "0 2px 8px rgba(0,0,0,.12)",
           overflow: "hidden",
-          whiteSpace: "nowrap",
-          maxHeight: expanded ? 28 : 0,
+          whiteSpace: "normal",
+          maxWidth: 250,
+          textAlign: "left",
+          maxHeight: expanded ? 140 : 0,
           opacity: expanded ? 1 : 0,
           transform: expanded ? "translateY(0)" : "translateY(-4px)",
           marginTop: expanded ? 8 : 0,
-          padding: expanded ? "5px 12px" : "0 12px",
+          padding: expanded ? "8px 12px" : "0 12px",
           transition:
-            "max-height .28s ease, opacity .2s ease, transform .28s ease, margin-top .28s ease",
+            "max-height .28s ease, opacity .2s ease, transform .28s ease, " +
+            "margin-top .28s ease, padding .28s ease",
         }}
       >
-        This chat is recorded.
+        You&rsquo;re chatting with an AI. Messages may be stored. By continuing,
+        you agree to our{" "}
+        <a
+          href="https://www.bleviq.com/ai-terms"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "inherit", textDecoration: "underline" }}
+        >
+          AI Terms
+        </a>
+        .
       </div>
     </div>
   );
