@@ -27,7 +27,18 @@
   frame.title = "Chat";
   frame.setAttribute("allowtransparency", "true");
   frame.setAttribute("scrolling", "no");
-  frame.src = origin + "/frame?key=" + encodeURIComponent(key);
+  var lang = "";
+  try {
+    lang =
+      (navigator.languages && navigator.languages[0]) ||
+      navigator.language ||
+      "";
+  } catch (e) {}
+  frame.src =
+    origin +
+    "/frame?key=" +
+    encodeURIComponent(key) +
+    (lang ? "&lang=" + encodeURIComponent(lang) : "");
   frame.style.cssText =
     "position:fixed;bottom:0;right:0;left:auto;width:0;height:0;border:0;" +
     "background:transparent;z-index:" + Z + ";opacity:0;" +
