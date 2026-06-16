@@ -23,7 +23,7 @@ export function AgentStatus({ active }: { active: boolean }) {
       </span>
       <span
         role="tooltip"
-        className="pointer-events-none absolute right-0 top-full z-20 mt-2 w-max max-w-[16rem] rounded-lg bg-slate-900 px-3 py-2 text-xs font-normal leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100"
+        className="pointer-events-none absolute right-0 top-full z-20 mt-2 w-56 whitespace-normal rounded-lg bg-slate-900 px-3 py-2 text-left text-xs font-normal leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100"
       >
         Please select a plan to activate your agent
       </span>
