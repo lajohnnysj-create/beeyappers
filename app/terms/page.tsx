@@ -18,7 +18,7 @@ export default async function TermsPage() {
     <LegalShell
       signedIn={!!user}
       title="Terms of Service"
-      updated="June 15, 2026"
+      updated="June 16, 2026"
     >
       <p>
         These Terms of Service (&ldquo;Terms&rdquo;) govern your access to and
@@ -131,6 +131,14 @@ export default async function TermsPage() {
         inaccurate, incomplete, or outdated. Bleviq does not guarantee the
         correctness of any answer, and answers are not professional advice. You
         are responsible for reviewing and curating how your assistant behaves.
+      </p>
+      <p>
+        Bleviq relies on third-party AI models to generate answers, and we may
+        change, add, or replace the underlying models or providers at any time,
+        including in response to performance, cost, availability, or broader
+        market conditions. As a result, the behavior, quality, speed, and limits
+        of AI-generated answers may vary over time, and we do not guarantee that
+        any particular model will be used.
       </p>
 
       <h2>Intellectual property</h2>
