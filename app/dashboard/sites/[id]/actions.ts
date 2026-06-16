@@ -52,6 +52,24 @@ export async function setTranscriptEmails(siteId: string, enabled: boolean) {
   return { ok: true };
 }
 
+export async function setCollectLeads(siteId: string, enabled: boolean) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Signed out. Refresh and sign in again." };
+
+  // RLS confines this update to the owner's own site row.
+  const { error } = await supabase
+    .from("sites")
+    .update({ collect_leads: enabled })
+    .eq("id", siteId);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/dashboard/sites/${siteId}`);
+  return { ok: true };
+}
+
 export async function deleteSite(siteId: string) {
   const supabase = createClient();
   const {
