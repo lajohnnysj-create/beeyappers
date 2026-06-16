@@ -26,6 +26,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     annualMonthly: 12,
     features: [
       "1,000 AI replies",
+      "GPT-4-class intelligence",
       "1 trained site",
       "Custom branding, colors & fonts",
       "No Bleviq branding",
@@ -41,7 +42,9 @@ export const PLANS: Record<PlanKey, Plan> = {
     annualMonthly: 30,
     features: [
       "8,000 AI replies",
+      "GPT-4-class intelligence",
       "Everything in Basic",
+      "No Bleviq branding",
       "Priority support",
     ],
   },
