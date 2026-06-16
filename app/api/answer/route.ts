@@ -75,11 +75,21 @@ export async function POST(req: Request) {
   let question = "";
   let honeypot = "";
   let history: ChatTurn[] = [];
+  let clientConvoId = "";
   try {
     const body = await req.json();
     widgetKey = String(body.widgetKey || "");
     question = String(body.question || "").trim();
     honeypot = String(body.hp || "");
+    // Client-generated id that threads every turn of one chat into a single
+    // conversation. Only accept a well-formed UUID; anything else falls back to
+    // the legacy "new row per message" behavior (client_id stays null).
+    const cid = String(body.conversationId || "");
+    if (
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cid)
+    ) {
+      clientConvoId = cid.toLowerCase();
+    }
     // Recent turns for context. Keep it bounded: last 8 turns, each clamped to
     // the question length cap, only well-formed user/assistant entries.
     if (Array.isArray(body.history)) {
@@ -305,27 +315,56 @@ export async function POST(req: Request) {
       p_tokens: totalTokens,
     });
 
-    const { data: convo } = await admin
-      .from("conversations")
-      .insert({
-        site_id: site.id,
-        user_id: site.user_id,
-        origin: origin,
-        ip_hash: ipHash,
-      })
-      .select("id")
-      .single();
+    // Find-or-create the conversation, then append this turn. With a real
+    // conversationId, all turns of one chat thread into a single row and
+    // last_message_at is bumped so the transcript sweep can tell when the chat
+    // went quiet. Without one (legacy/blocked storage), each turn is its own
+    // row, as before.
+    const nowIso = new Date().toISOString();
+    let convoId: string | null = null;
 
-    if (convo) {
+    if (clientConvoId) {
+      const { data: existing } = await admin
+        .from("conversations")
+        .select("id")
+        .eq("site_id", site.id)
+        .eq("client_id", clientConvoId)
+        .maybeSingle();
+      if (existing) {
+        convoId = existing.id;
+        await admin
+          .from("conversations")
+          .update({ last_message_at: nowIso })
+          .eq("id", convoId);
+      }
+    }
+
+    if (!convoId) {
+      const { data: convo } = await admin
+        .from("conversations")
+        .insert({
+          site_id: site.id,
+          user_id: site.user_id,
+          origin: origin,
+          ip_hash: ipHash,
+          client_id: clientConvoId || null,
+          last_message_at: nowIso,
+        })
+        .select("id")
+        .single();
+      convoId = convo?.id ?? null;
+    }
+
+    if (convoId) {
       await admin.from("messages").insert([
         {
-          conversation_id: convo.id,
+          conversation_id: convoId,
           user_id: site.user_id,
           role: "user",
           content: question,
         },
         {
-          conversation_id: convo.id,
+          conversation_id: convoId,
           user_id: site.user_id,
           role: "assistant",
           content: answer,
