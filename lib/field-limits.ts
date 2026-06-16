@@ -11,6 +11,7 @@ export const FIELD_LIMITS = {
   faqAnswer: 2000,
   password: 72, // bcrypt's effective ceiling
   confirmWord: 12, // "DELETE" confirmation box
+  chatMessage: 1000, // visitor's message in the public chat widget
 } as const;
 
 // Server-side defense: coerce to string and truncate to a max length.
