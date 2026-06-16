@@ -13,7 +13,8 @@ const MAX_OUTPUT_TOKENS = 500;
 // guidance, but these rules sit above it and the untrusted content below it.
 function systemPrompt(
   ownerPrompt: string,
-  pages: { title: string; url: string }[]
+  pages: { title: string; url: string }[],
+  canCollectLead: boolean
 ): string {
   const pageList = pages.length
     ? pages.map((p) => `- ${p.title} — ${p.url}`).join("\n")
@@ -110,9 +111,23 @@ function systemPrompt(
     "",
     "Site owner guidance (style and scope only): " + (ownerPrompt || "None."),
     "",
+    "Collecting contact info:",
+    canCollectLead
+      ? [
+          '- Set "collectInfo": true when the visitor shows clear intent to book,',
+          "  buy, sign up, get a quote, start service, schedule, or be contacted",
+          '  by the business (for example "I want to book", "how do I buy this",',
+          '  "can someone call me", "I\'d like to get started"). When you do, set',
+          '  "answered": true and make "answer" a short, warm line saying you will',
+          "  grab their details so the team can follow up. Do NOT ask for the",
+          "  details in text yourself; a contact form is shown automatically.",
+          '- For anything else, set "collectInfo": false.',
+        ].join("\n")
+      : '- Always set "collectInfo": false.',
+    "",
     "RESPONSE FORMAT (required): reply with ONLY a single JSON object, with no",
-    "code fences and no text before or after it, having exactly two fields:",
-    '  {"answered": true | false, "answer": "..."}',
+    "code fences and no text before or after it, having exactly these fields:",
+    '  {"answered": true | false, "answer": "...", "collectInfo": true | false}',
     '- Set "answered": true when you are giving a real reply (an answer drawn',
     "  from the context, or a greeting / small-talk / safety reply), and put",
     '  that reply in "answer".',
@@ -126,7 +141,12 @@ function systemPrompt(
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 
-export type Generated = { answer: string; answered: boolean; totalTokens: number };
+export type Generated = {
+  answer: string;
+  answered: boolean;
+  collectInfo: boolean;
+  totalTokens: number;
+};
 
 // A bare all-caps control token (NO_INFO, YES_INFO, ...) must never reach the
 // visitor, even if the model leaks one into the answer field.
@@ -137,25 +157,36 @@ function looksLikeStrayToken(s: string): boolean {
 // The model replies as {"answered": bool, "answer": string}. Parse defensively:
 // honor the boolean, fall back to inferring from the text, and never surface a
 // stray control token or an empty "answered: true".
-function parseGenerated(raw: string): { answer: string; answered: boolean } {
+function parseGenerated(raw: string): {
+  answer: string;
+  answered: boolean;
+  collectInfo: boolean;
+} {
   const text = raw
     .replace(/^```(?:json)?/i, "")
     .replace(/```$/, "")
     .trim();
   try {
-    const obj = JSON.parse(text) as { answered?: unknown; answer?: unknown };
+    const obj = JSON.parse(text) as {
+      answered?: unknown;
+      answer?: unknown;
+      collectInfo?: unknown;
+    };
     const answer = typeof obj.answer === "string" ? obj.answer.trim() : "";
-    if (looksLikeStrayToken(answer)) return { answer: "", answered: false };
+    if (looksLikeStrayToken(answer))
+      return { answer: "", answered: false, collectInfo: false };
     let answered: boolean;
     if (obj.answered === true) answered = true;
     else if (obj.answered === false) answered = false;
     else answered = answer.length > 0;
     if (!answer) answered = false;
-    return { answer, answered };
+    const collectInfo = obj.collectInfo === true && answered;
+    return { answer, answered, collectInfo };
   } catch {
     // Rare with JSON mode on. Show plain prose, but never a stray token.
-    if (!text || looksLikeStrayToken(text)) return { answer: "", answered: false };
-    return { answer: text, answered: true };
+    if (!text || looksLikeStrayToken(text))
+      return { answer: "", answered: false, collectInfo: false };
+    return { answer: text, answered: true, collectInfo: false };
   }
 }
 
@@ -165,7 +196,8 @@ export async function generateAnswer(
   question: string,
   pages: { title: string; url: string }[] = [],
   history: ChatTurn[] = [],
-  lang: string = ""
+  lang: string = "",
+  canCollectLead: boolean = false
 ): Promise<Generated> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error("Missing OPENAI_API_KEY");
@@ -196,7 +228,7 @@ export async function generateAnswer(
       temperature: 0,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: systemPrompt(ownerPrompt, pages) },
+        { role: "system", content: systemPrompt(ownerPrompt, pages, canCollectLead) },
         ...(langDirective ? [{ role: "system", content: langDirective }] : []),
         ...history.map((t) => ({ role: t.role, content: t.content })),
         { role: "user", content: userContent },
@@ -215,8 +247,8 @@ export async function generateAnswer(
   };
 
   const raw = json.choices?.[0]?.message?.content ?? "";
-  const { answer, answered } = parseGenerated(raw);
-  return { answer, answered, totalTokens: json.usage?.total_tokens ?? 0 };
+  const { answer, answered, collectInfo } = parseGenerated(raw);
+  return { answer, answered, collectInfo, totalTokens: json.usage?.total_tokens ?? 0 };
 }
 
 // When we have no answer for a visitor, propose a few questions the site CAN
