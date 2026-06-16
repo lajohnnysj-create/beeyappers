@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { LegalShell } from "@/app/legal-shell";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Terms of Service | Bleviq",
+export const metadata: Metadata = pageMetadata({
+  title: "Terms of Service | Bleviq AI Chatbot for Your Website",
   description:
-    "The terms that govern your use of Bleviq, a product of MRLA Media LLC.",
-};
+    "Read the terms of service for Bleviq, the AI chatbot you train on your website to answer visitors. Covers accounts, billing, and acceptable use.",
+  path: "/terms",
+});
 
 export default async function TermsPage() {
   const supabase = createClient();
