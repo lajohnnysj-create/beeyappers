@@ -38,6 +38,42 @@ type SiteRow = {
   period_start: string;
 };
 
+// Owner-only retrieval/generation trace. Gated behind the cron secret so it is
+// never exposed to the public widget. Send the question with the header
+// `x-debug-token: <CRON_SECRET>` and the response gains a `_debug` object
+// showing the queries used, the chunks retrieved (with similarity), and the
+// model's raw verdict. Returns `base` unchanged when the token is absent/wrong.
+function debugTrace(
+  req: Request,
+  data: {
+    question: string;
+    rewritten: string;
+    queries: string[];
+    chunks: MatchedChunk[];
+    answered: boolean | null;
+    rawAnswer: string;
+  },
+  base: Record<string, unknown>
+): Record<string, unknown> {
+  const secret = process.env.CRON_SECRET || "";
+  if (!secret || req.headers.get("x-debug-token") !== secret) return base;
+  return {
+    ...base,
+    _debug: {
+      question: data.question,
+      rewritten: data.rewritten,
+      queries: data.queries,
+      answered: data.answered,
+      rawAnswer: data.rawAnswer,
+      retrieved: data.chunks.map((c) => ({
+        id: c.id,
+        similarity: Number(c.similarity.toFixed(4)),
+        preview: c.content.replace(/\s+/g, " ").slice(0, 120),
+      })),
+    },
+  };
+}
+
 // ---- CORS helpers ----------------------------------------------------------
 function corsHeaders(origin: string | null, allowed: string[]): HeadersInit {
   // Reflect the origin when it is allowed (or when no allowlist is set yet).
@@ -282,7 +318,11 @@ export async function POST(req: Request) {
     if (chunks.length === 0) {
       const suggestions = await suggestAnswerableQuestions(faqQuestions, contentSamples);
       return json(
-        { answer: noInfoText(suggestions.length > 0), suggestions },
+        debugTrace(
+          req,
+          { question, rewritten, queries, chunks, answered: null, rawAnswer: "" },
+          { answer: noInfoText(suggestions.length > 0), suggestions }
+        ),
         200,
         headers
       );
@@ -377,7 +417,15 @@ export async function POST(req: Request) {
       ]);
     }
 
-    return json(suggestions ? { answer, suggestions } : { answer }, 200, headers);
+    return json(
+      debugTrace(
+        req,
+        { question, rewritten, queries, chunks, answered: gen.answered, rawAnswer: gen.answer },
+        suggestions ? { answer, suggestions } : { answer }
+      ),
+      200,
+      headers
+    );
   } catch (err) {
     // Never leak internal detail to the public client.
     console.error("answer route error:", err);
