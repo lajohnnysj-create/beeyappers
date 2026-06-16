@@ -9,7 +9,7 @@ export function AgentStatus({ active }: { active: boolean }) {
           <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
         </span>
         <span className="text-sm font-medium text-slate-600">
-          Agent is online
+          Chatbot is online
         </span>
       </div>
     );
@@ -19,13 +19,13 @@ export function AgentStatus({ active }: { active: boolean }) {
     <div className="group relative flex cursor-default items-center gap-2 whitespace-nowrap">
       <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
       <span className="text-sm font-medium text-slate-600">
-        Agent is offline
+        Chatbot is offline
       </span>
       <span
         role="tooltip"
         className="pointer-events-none absolute right-0 top-full z-20 mt-2 w-56 whitespace-normal rounded-lg bg-slate-900 px-3 py-2 text-left text-xs font-normal leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100"
       >
-        Please select a plan to activate your agent
+        Please select a plan to activate your chatbot
       </span>
     </div>
   );
