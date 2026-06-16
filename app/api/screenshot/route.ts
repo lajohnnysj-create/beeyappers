@@ -67,6 +67,8 @@ export async function GET(req: Request) {
     status: 200,
     headers: {
       "Content-Type": last.type,
+      // Lets the dashboard preview know whether to retry for a better shot.
+      "X-Shot-Status": isReal ? "real" : "placeholder",
       // Cache real previews; let a placeholder expire fast so it retries.
       "Cache-Control": isReal ? "public, max-age=86400" : "public, max-age=30",
     },
