@@ -29,11 +29,14 @@ export default function LoginPage() {
   const [showEmail, setShowEmail] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const err = params.get("error");
     if (err) setOauthError(err);
+    if (params.get("deleted"))
+      setNotice("Your account has been deleted. We're sorry to see you go.");
     // The homepage "Continue with Email" button links here with these params
     // to open the form directly in account-creation mode.
     if (params.get("email")) setShowEmail(true);
@@ -90,6 +93,15 @@ export default function LoginPage() {
           <p className="mt-2 text-center text-sm text-slate-600">
             Sign in to train and manage your assistant.
           </p>
+
+          {notice && (
+            <p
+              role="status"
+              className="mt-6 rounded-lg bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-800"
+            >
+              {notice}
+            </p>
+          )}
 
           {/* Continue with Google */}
           <button
