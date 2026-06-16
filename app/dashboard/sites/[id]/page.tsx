@@ -24,7 +24,7 @@ export default async function SiteWorkspacePage({
 
   const { data: site } = await supabase
     .from("sites")
-    .select("id, name, domain, widget_key, widget_config, crawl_status, last_crawled_at")
+    .select("id, name, domain, widget_key, widget_config, crawl_status, last_crawled_at, email_transcripts")
     .eq("id", params.id)
     .single();
 
@@ -123,6 +123,7 @@ export default async function SiteWorkspacePage({
           knowledge={knowledge}
           canRetrain={entitlement.active}
           canRemoveBranding={entitlement.active}
+          emailTranscripts={site.email_transcripts ?? true}
         />
       </main>
     </div>

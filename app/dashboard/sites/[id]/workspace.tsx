@@ -5,6 +5,7 @@ import { BrandingForm } from "./branding-form";
 import { KnowledgePanel, type KnowledgeItem } from "./knowledge-panel";
 import { TrainStatus } from "./train-status";
 import { DeleteSite } from "./delete-site";
+import { TranscriptToggle } from "./transcript-toggle";
 import { EmbedSnippet } from "@/app/dashboard/embed-snippet";
 import type { WidgetConfig } from "@/lib/widget-config";
 
@@ -24,6 +25,7 @@ type Props = {
   knowledge: KnowledgeItem[];
   canRetrain: boolean;
   canRemoveBranding: boolean;
+  emailTranscripts: boolean;
 };
 
 const NAV: { id: Tab; label: string; icon: JSX.Element }[] = [
@@ -103,6 +105,7 @@ export function Workspace(props: Props) {
             knowledge={props.knowledge}
             siteName={props.siteName}
             canRetrain={props.canRetrain}
+            emailTranscripts={props.emailTranscripts}
           />
         )}
         {tab === "customize" && (
@@ -150,6 +153,7 @@ function TrainPanel({
   knowledge,
   siteName,
   canRetrain,
+  emailTranscripts,
 }: {
   siteId: string;
   domain: string | null;
@@ -160,6 +164,7 @@ function TrainPanel({
   knowledge: KnowledgeItem[];
   siteName: string;
   canRetrain: boolean;
+  emailTranscripts: boolean;
 }) {
   return (
     <div className="space-y-6">
@@ -196,6 +201,8 @@ function TrainPanel({
       </section>
 
       <KnowledgePanel siteId={siteId} items={knowledge} />
+
+      <TranscriptToggle siteId={siteId} initial={emailTranscripts} />
 
       <DeleteSite siteId={siteId} siteName={siteName} />
     </div>
