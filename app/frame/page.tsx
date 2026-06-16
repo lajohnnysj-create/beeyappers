@@ -1,7 +1,8 @@
 import { createPublicClient } from "@/lib/supabase/public";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getEntitlementByUserId } from "@/lib/billing/entitlement";
-import { mergeConfig } from "@/lib/widget-config";
+import { mergeConfig, DEFAULT_LABELS, type WidgetLabels } from "@/lib/widget-config";
+import { getWidgetStrings } from "@/lib/i18n/widget-strings";
 import { WidgetFrame } from "../embed/widget-frame";
 
 // Always render fresh so dashboard config changes show up immediately
@@ -23,10 +24,12 @@ export const viewport = {
 export default async function FramePage({
   searchParams,
 }: {
-  searchParams: { key?: string };
+  searchParams: { key?: string; lang?: string };
 }) {
   const key = searchParams.key || "";
+  const lang = searchParams.lang || "";
   let config = mergeConfig(null);
+  let labels: WidgetLabels = DEFAULT_LABELS;
 
   if (key) {
     const supabase = createPublicClient();
@@ -44,12 +47,32 @@ export default async function FramePage({
     const admin = createAdminClient();
     const { data: site } = await admin
       .from("sites")
-      .select("user_id")
+      .select("id, user_id")
       .eq("widget_key", key)
       .maybeSingle();
     if (site?.user_id) {
       const ent = await getEntitlementByUserId(site.user_id);
       if (!ent.active) config = { ...config, showBranding: true };
+    }
+
+    // Localize the greeting + UI chrome to the visitor's language (cached;
+    // English/unknown returns the author's text with no model call). The
+    // assistant name stays exactly as written.
+    if (site?.id) {
+      const t = await getWidgetStrings(site.id, lang, {
+        greeting: config.greeting,
+        placeholder: DEFAULT_LABELS.placeholder,
+        send: DEFAULT_LABELS.send,
+        poweredBy: DEFAULT_LABELS.poweredBy,
+        askAI: DEFAULT_LABELS.askAI,
+      });
+      config = { ...config, greeting: t.greeting };
+      labels = {
+        placeholder: t.placeholder,
+        send: t.send,
+        poweredBy: t.poweredBy,
+        askAI: t.askAI,
+      };
     }
   }
 
@@ -57,7 +80,7 @@ export default async function FramePage({
     <>
       {/* The loader's iframe must be see-through outside the widget itself. */}
       <style>{`html,body{background:transparent !important;margin:0;overflow:hidden}`}</style>
-      <WidgetFrame widgetKey={key} config={config} />
+      <WidgetFrame widgetKey={key} config={config} labels={labels} lang={lang} />
     </>
   );
 }
