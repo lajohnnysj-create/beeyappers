@@ -350,6 +350,9 @@ function LeadForm({
       <div
         style={{
           marginTop: 8,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
           padding: "10px 12px",
           borderRadius: 12,
           background: config.assistantBubbleColor,
@@ -357,7 +360,21 @@ function LeadForm({
           fontSize: 15,
         }}
       >
-        {labels.leadSent}
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={config.bubbleColor}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ flexShrink: 0 }}
+          aria-hidden="true"
+        >
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
+        <span>{labels.leadSent}</span>
       </div>
     );
   }
@@ -764,7 +781,7 @@ export function ChatWidget({
                     onPick={(q) => sendText(q)}
                   />
                 )}
-                {m.collectInfo && !leadCaptured && (
+                {m.collectInfo && (
                   <LeadForm
                     widgetKey={widgetKey}
                     conversationId={convoIdRef.current}
