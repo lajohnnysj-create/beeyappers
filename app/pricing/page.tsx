@@ -1,13 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
+import { pageMetadata } from "@/lib/seo";
 import { SiteHeader, SiteFooter } from "@/app/site-nav";
 import { PricingTable } from "./pricing-table";
 import { BleviqWidget } from "@/app/bleviq-widget";
 
-export const metadata = {
-  title: "Pricing | Bleviq",
+export const metadata = pageMetadata({
+  title: "AI Chatbot for Websites: Pricing and Plans | Bleviq",
   description:
-    "Simple plans for an AI chat widget trained on your site. Every plan starts with a 14-day free trial.",
-};
+    "Compare Bleviq pricing for an AI chatbot you train on your website to answer visitor questions 24/7. Simple plans with a 14-day free trial.",
+  path: "/pricing",
+});
 
 export default async function PricingPage({
   searchParams,
