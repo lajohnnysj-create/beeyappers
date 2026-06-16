@@ -188,7 +188,7 @@ export default async function Home() {
       <section className="border-t border-slate-200 bg-white">
         <div className="mx-auto max-w-5xl px-6 py-20">
           <h2 className="font-display text-center text-3xl font-bold tracking-tight text-slate-900">
-            Live in five steps
+            Live in a few steps
           </h2>
           <p className="mx-auto mt-3 max-w-md text-center text-slate-600">
             From website to working chat widget in about the time it takes to
@@ -348,7 +348,7 @@ export default async function Home() {
       </section>
 
       {/* CTA */}
-      <section className="mx-auto max-w-5xl px-6 pb-24 pt-4">
+      <section className="mx-auto max-w-5xl px-6 py-20">
         <div className="relative isolate overflow-hidden rounded-3xl px-8 py-20 text-center shadow-2xl sm:py-24">
           {/* Background image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
