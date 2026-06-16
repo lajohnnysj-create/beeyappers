@@ -281,6 +281,10 @@ export function ChatWidget({
   const [atBottom, setAtBottom] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastMsgRef = useRef<HTMLDivElement>(null);
+  // One stable id per chat session so every turn threads into a single
+  // server-side conversation (instead of a new row per message). Set on mount,
+  // persisted for the tab, reset on a fresh visit.
+  const convoIdRef = useRef<string>("");
   const font = resolveFont(config.fontFamily);
 
   // Load the selected Google font inside the widget iframe (the host page may
@@ -296,6 +300,33 @@ export function ChatWidget({
     link.href = href;
     document.head.appendChild(link);
   }, [config.fontFamily]);
+
+  // Establish the conversation id once per session (client-only).
+  useEffect(() => {
+    const storeKey = "bv_convo_" + widgetKey;
+    let id = "";
+    try {
+      id = sessionStorage.getItem(storeKey) || "";
+    } catch {
+      /* storage blocked; we'll keep an in-memory id for this load */
+    }
+    if (!id) {
+      id =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+              const r = (Math.random() * 16) | 0;
+              const v = c === "x" ? r : (r & 0x3) | 0x8;
+              return v.toString(16);
+            });
+      try {
+        sessionStorage.setItem(storeKey, id);
+      } catch {
+        /* ignore */
+      }
+    }
+    convoIdRef.current = id;
+  }, [widgetKey]);
 
   const headerBg = config.headerColor;
   const headerFg = readable(headerBg);
@@ -362,7 +393,13 @@ export function ChatWidget({
       const res = await fetch("/api/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ widgetKey, question: q, hp, history }),
+        body: JSON.stringify({
+          widgetKey,
+          question: q,
+          hp,
+          history,
+          conversationId: convoIdRef.current,
+        }),
       });
       const data = await res.json();
       const reply =
