@@ -15,7 +15,7 @@ export default async function PrivacyPage() {
   } = await supabase.auth.getUser();
 
   return (
-    <LegalShell signedIn={!!user} title="Privacy Policy" updated="June 15, 2026">
+    <LegalShell signedIn={!!user} title="Privacy Policy" updated="June 16, 2026">
       <p>
         This Privacy Policy explains how Bleviq, a product of{" "}
         <strong>MRLA Media LLC</strong> (&ldquo;Bleviq,&rdquo; &ldquo;we,&rdquo;
@@ -156,10 +156,22 @@ export default async function PrivacyPage() {
       <h2>Data retention</h2>
       <p>
         We keep account information and trained content for as long as your
-        account is active. Conversations are retained to operate the service.
-        You can delete content you have added, and you may request deletion of
-        your account and associated data by contacting us. We may retain limited
-        information as required for legal, accounting, or security purposes.
+        account is active. Visitor conversations are retained to operate the
+        service and are automatically deleted about 90 days after a
+        conversation&rsquo;s last activity.
+      </p>
+      <p>
+        You can delete content you have added at any time. You can also
+        permanently delete your entire account from your account settings, which
+        cancels any active subscription and removes your account, trained
+        content, conversations, and associated data. You may also request
+        deletion by contacting us.
+      </p>
+      <p>
+        After deletion, we may retain limited records as required for legal,
+        accounting, tax, or security purposes. Payment and transaction records
+        are held by our payment processor, Stripe, in line with its own
+        retention obligations.
       </p>
 
       <h2>Security</h2>
