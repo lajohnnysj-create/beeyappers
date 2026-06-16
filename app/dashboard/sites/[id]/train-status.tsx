@@ -286,7 +286,7 @@ function SitePreview({
   );
 }
 
-function TrainingWidget({ message }: { message: string }) {
+export function TrainingWidget({ message }: { message: string }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-8 text-center">
       <div className="relative mx-auto h-20 w-20">
