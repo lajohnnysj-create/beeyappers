@@ -89,6 +89,22 @@ export const DEFAULT_CONFIG: WidgetConfig = {
   showBranding: true,
 };
 
+// Fixed UI chrome shown in the widget. Localized alongside the greeting at
+// frame-render time; these defaults are the English source.
+export type WidgetLabels = {
+  placeholder: string;
+  send: string;
+  poweredBy: string;
+  askAI: string;
+};
+
+export const DEFAULT_LABELS: WidgetLabels = {
+  placeholder: "Type here...",
+  send: "Send",
+  poweredBy: "Powered by",
+  askAI: "Ask AI",
+};
+
 // Merge stored (possibly partial) config over defaults.
 export function mergeConfig(raw: unknown): WidgetConfig {
   const r = (raw && typeof raw === "object" ? raw : {}) as Partial<WidgetConfig>;
