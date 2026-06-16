@@ -87,7 +87,7 @@ export function DeleteSite({
                 autoFocus
                 placeholder="DELETE"
                 maxLength={FIELD_LIMITS.confirmWord}
-                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
+                className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 outline-none focus:border-brand-600"
               />
             </label>
 
