@@ -18,6 +18,7 @@ const STEPS = [
     body: "Paste your website address. That's the whole setup form.",
     card: "border-indigo-100 bg-indigo-50",
     badge: "bg-indigo-600",
+    img: "/card1.webp",
   },
   {
     n: "02",
@@ -25,6 +26,7 @@ const STEPS = [
     body: "Our AI learns your website and trains your chatbot on responses.",
     card: "border-sky-100 bg-sky-50",
     badge: "bg-sky-500",
+    img: "/card2.webp",
   },
   {
     n: "03",
@@ -32,6 +34,7 @@ const STEPS = [
     body: "Provide additional information for your chatbot.",
     card: "border-teal-100 bg-teal-50",
     badge: "bg-teal-600",
+    img: "/card3.webp",
   },
   {
     n: "04",
@@ -39,6 +42,7 @@ const STEPS = [
     body: "Match your colors, fonts, and avatar so it feels like you.",
     card: "border-amber-100 bg-amber-50",
     badge: "bg-amber-500",
+    img: "/card4.webp",
   },
   {
     n: "05",
@@ -46,6 +50,7 @@ const STEPS = [
     body: "Copy one script tag onto your site. The chat bubble is live.",
     card: "border-rose-100 bg-rose-50",
     badge: "bg-rose-500",
+    img: "/card5.webp",
   },
 ];
 
@@ -204,6 +209,10 @@ export default async function Home() {
                   {s.title}
                 </h3>
                 <p className="mt-2 text-slate-600">{s.body}</p>
+                <div className="mt-5 overflow-hidden rounded-xl border border-slate-900/5 bg-white shadow-lg ring-1 ring-black/5">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={s.img} alt="" className="block w-full" />
+                </div>
               </div>
             ))}
           </div>
