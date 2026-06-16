@@ -36,9 +36,9 @@ export function DeleteAccount() {
     <section className="rounded-2xl border border-red-200 bg-white p-6 shadow-card">
       <h2 className="text-lg font-semibold text-slate-900">Delete account</h2>
       <p className="mt-1 text-sm text-slate-600">
-        Permanently delete your account, all your sites, their crawled pages,
-        documents, FAQs, and chat history. Your subscription is canceled. This
-        cannot be undone.
+        This cancels your Stripe subscription, then permanently deletes your
+        account, all your sites, their crawled pages, documents, FAQs, and chat
+        history. This cannot be undone.
       </p>
 
       <button
@@ -77,9 +77,9 @@ export function DeleteAccount() {
               Delete your account?
             </h2>
             <p className="mt-2 text-center text-sm text-slate-600">
-              This permanently deletes your account and every site you own,
-              along with their pages, documents, FAQs, and chat history. Any
-              active subscription is canceled. This cannot be undone.
+              This cancels your Stripe subscription, then permanently deletes
+              your account and every site you own, along with their pages,
+              documents, FAQs, and chat history. This cannot be undone.
             </p>
 
             <label className="mt-4 block">
