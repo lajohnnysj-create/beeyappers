@@ -229,7 +229,7 @@ function AvatarPicker({
         type="button"
         onClick={() => onChange(null)}
         className={
-          "grid aspect-square place-items-center rounded-lg border text-xs font-medium text-slate-400 transition " +
+          "grid aspect-square place-items-center rounded-lg border text-xs font-medium text-slate-600 transition " +
           (!value
             ? "border-brand-500 ring-2 ring-brand-200"
             : "border-slate-200 hover:border-slate-300")
@@ -263,20 +263,23 @@ function ColorField({
   label,
   value,
   onChange,
+  open,
+  onToggle,
 }: {
   icon: ReactNode;
   label: string;
   value: string;
   onChange: (v: string) => void;
+  open: boolean;
+  onToggle: () => void;
 }) {
-  const [open, setOpen] = useState(false);
   const v = value.toLowerCase();
   const isPreset = PRESET_COLORS.includes(v);
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={onToggle}
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-slate-50"
       >
         <span className="flex items-center gap-2.5">
@@ -390,6 +393,13 @@ export function BrandingForm({
     onToggle: () => setOpenId((cur) => (cur === id ? "" : id)),
   });
 
+  // Accordion: at most one color picker open at a time within Colors.
+  const [openColor, setOpenColor] = useState<string>("");
+  const colorProps = (id: string) => ({
+    open: openColor === id,
+    onToggle: () => setOpenColor((cur) => (cur === id ? "" : id)),
+  });
+
   // Auto-dismiss the save confirmation (or error) after a few seconds.
   useEffect(() => {
     if (!msg) return;
@@ -452,12 +462,12 @@ export function BrandingForm({
 
         <Section icon={ICONS.palette} title="Colors" {...sectionProps("colors")}>
           <div className="space-y-2.5">
-            <ColorField icon={COLOR_ICONS.accent} label="Accent" value={config.bubbleColor} onChange={(v) => set("bubbleColor", v)} />
-            <ColorField icon={COLOR_ICONS.header} label="Header" value={config.headerColor} onChange={(v) => set("headerColor", v)} />
-            <ColorField icon={COLOR_ICONS.background} label="Background" value={config.backgroundColor} onChange={(v) => set("backgroundColor", v)} />
-            <ColorField icon={COLOR_ICONS.visitor} label="Visitor message" value={config.userBubbleColor} onChange={(v) => set("userBubbleColor", v)} />
-            <ColorField icon={COLOR_ICONS.bot} label="AI message" value={config.assistantBubbleColor} onChange={(v) => set("assistantBubbleColor", v)} />
-            <ColorField icon={COLOR_ICONS.text} label="Text" value={config.textColor} onChange={(v) => set("textColor", v)} />
+            <ColorField icon={COLOR_ICONS.accent} label="Accent" value={config.bubbleColor} onChange={(v) => set("bubbleColor", v)} {...colorProps("accent")} />
+            <ColorField icon={COLOR_ICONS.header} label="Header" value={config.headerColor} onChange={(v) => set("headerColor", v)} {...colorProps("header")} />
+            <ColorField icon={COLOR_ICONS.background} label="Background" value={config.backgroundColor} onChange={(v) => set("backgroundColor", v)} {...colorProps("background")} />
+            <ColorField icon={COLOR_ICONS.visitor} label="Visitor message" value={config.userBubbleColor} onChange={(v) => set("userBubbleColor", v)} {...colorProps("visitor")} />
+            <ColorField icon={COLOR_ICONS.bot} label="AI message" value={config.assistantBubbleColor} onChange={(v) => set("assistantBubbleColor", v)} {...colorProps("bot")} />
+            <ColorField icon={COLOR_ICONS.text} label="Text" value={config.textColor} onChange={(v) => set("textColor", v)} {...colorProps("text")} />
           </div>
         </Section>
 
@@ -634,7 +644,7 @@ export function BrandingForm({
 
       {/* Live preview */}
       <div className="lg:sticky lg:top-6 lg:self-start">
-        <p className="mb-2 text-center text-xs font-medium text-slate-500">Live preview</p>
+        <p className="mb-2 text-center text-xs font-medium text-slate-600">Live preview</p>
         <LauncherPreview config={config} />
         <Preview config={previewConfig} />
       </div>

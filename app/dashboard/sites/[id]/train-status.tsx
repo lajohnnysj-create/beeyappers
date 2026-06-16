@@ -208,7 +208,7 @@ export function TrainStatus({
               </button>
               <span
                 role="tooltip"
-                className="pointer-events-none absolute bottom-full left-0 z-20 mb-1.5 w-max max-w-[15rem] rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-normal leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100"
+                className="pointer-events-none absolute bottom-full left-0 z-20 mb-1.5 w-max max-w-[15rem] rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-normal leading-snug text-white opacity-0 invisible shadow-lg transition-opacity duration-150 group-hover:visible group-hover:opacity-100"
               >
                 Please upgrade to re-train your website
               </span>
@@ -233,7 +233,7 @@ function InfoTip({ text }: { text: string }) {
       </button>
       <span
         role="tooltip"
-        className="pointer-events-none absolute bottom-full left-0 z-20 mb-1.5 w-56 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-normal leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+        className="pointer-events-none absolute bottom-full left-0 z-20 mb-1.5 w-56 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-normal leading-snug text-white opacity-0 invisible shadow-lg transition-opacity duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
       >
         {text}
       </span>

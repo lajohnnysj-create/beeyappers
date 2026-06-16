@@ -126,6 +126,7 @@ export function AvatarUploader({
         ref={inputRef}
         type="file"
         accept="image/*"
+        aria-label="Upload avatar image"
         className="hidden"
         onChange={(e) => e.target.files?.[0] && pick(e.target.files[0])}
       />
