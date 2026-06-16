@@ -96,6 +96,12 @@ export type WidgetLabels = {
   send: string;
   poweredBy: string;
   askAI: string;
+  leadName: string;
+  leadEmail: string;
+  leadPhone: string;
+  leadSubmit: string;
+  leadSent: string;
+  leadError: string;
 };
 
 export const DEFAULT_LABELS: WidgetLabels = {
@@ -103,6 +109,12 @@ export const DEFAULT_LABELS: WidgetLabels = {
   send: "Send",
   poweredBy: "Powered by",
   askAI: "Ask AI",
+  leadName: "Name",
+  leadEmail: "Email",
+  leadPhone: "Phone",
+  leadSubmit: "Submit",
+  leadSent: "Thanks! We'll be in touch soon.",
+  leadError: "Please check your details.",
 };
 
 // Merge stored (possibly partial) config over defaults.
