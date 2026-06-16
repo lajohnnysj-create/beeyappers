@@ -17,16 +17,22 @@ const STEPS = [
     n: "01",
     title: "Add your site",
     body: "Paste your website address. That's the whole setup form.",
+    card: "border-indigo-100 bg-indigo-50",
+    badge: "bg-indigo-600",
   },
   {
     n: "02",
     title: "Bleviq learns it",
-    body: "We read your pages and build an index of what your business actually says.",
+    body: "Our AI learns your website and trains your chatbot on responses.",
+    card: "border-teal-100 bg-teal-50",
+    badge: "bg-teal-600",
   },
   {
     n: "03",
     title: "Drop in the widget",
     body: "Copy one script tag onto your site. The chat bubble is live.",
+    card: "border-amber-100 bg-amber-50",
+    badge: "bg-amber-500",
   },
 ];
 
@@ -80,11 +86,18 @@ export default async function Home() {
             From website to working chat widget in about the time it takes to
             grab a coffee.
           </p>
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
             {STEPS.map((s) => (
-              <div key={s.n}>
-                <div className="text-sm font-semibold text-brand-600">{s.n}</div>
-                <h3 className="mt-2 text-lg font-semibold text-slate-900">
+              <div
+                key={s.n}
+                className={`rounded-2xl border p-6 shadow-card ${s.card}`}
+              >
+                <div
+                  className={`grid h-11 w-11 place-items-center rounded-full text-base font-bold text-white ${s.badge}`}
+                >
+                  {s.n}
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-slate-900">
                   {s.title}
                 </h3>
                 <p className="mt-2 text-slate-600">{s.body}</p>
