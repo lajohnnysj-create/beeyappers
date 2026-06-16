@@ -121,7 +121,7 @@ export function TrainStatus({
         <button onClick={startCrawl} className={btnClass}>
           Train site
         </button>
-        {error && <span className="text-xs text-red-600">{error}</span>}
+        {error && <span role="alert" className="text-xs text-red-600">{error}</span>}
       </div>
     );
   }
@@ -214,7 +214,7 @@ export function TrainStatus({
               </span>
             </div>
           )}
-          {error && <span className="text-xs text-red-600">{error}</span>}
+          {error && <span role="alert" className="text-xs text-red-600">{error}</span>}
         </div>
       </div>
     </div>

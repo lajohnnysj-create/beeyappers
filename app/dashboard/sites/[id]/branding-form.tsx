@@ -136,7 +136,7 @@ function Section({
           strokeLinecap="round"
           strokeLinejoin="round"
           className={
-            "shrink-0 text-slate-400 transition-transform " +
+            "shrink-0 text-slate-500 transition-transform " +
             (isOpen ? "rotate-180" : "")
           }
           aria-hidden="true"
@@ -180,6 +180,7 @@ function AvatarChoice({
     <button
       type="button"
       onClick={onSelect}
+      aria-pressed={selected}
       className={
         "relative aspect-square overflow-hidden rounded-lg border transition " +
         (selected
@@ -188,7 +189,7 @@ function AvatarChoice({
       }
     >
       {err ? (
-        <span className="grid h-full w-full place-items-center bg-slate-100 text-xs text-slate-400">
+        <span className="grid h-full w-full place-items-center bg-slate-100 text-xs text-slate-600">
           {index}
         </span>
       ) : (
@@ -280,6 +281,7 @@ function ColorField({
       <button
         type="button"
         onClick={onToggle}
+        aria-expanded={open}
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-slate-50"
       >
         <span className="flex items-center gap-2.5">
@@ -303,7 +305,7 @@ function ColorField({
             strokeLinecap="round"
             strokeLinejoin="round"
             className={
-              "text-slate-400 transition-transform " + (open ? "rotate-180" : "")
+              "text-slate-500 transition-transform " + (open ? "rotate-180" : "")
             }
           >
             <path d="m6 9 6 6 6-6" />
@@ -321,6 +323,7 @@ function ColorField({
                   type="button"
                   onClick={() => onChange(c)}
                   aria-label={c}
+                  aria-pressed={active}
                   className={
                     "h-8 w-8 rounded-lg border transition " +
                     (active
@@ -490,6 +493,7 @@ export function BrandingForm({
                       key={s}
                       type="button"
                       onClick={() => set("launcherStyle", s)}
+                      aria-pressed={active}
                       className={
                         "flex flex-col items-center gap-2 rounded-xl border p-3 transition " +
                         (active
@@ -637,8 +641,8 @@ export function BrandingForm({
           >
             {saving ? "Saving..." : "Save changes"}
           </button>
-          {msg?.ok && <span className="text-sm text-brand-700">{msg.ok}</span>}
-          {msg?.error && <span className="text-sm text-red-600">{msg.error}</span>}
+          {msg?.ok && <span role="status" className="text-sm text-brand-700">{msg.ok}</span>}
+          {msg?.error && <span role="alert" className="text-sm text-red-600">{msg.error}</span>}
         </div>
       </div>
 
@@ -918,7 +922,7 @@ function FontSelect({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
         >
           <path d="m6 9 6 6 6-6" />
         </svg>

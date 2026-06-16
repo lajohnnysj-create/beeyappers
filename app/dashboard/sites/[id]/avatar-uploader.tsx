@@ -117,7 +117,7 @@ export function AvatarUploader({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={value} alt="Custom avatar" className="h-full w-full object-cover" />
         ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-slate-400">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-slate-500">
             <path d="M12 5v14M5 12h14" />
           </svg>
         )}
@@ -162,7 +162,7 @@ export function AvatarUploader({
               onChange={(e) => setZoom(Number(e.target.value))}
               className="mt-4 w-full accent-brand-600"
             />
-            {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+            {error && <p role="alert" className="mt-2 text-sm text-red-600">{error}</p>}
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={() => setSrc(null)}

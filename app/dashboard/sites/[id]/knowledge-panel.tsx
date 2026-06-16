@@ -164,7 +164,7 @@ export function KnowledgePanel({
       {busy && (
         <p className="mt-3 text-sm text-slate-500">Adding to your knowledge base...</p>
       )}
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="mt-3 text-sm text-red-600">{error}</p>}
 
       {mode === "none" && (
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -282,7 +282,7 @@ export function KnowledgePanel({
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         className={
-                          "shrink-0 text-slate-400 transition-transform " +
+                          "shrink-0 text-slate-500 transition-transform " +
                           (editing ? "rotate-90" : "")
                         }
                         aria-hidden="true"
@@ -327,7 +327,7 @@ export function KnowledgePanel({
                         className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
                       />
                     </label>
-                    {editError && <p className="text-sm text-red-600">{editError}</p>}
+                    {editError && <p role="alert" className="text-sm text-red-600">{editError}</p>}
                     <div className="flex gap-2">
                       <button
                         onClick={() => saveEdit(it.sourceId)}
