@@ -150,11 +150,11 @@ export function TrainStatus({
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
             <dt className="text-xs font-medium text-slate-500">Last trained</dt>
-            <dd className="mt-0.5 text-sm font-semibold text-slate-900">
+            <dd className="mt-0.5 text-sm font-semibold text-slate-900" suppressHydrationWarning>
               {lastCrawledAt ? (
                 <>
                   {new Date(lastCrawledAt).toLocaleDateString()}
-                  <span className="ml-1 text-xs font-normal text-slate-500">
+                  <span className="ml-1 text-xs font-normal text-slate-500" suppressHydrationWarning>
                     at{" "}
                     {new Date(lastCrawledAt).toLocaleTimeString([], {
                       hour: "numeric",
