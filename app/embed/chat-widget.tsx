@@ -278,7 +278,6 @@ export function ChatWidget({
   const [input, setInput] = useState("");
   const [hp, setHp] = useState("");
   const [busy, setBusy] = useState(false);
-  const [focused, setFocused] = useState(false);
   const [atBottom, setAtBottom] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastMsgRef = useRef<HTMLDivElement>(null);
@@ -396,7 +395,6 @@ export function ChatWidget({
   sendRef.current = sendText;
   useEffect(() => {
     if (pendingQuestion) {
-      setFocused(true);
       sendRef.current(pendingQuestion);
       onQuestionConsumed?.();
     }
@@ -629,7 +627,6 @@ export function ChatWidget({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
-            onFocus={() => setFocused(true)}
             placeholder="Type here..."
             style={{
               flex: 1,
@@ -669,18 +666,34 @@ export function ChatWidget({
       {/* Footer */}
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 8,
           padding: "6px 16px 10px",
           fontSize: 11,
           color: panelIsDark ? "rgba(255,255,255,0.6)" : "#64748b",
         }}
       >
-        <span>{focused ? "This chat is recorded." : ""}</span>
+        <p style={{ margin: 0, fontSize: 10, lineHeight: 1.45, textAlign: "center" }}>
+          You&rsquo;re chatting with an AI. Messages may be stored. By
+          continuing, you agree to our{" "}
+          <a
+            href="https://www.bleviq.com/ai-terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit", textDecoration: "underline" }}
+          >
+            AI Terms
+          </a>
+          .
+        </p>
         {config.showBranding && (
-          <span style={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <span
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 2,
+              marginTop: 5,
+            }}
+          >
             <span style={{ fontSize: 10 }}>Powered by</span>
             <a
               href="https://bleviq.com"
