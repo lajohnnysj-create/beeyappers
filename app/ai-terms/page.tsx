@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { LegalShell } from "@/app/legal-shell";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "AI Terms of Use | Bleviq",
+export const metadata: Metadata = pageMetadata({
+  title: "AI Terms of Use | Bleviq AI Chatbot for Your Website",
   description:
-    "Terms governing Bleviq's AI chat assistant: training, generated answers, and your responsibilities.",
-};
+    "The AI terms for Bleviq, the chatbot you train on your website. How AI answers work, provider use, visitor data, and your responsibilities.",
+  path: "/ai-terms",
+});
 
 export default async function AiTermsPage() {
   const supabase = createClient();
