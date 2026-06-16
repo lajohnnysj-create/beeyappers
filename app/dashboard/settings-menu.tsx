@@ -1,8 +1,48 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { signOut } from "@/app/auth/actions";
+
+// Sign-out hits Supabase server-side, which can take a couple of seconds, so
+// show progress immediately on click. useFormStatus reflects the parent form's
+// pending state.
+function SignOutButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 disabled:cursor-default disabled:opacity-70"
+    >
+      {pending && (
+        <svg
+          className="h-4 w-4 shrink-0 animate-spin text-slate-400"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+            className="opacity-25"
+          />
+          <path
+            d="M4 12a8 8 0 0 1 8-8"
+            stroke="currentColor"
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
+        </svg>
+      )}
+      {pending ? "Signing out..." : "Sign out"}
+    </button>
+  );
+}
 
 export function SettingsMenu({
   email,
@@ -167,12 +207,7 @@ export function SettingsMenu({
           </Link>
 
           <form action={signOut}>
-            <button
-              type="submit"
-              className="block w-full px-4 py-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
-            >
-              Sign out
-            </button>
+            <SignOutButton />
           </form>
         </div>
       )}
