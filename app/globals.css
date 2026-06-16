@@ -62,6 +62,19 @@ body {
   animation: bv-wiggle 0.45s ease-in-out;
 }
 
+/* Dashboard mockup: cursor gliding between UI spots */
+@keyframes bv-cursor-move {
+  0%, 8% { left: 58%; top: 74%; }
+  20%, 27% { left: 14%; top: 27%; }
+  39%, 46% { left: 15%; top: 33%; }
+  58%, 65% { left: 30%; top: 86%; }
+  77%, 84% { left: 62%; top: 86%; }
+  96%, 100% { left: 58%; top: 74%; }
+}
+.bv-cursor {
+  animation: bv-cursor-move 11s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

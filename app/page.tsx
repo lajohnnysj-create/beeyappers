@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { MarketingHeader } from "@/app/marketing-header";
 import { MarketingFooter } from "@/app/marketing-footer";
 import { HomeHero } from "@/app/home-hero";
-import { PLANS, PLAN_ORDER } from "@/lib/billing/plans";
 
 export const metadata: Metadata = {
   title: "24/7 AI Chatbot that Works While you Sleep | Bleviq",
@@ -71,7 +70,7 @@ const FEATURES = [
   },
   {
     title: "Make it yours",
-    body: "Set the colors, fonts, and avatar. On a paid plan, remove Bleviq branding entirely.",
+    body: "Set the avatar, colors, fonts, and more.",
     icon: "palette",
     tint: "from-amber-500 to-orange-500",
   },
@@ -87,6 +86,12 @@ const FEATURES = [
     icon: "shield",
     tint: "from-fuchsia-500 to-purple-500",
   },
+];
+
+const DASHBOARD_POINTS = [
+  "Train, customize, and grab your embed code from one place.",
+  "See pages trained and the last-trained time at a glance.",
+  "Add documents and FAQs that work instantly and survive re-training.",
 ];
 
 function Glyph({ children }: { children: React.ReactNode }) {
@@ -205,6 +210,87 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Dashboard showcase */}
+      <section className="overflow-hidden border-t border-slate-200 bg-slate-50">
+        <div className="mx-auto grid max-w-5xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:gap-16">
+          {/* Tilted desktop mockup */}
+          <div className="lg:[perspective:1600px]">
+            <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl transition-transform duration-500 lg:[transform:rotateY(-9deg)_rotateX(3deg)] lg:hover:[transform:rotateY(0deg)_rotateX(0deg)]">
+              {/* Browser chrome */}
+              <div className="flex items-center gap-1.5 border-b border-slate-200 bg-slate-100 px-3 py-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                <span className="ml-3 hidden flex-1 truncate rounded bg-white px-2 py-0.5 text-[11px] text-slate-400 sm:block">
+                  bleviq.com/dashboard
+                </span>
+              </div>
+              {/* Screenshot + roving cursor */}
+              <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/dashboardmockup.webp"
+                  alt="The Bleviq dashboard: train your site, customize the widget, and grab the embed code."
+                  className="block w-full"
+                />
+                <span
+                  className="bv-cursor pointer-events-none absolute"
+                  style={{ left: "58%", top: "74%" }}
+                  aria-hidden="true"
+                >
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 28 28"
+                    style={{ filter: "drop-shadow(0 1px 2px rgba(15,23,42,0.45))" }}
+                  >
+                    <path
+                      d="M5 3l16.5 7.4-6.7 2.2-2.4 6.9z"
+                      fill="#ffffff"
+                      stroke="#0f172a"
+                      strokeWidth="1.6"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Copy */}
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+              Easy-to-use dashboard, powered by AI
+            </h2>
+            <p className="mt-4 text-lg text-slate-600">
+              A simple dashboard that gets the job done, without all the
+              headaches.
+            </p>
+            <ul className="mt-6 space-y-3">
+              {DASHBOARD_POINTS.map((p) => (
+                <li key={p} className="flex items-start gap-3 text-slate-700">
+                  <span className="mt-0.5 grid h-5 w-5 flex-shrink-0 place-items-center rounded-full bg-indigo-100 text-indigo-600">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  </span>
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="relative isolate overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -218,7 +304,7 @@ export default async function Home() {
 
         <div className="mx-auto max-w-5xl px-6 py-20 lg:py-24">
           <h2 className="text-center text-3xl font-bold tracking-tight text-white">
-            Answers your visitors can trust
+            Everything your chatbot needs
           </h2>
           <p className="mx-auto mt-3 max-w-lg text-center text-slate-300">
             A chatbot is only useful if it&rsquo;s right. Bleviq stays close to
@@ -240,50 +326,6 @@ export default async function Home() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Pricing teaser */}
-      <section className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-5xl px-6 py-20 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-            Simple, traffic-based pricing
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-slate-600">
-            Pick a plan by how many replies you need. Every plan starts with a
-            14-day free trial.
-          </p>
-          <div className="mx-auto mt-10 grid max-w-2xl gap-6 text-left sm:grid-cols-2">
-            {PLAN_ORDER.map((key) => {
-              const plan = PLANS[key];
-              return (
-                <div
-                  key={key}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-6"
-                >
-                  <p className="text-sm font-semibold text-slate-900">
-                    {plan.name}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-600">{plan.tagline}</p>
-                  <p className="mt-4">
-                    <span className="text-3xl font-bold text-slate-900">
-                      ${plan.monthly}
-                    </span>
-                    <span className="text-slate-500">/mo</span>
-                  </p>
-                  <p className="mt-2 text-sm text-slate-600">
-                    {plan.messageCap.toLocaleString()} AI replies
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-          <Link
-            href="/pricing"
-            className="mt-10 inline-block font-medium text-brand-600 transition hover:text-brand-700"
-          >
-            Compare plans &rarr;
-          </Link>
         </div>
       </section>
 
