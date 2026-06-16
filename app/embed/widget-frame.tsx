@@ -4,10 +4,16 @@ import { useState, useRef, useEffect } from "react";
 import { type WidgetConfig } from "@/lib/widget-config";
 import { ChatWidget } from "./chat-widget";
 
-const SHADOW = 36; // transparent room for drop shadows
+const SHADOW = 36; // transparent room for the open panel's drop shadow
+// Collapsed, the launcher is the only thing on screen, so we hug it tightly.
+// An iframe captures clicks across its WHOLE rectangle (transparency doesn't
+// matter), so any extra padding here becomes a dead zone over the host page.
+const SHADOW_TIGHT = 12; // just enough room for the launcher's own shadow
 const MARGIN = 18; // gap between widget and the viewport corner
 const GAP = 8; // gap between panel and the close button
 const X_SIZE = 56;
+const BUBBLE_SIZE = 72; // ~30% larger launcher bubble (was 56)
+const LAUNCHER_SHADOW = "0 5px 14px rgba(0,0,0,.20)"; // tight, fits SHADOW_TIGHT
 
 // Pick a legible icon color (dark or white) for a given hex background.
 function readable(bg: string): string {
@@ -20,9 +26,17 @@ function readable(bg: string): string {
   return L > 0.62 ? "#0f172a" : "#ffffff";
 }
 
-function ChatIcon({ fill, dot }: { fill: string; dot: string }) {
+function ChatIcon({
+  fill,
+  dot,
+  size = 26,
+}: {
+  fill: string;
+  dot: string;
+  size?: number;
+}) {
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
         d="M5 4h14a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-6l-5 4v-4H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"
         fill={fill}
@@ -143,6 +157,16 @@ export function WidgetFrame({
     ? { paddingTop: SHADOW, paddingRight: SHADOW, paddingBottom: MARGIN, paddingLeft: MARGIN }
     : { paddingTop: SHADOW, paddingLeft: SHADOW, paddingBottom: MARGIN, paddingRight: MARGIN };
 
+  // When collapsed, only the launcher shows, so shrink the page-facing padding
+  // to a tight shadow allowance. This keeps the iframe's click/visual footprint
+  // hugging the bubble instead of blanketing the page corner (which was eating
+  // footer clicks and showing a faint box). Roomy SHADOW padding is reserved
+  // for the open panel, whose larger shadow needs the space.
+  const collapsedPad = left
+    ? { paddingTop: SHADOW_TIGHT, paddingRight: SHADOW_TIGHT, paddingBottom: MARGIN, paddingLeft: MARGIN }
+    : { paddingTop: SHADOW_TIGHT, paddingLeft: SHADOW_TIGHT, paddingBottom: MARGIN, paddingRight: MARGIN };
+  const activePad = open ? pad : collapsedPad;
+
   return (
     <div
       ref={rootRef}
@@ -168,7 +192,7 @@ export function WidgetFrame({
               flexDirection: "column",
               alignItems: left ? "flex-start" : "flex-end",
               justifyContent: "flex-end",
-              ...pad,
+              ...activePad,
             }
       }
     >
@@ -243,13 +267,13 @@ function BubbleLauncher({
       onClick={onOpen}
       aria-label="Open chat"
       style={{
-        width: 56,
-        height: 56,
-        borderRadius: left ? "20px 20px 20px 8px" : "20px 20px 8px 20px",
+        width: BUBBLE_SIZE,
+        height: BUBBLE_SIZE,
+        borderRadius: left ? "24px 24px 24px 10px" : "24px 24px 10px 24px",
         background: config.bubbleColor,
         border: "none",
         cursor: "pointer",
-        boxShadow: "0 6px 20px rgba(0,0,0,.22)",
+        boxShadow: LAUNCHER_SHADOW,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -261,10 +285,10 @@ function BubbleLauncher({
         <img
           src={config.avatarUrl}
           alt=""
-          style={{ width: 38, height: 38, borderRadius: 13, objectFit: "cover" }}
+          style={{ width: 50, height: 50, borderRadius: 16, objectFit: "cover" }}
         />
       ) : (
-        <ChatIcon fill={readable(config.bubbleColor)} dot={config.bubbleColor} />
+        <ChatIcon fill={readable(config.bubbleColor)} dot={config.bubbleColor} size={34} />
       )}
     </button>
   );
@@ -331,7 +355,7 @@ function BarLauncher({
           background: config.bubbleColor,
           borderRadius: left ? "22px 22px 22px 8px" : "22px 22px 8px 22px",
           padding: 8,
-          boxShadow: "0 6px 20px rgba(0,0,0,.22)",
+          boxShadow: LAUNCHER_SHADOW,
         }}
       >
         {config.avatarUrl ? (
