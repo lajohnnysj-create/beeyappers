@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { mergeConfig } from "@/lib/widget-config";
 import { Wordmark } from "@/app/wordmark";
 import { SettingsMenu } from "@/app/dashboard/settings-menu";
+import { AgentStatus } from "@/app/dashboard/agent-status";
 import { Workspace } from "./workspace";
 import { getEntitlementByUserId } from "@/lib/billing/entitlement";
 import { PLANS } from "@/lib/billing/plans";
@@ -84,14 +85,17 @@ export default async function SiteWorkspacePage({
           <Link href="/dashboard">
             <Wordmark />
           </Link>
-          <SettingsMenu
-            email={user.email || ""}
-            used={messagesUsed || 0}
-            cap={cap}
-            planLabel={planLabel}
-            status={entitlement.status}
-            active={entitlement.active}
-          />
+          <div className="flex items-center gap-4">
+            <AgentStatus active={entitlement.active} />
+            <SettingsMenu
+              email={user.email || ""}
+              used={messagesUsed || 0}
+              cap={cap}
+              planLabel={planLabel}
+              status={entitlement.status}
+              active={entitlement.active}
+            />
+          </div>
         </div>
       </header>
 
