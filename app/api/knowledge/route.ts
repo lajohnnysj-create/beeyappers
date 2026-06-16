@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { embedTexts, toVectorLiteral } from "@/lib/embed/openai";
 import { chunkText } from "@/lib/crawl/chunk";
 import { extractDocText } from "@/lib/knowledge/extract-doc";
+import { FIELD_LIMITS } from "@/lib/field-limits";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -124,8 +125,8 @@ export async function POST(req: Request) {
   if (!site) return NextResponse.json({ error: "Site not found" }, { status: 404 });
 
   if (body.action === "faq") {
-    const q = String(body.question || "").trim();
-    const a = String(body.answer || "").trim();
+    const q = String(body.question || "").trim().slice(0, FIELD_LIMITS.faqQuestion);
+    const a = String(body.answer || "").trim().slice(0, FIELD_LIMITS.faqAnswer);
     if (!q || !a) {
       return NextResponse.json(
         { error: "Both a question and an answer are required." },
@@ -165,8 +166,8 @@ export async function POST(req: Request) {
 
   if (body.action === "faq-update") {
     const sourceId = String(body.sourceId || "");
-    const q = String(body.question || "").trim();
-    const a = String(body.answer || "").trim();
+    const q = String(body.question || "").trim().slice(0, FIELD_LIMITS.faqQuestion);
+    const a = String(body.answer || "").trim().slice(0, FIELD_LIMITS.faqAnswer);
     if (!sourceId) return NextResponse.json({ error: "Missing item" }, { status: 400 });
     if (!q || !a) {
       return NextResponse.json(
