@@ -65,6 +65,12 @@ export default async function FramePage({
         send: DEFAULT_LABELS.send,
         poweredBy: DEFAULT_LABELS.poweredBy,
         askAI: DEFAULT_LABELS.askAI,
+        leadName: DEFAULT_LABELS.leadName,
+        leadEmail: DEFAULT_LABELS.leadEmail,
+        leadPhone: DEFAULT_LABELS.leadPhone,
+        leadSubmit: DEFAULT_LABELS.leadSubmit,
+        leadSent: DEFAULT_LABELS.leadSent,
+        leadError: DEFAULT_LABELS.leadError,
       });
       config = { ...config, greeting: t.greeting };
       labels = {
@@ -72,6 +78,12 @@ export default async function FramePage({
         send: t.send,
         poweredBy: t.poweredBy,
         askAI: t.askAI,
+        leadName: t.leadName,
+        leadEmail: t.leadEmail,
+        leadPhone: t.leadPhone,
+        leadSubmit: t.leadSubmit,
+        leadSent: t.leadSent,
+        leadError: t.leadError,
       };
     }
   }
