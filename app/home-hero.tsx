@@ -14,11 +14,19 @@ function RotatingWord() {
     return () => clearInterval(id);
   }, []);
 
+  const pill =
+    "rounded-md border border-indigo-300/40 bg-indigo-400/10 px-2 py-0.5 font-semibold text-indigo-200";
+
   return (
-    <span className="relative inline-block align-baseline">
+    <span className="relative mx-1 inline-grid align-middle">
+      {/* Invisible sizer reserves the width of the widest word so the rest of
+          the sentence never shifts as words swap. */}
+      <span aria-hidden className={`invisible [grid-area:1/1] ${pill}`}>
+        chatting
+      </span>
       <span
         key={WORDS[i]}
-        className="animate-bv-word-in inline-block rounded-md border border-indigo-300/40 bg-indigo-400/10 px-2 py-0.5 font-semibold text-indigo-200"
+        className={`animate-bv-word-in flex items-center justify-center [grid-area:1/1] ${pill}`}
       >
         {WORDS[i]}
       </span>
@@ -49,19 +57,21 @@ export function HomeHero() {
         alt=""
         className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
       />
-      {/* Contrast scrims: darken the left where the text sits, and the bottom
-          so the section blends into the page below. */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#070713] via-[#070713]/85 to-[#070713]/25" />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#070713] via-transparent to-transparent" />
+      {/* Contrast scrims: an overall darken, a strong left wash where the text
+          sits, and a bottom fade so the section blends into the page below. */}
+      <div className="absolute inset-0 -z-10 bg-[#070713]/45" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#070713] via-[#070713]/85 to-transparent" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#070713] via-[#070713]/40 to-transparent" />
 
       <div className="mx-auto w-full max-w-5xl px-6 py-20 lg:py-24">
         <div className="max-w-xl">
-          <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl">
+          <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-5xl">
             24/7 AI Chatbot that works while you sleep
           </h1>
-          <p className="mt-5 text-lg leading-relaxed text-slate-300">
-            Easily train your AI Chatbot in minutes and start{" "}
-            <RotatingWord /> with your visitors.
+          <p className="mt-5 text-lg leading-relaxed text-slate-200 [text-shadow:0_1px_14px_rgba(0,0,0,0.55)]">
+            Easily train your AI Chatbot in minutes
+            <br />
+            and start <RotatingWord /> with your visitors.
           </p>
 
           <div className="mt-8 flex max-w-sm flex-col gap-3">
@@ -88,8 +98,8 @@ export function HomeHero() {
             </Link>
           </div>
 
-          <p className="mt-3 text-sm text-slate-400">
-            Free 14-day trial. Credit card required.
+          <p className="mt-3 text-sm text-slate-300">
+            Free 14-day trial. Cancel anytime.
           </p>
         </div>
       </div>
