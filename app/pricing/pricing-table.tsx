@@ -37,6 +37,7 @@ function InfoTip({ label }: { label: string }) {
       <button
         type="button"
         aria-label={label}
+        onMouseDown={(e) => e.preventDefault()}
         className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 text-[10px] font-semibold leading-none text-slate-500 transition hover:border-slate-400 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
       >
         i
