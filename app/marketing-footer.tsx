@@ -20,6 +20,9 @@ export function MarketingFooter() {
             <Link href="/terms" className="transition hover:text-slate-900">
               Terms
             </Link>
+            <Link href="/ai-terms" className="transition hover:text-slate-900">
+              AI Terms
+            </Link>
             <Link href="/login" className="transition hover:text-slate-900">
               Sign in
             </Link>
