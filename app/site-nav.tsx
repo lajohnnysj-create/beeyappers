@@ -32,7 +32,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-5 text-sm font-medium text-slate-600 sm:flex sm:gap-6">
+        <nav className="hidden items-center gap-5 text-base font-medium text-slate-600 sm:flex sm:gap-6">
           <Link href="/pricing" className="transition hover:text-slate-900">
             Pricing
           </Link>
@@ -129,9 +129,6 @@ export function SiteFooter() {
             </Link>
             <Link href="/ai-terms" className="transition hover:text-slate-900">
               AI Terms
-            </Link>
-            <Link href="/login" className="transition hover:text-slate-900">
-              Sign in
             </Link>
           </nav>
         </div>
