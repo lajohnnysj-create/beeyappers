@@ -1020,10 +1020,23 @@ function Preview({ config }: { config: WidgetConfig }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-4 pb-2.5 pt-1.5 text-[11px]" style={{ color: panelIsDark ? "rgba(255,255,255,0.6)" : "#64748b" }}>
-        <span>This chat is recorded.</span>
+      <div className="px-4 pb-2.5 pt-1.5" style={{ color: panelIsDark ? "rgba(255,255,255,0.6)" : "#64748b" }}>
+        <p className="m-0 text-center text-[10px] leading-snug">
+          You&rsquo;re chatting with an AI. Messages may be stored. By
+          continuing, you agree to our{" "}
+          <a
+            href="https://www.bleviq.com/ai-terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+            style={{ color: "inherit" }}
+          >
+            AI Terms
+          </a>
+          .
+        </p>
         {config.showBranding && (
-          <span className="flex items-center gap-0.5">
+          <span className="mt-1 flex items-center justify-center gap-0.5">
             <span className="text-[10px]">Powered by</span>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={panelIsDark ? "/logowhite-small.png" : "/logoblack-small.png"} alt="Bleviq" className="h-3 w-auto" />
