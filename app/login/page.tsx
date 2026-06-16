@@ -34,6 +34,10 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search);
     const err = params.get("error");
     if (err) setOauthError(err);
+    // The homepage "Continue with Email" button links here with these params
+    // to open the form directly in account-creation mode.
+    if (params.get("email")) setShowEmail(true);
+    if (params.get("mode") === "signup") setMode("signup");
   }, []);
 
   async function handleGoogle() {
