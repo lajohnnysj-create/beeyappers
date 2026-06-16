@@ -35,12 +35,12 @@ export const PLANS: Record<PlanKey, Plan> = {
     key: "pro",
     name: "Pro",
     tagline: "For busy sites with more traffic.",
-    messageCap: 10000,
+    messageCap: 8000,
     maxSites: 1, // TODO: confirm whether Pro should allow more than 1 site
     monthly: 40,
     annualMonthly: 30,
     features: [
-      "10,000 AI replies",
+      "8,000 AI replies",
       "Everything in Basic",
       "Priority support",
     ],
