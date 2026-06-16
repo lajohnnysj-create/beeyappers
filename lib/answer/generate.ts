@@ -1,6 +1,10 @@
 import "server-only";
 
-const CHAT_MODEL = "gpt-4o-mini"; // cheap; swappable with zero schema impact
+// The answer step does the hard reasoning (judging relevance, synthesizing an
+// identity from scattered context), so it runs on a stronger model for
+// consistent results. The lighter rewrite + suggestion steps stay cheap.
+const ANSWER_MODEL = "gpt-4.1-mini";
+const CHAT_MODEL = "gpt-4o-mini"; // suggestion chips; cheap, low-judgment
 const MAX_OUTPUT_TOKENS = 500;
 
 // Non-overridable guardrails. The site owner's prompt is added as persona
@@ -176,9 +180,9 @@ export async function generateAnswer(
       Authorization: `Bearer ${key}`,
     },
     body: JSON.stringify({
-      model: CHAT_MODEL,
+      model: ANSWER_MODEL,
       max_tokens: MAX_OUTPUT_TOKENS,
-      temperature: 0.2,
+      temperature: 0,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt(ownerPrompt, pages) },
