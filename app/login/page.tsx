@@ -31,6 +31,34 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
+  // Forgot-password flow (handled client-side, like Google sign-in).
+  const [resetMode, setResetMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetBusy, setResetBusy] = useState(false);
+  const [resetMsg, setResetMsg] = useState<{ ok?: string; error?: string } | null>(
+    null
+  );
+
+  async function handleReset() {
+    const email = resetEmail.trim();
+    if (!email) return;
+    setResetBusy(true);
+    setResetMsg(null);
+    const supabase = createClient();
+    // The recovery email template links to /auth/confirm, so no redirectTo is
+    // needed here. Always show a generic success message so the form can't be
+    // used to probe which emails have accounts.
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    setResetBusy(false);
+    if (error) {
+      setResetMsg({ error: error.message });
+      return;
+    }
+    setResetMsg({
+      ok: "If an account exists for that email, a reset link is on its way. Check your inbox.",
+    });
+  }
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const err = params.get("error");
@@ -87,7 +115,7 @@ export default function LoginPage() {
             <Wordmark />
           </Link>
 
-          <h1 className="mt-6 text-center text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="mt-6 text-center text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[34px]">
             24/7 AI Chatbox that works while you sleep.
           </h1>
           <p className="mt-2 text-center text-sm text-slate-600">
@@ -149,7 +177,7 @@ export default function LoginPage() {
             </svg>
           </button>
 
-          {showEmail && (
+          {showEmail && !resetMode && (
             <form action={formAction} className="mt-5 space-y-4">
               <div>
                 <label
@@ -168,12 +196,27 @@ export default function LoginPage() {
                 />
               </div>
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-slate-700"
-                >
-                  Password
-                </label>
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-slate-700"
+                  >
+                    Password
+                  </label>
+                  {mode === "signin" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setResetMode(true);
+                        setResetMsg(null);
+                        setResetEmail("");
+                      }}
+                      className="text-sm font-medium text-brand-600 hover:text-brand-700"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
                 <input
                   id="password"
                   name="password"
@@ -213,6 +256,65 @@ export default function LoginPage() {
                 </button>
               </p>
             </form>
+          )}
+
+          {showEmail && resetMode && (
+            <div className="mt-5 space-y-4">
+              <p className="text-sm text-slate-600">
+                Enter your email and we&apos;ll send a link to reset your
+                password.
+              </p>
+              <div>
+                <label
+                  htmlFor="reset-email"
+                  className="block text-sm font-medium text-slate-700"
+                >
+                  Email
+                </label>
+                <input
+                  id="reset-email"
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  autoComplete="email"
+                  autoFocus
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 outline-none focus:border-brand-600"
+                />
+              </div>
+
+              {resetMsg?.error && (
+                <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {resetMsg.error}
+                </p>
+              )}
+              {resetMsg?.ok && (
+                <p role="status" className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                  {resetMsg.ok}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={handleReset}
+                disabled={resetBusy || !resetEmail.trim()}
+                className="w-full rounded-lg bg-brand-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-brand-700 disabled:opacity-60"
+              >
+                {resetBusy ? "Sending..." : "Send reset link"}
+              </button>
+
+              <p className="text-center text-sm text-slate-600">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResetMode(false);
+                    setResetMsg(null);
+                  }}
+                  className="font-medium text-brand-600 hover:text-brand-700"
+                >
+                  Back to sign in
+                </button>
+              </p>
+            </div>
           )}
         </div>
       </div>
