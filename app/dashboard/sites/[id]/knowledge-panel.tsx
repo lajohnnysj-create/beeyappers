@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FIELD_LIMITS } from "@/lib/field-limits";
 
 export type KnowledgeItem = {
   sourceId: string;
@@ -219,6 +220,7 @@ export function KnowledgePanel({
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="e.g. Do you offer refunds?"
+              maxLength={FIELD_LIMITS.faqQuestion}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
             />
           </label>
@@ -229,6 +231,7 @@ export function KnowledgePanel({
               onChange={(e) => setAnswer(e.target.value)}
               rows={3}
               placeholder="Write the answer the assistant should give."
+              maxLength={FIELD_LIMITS.faqAnswer}
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
             />
           </label>
@@ -315,6 +318,7 @@ export function KnowledgePanel({
                       <input
                         value={editQ}
                         onChange={(e) => setEditQ(e.target.value)}
+                        maxLength={FIELD_LIMITS.faqQuestion}
                         className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
                       />
                     </label>
@@ -324,6 +328,7 @@ export function KnowledgePanel({
                         value={editA}
                         onChange={(e) => setEditA(e.target.value)}
                         rows={3}
+                        maxLength={FIELD_LIMITS.faqAnswer}
                         className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
                       />
                     </label>

@@ -10,6 +10,7 @@ import {
 import { createPortal } from "react-dom";
 import { saveBranding } from "./actions";
 import { AvatarUploader } from "./avatar-uploader";
+import { FIELD_LIMITS } from "@/lib/field-limits";
 import {
   type WidgetConfig,
   FONTS,
@@ -491,6 +492,7 @@ export function BrandingForm({
                 value={config.assistantName}
                 onChange={(e) => set("assistantName", e.target.value)}
                 placeholder="Assistant"
+                maxLength={FIELD_LIMITS.assistantName}
                 className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
               />
             </label>
@@ -503,6 +505,7 @@ export function BrandingForm({
                 onChange={(e) => set("greeting", e.target.value)}
                 rows={5}
                 placeholder="Hi! Ask me anything about this site."
+                maxLength={FIELD_LIMITS.greeting}
                 className="mt-1.5 w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
               />
             </label>
@@ -621,6 +624,7 @@ export function BrandingForm({
                 value={config.launcherLabel}
                 onChange={(e) => set("launcherLabel", e.target.value)}
                 placeholder="e.g. Chat with us"
+                maxLength={FIELD_LIMITS.launcherLabel}
                 className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 outline-none focus:border-brand-600"
               />
             </label>
