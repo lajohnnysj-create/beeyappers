@@ -250,10 +250,63 @@ function SitePreview({
   version?: string | null;
   domain?: string | null;
 }) {
-  const [loaded, setLoaded] = useState(false);
-  const src =
+  const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  const base =
     `/api/screenshot?siteId=${siteId}` +
     (version ? `&v=${encodeURIComponent(version)}` : "");
+
+  useEffect(() => {
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let objectUrl: string | null = null;
+
+    const MAX_ATTEMPTS = 4; // beyond the first try
+    const RETRY_MS = 5000; // give mShots time to finish rendering
+
+    async function attempt(n: number) {
+      // First try uses the plain URL so a cached real shot loads instantly;
+      // retries add a cache-buster to force a fresh render server-side.
+      const url = n === 0 ? base : `${base}&r=${n}`;
+      try {
+        const res = await fetch(url, n === 0 ? {} : { cache: "no-store" });
+        if (cancelled) return;
+        if (!res.ok) throw new Error(String(res.status));
+
+        const blob = await res.blob();
+        if (cancelled) return;
+        if (objectUrl) URL.revokeObjectURL(objectUrl);
+        objectUrl = URL.createObjectURL(blob);
+        setImgUrl(objectUrl);
+        setFailed(false);
+
+        // Show what we have, but keep trying if it was only the placeholder.
+        const real = res.headers.get("X-Shot-Status") === "real";
+        if (!real && n < MAX_ATTEMPTS) {
+          timer = setTimeout(() => attempt(n + 1), RETRY_MS);
+        }
+      } catch {
+        if (cancelled) return;
+        if (n < MAX_ATTEMPTS) {
+          timer = setTimeout(() => attempt(n + 1), RETRY_MS);
+        } else if (!objectUrl) {
+          setFailed(true);
+        }
+      }
+    }
+
+    setImgUrl(null);
+    setFailed(false);
+    attempt(0);
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [base]);
+
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50 px-3 py-2">
@@ -267,20 +320,22 @@ function SitePreview({
         )}
       </div>
       <div className="relative aspect-[16/10] w-full bg-slate-100">
-        {!loaded && (
+        {!imgUrl && !failed && (
           <div className="absolute inset-0 animate-pulse bg-slate-200" />
         )}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          key={src}
-          src={src}
-          alt="Homepage preview"
-          onLoad={() => setLoaded(true)}
-          className={
-            "h-full w-full object-cover object-top transition-opacity duration-300 " +
-            (loaded ? "opacity-100" : "opacity-0")
-          }
-        />
+        {imgUrl && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={imgUrl}
+            alt="Homepage preview"
+            className="h-full w-full object-cover object-top"
+          />
+        )}
+        {failed && (
+          <div className="absolute inset-0 grid place-items-center px-4 text-center text-xs text-slate-400">
+            Preview unavailable
+          </div>
+        )}
       </div>
     </div>
   );
