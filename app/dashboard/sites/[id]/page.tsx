@@ -60,10 +60,10 @@ export default async function SiteWorkspacePage({
         .gte("created_at", since30),
       supabase
         .from("leads")
-        .select("id, name, email, phone, message, created_at")
+        .select("id, name, email, phone, message, created_at, answered_at")
         .eq("site_id", site.id)
         .order("created_at", { ascending: false })
-        .limit(200),
+        .limit(50),
     ]);
 
   // Group manual knowledge chunks by source_id into single items.

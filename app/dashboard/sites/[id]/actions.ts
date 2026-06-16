@@ -70,6 +70,35 @@ export async function setCollectLeads(siteId: string, enabled: boolean) {
   return { ok: true };
 }
 
+export async function deleteLead(leadId: string) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Signed out. Refresh and sign in again." };
+
+  // RLS confines this delete to the caller's own leads.
+  const { error } = await supabase.from("leads").delete().eq("id", leadId);
+  if (error) return { error: error.message };
+  return { ok: true };
+}
+
+export async function setLeadAnswered(leadId: string, answered: boolean) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Signed out. Refresh and sign in again." };
+
+  // RLS confines this update to the caller's own leads.
+  const { error } = await supabase
+    .from("leads")
+    .update({ answered_at: answered ? new Date().toISOString() : null })
+    .eq("id", leadId);
+  if (error) return { error: error.message };
+  return { ok: true };
+}
+
 export async function deleteSite(siteId: string) {
   const supabase = createClient();
   const {
