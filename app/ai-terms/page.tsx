@@ -18,7 +18,7 @@ export default async function AiTermsPage() {
     <LegalShell
       signedIn={!!user}
       title="AI Terms of Use"
-      updated="June 15, 2026"
+      updated="June 16, 2026"
     >
       <p>
         These AI Terms of Use (&ldquo;AI Terms&rdquo;) govern your use of the AI
@@ -115,6 +115,13 @@ export default async function AiTermsPage() {
           We use Providers to deliver the AI Features. Providers process Input
           and Output, possibly in locations different from where your other data
           is stored, and by using the AI Features you consent to this.
+        </li>
+        <li>
+          The specific AI models and Providers we use may change at any time, at
+          our discretion, including in response to performance, cost,
+          availability, or market conditions. This may affect the behavior,
+          quality, speed, or limits of the Output, and we do not guarantee that
+          any particular model or Provider will be used.
         </li>
         <li>
           If your Input contains personal or sensitive data, that data may be
