@@ -9,8 +9,15 @@ import {
   googleFontsHref,
 } from "@/lib/widget-config";
 import { FIELD_LIMITS } from "@/lib/field-limits";
+import { isRtlLang } from "@/lib/lang";
+import { leadError, LEAD_LIMITS } from "@/lib/lead";
 
-type Msg = { role: "user" | "assistant"; content: string; suggestions?: string[] };
+type Msg = {
+  role: "user" | "assistant";
+  content: string;
+  suggestions?: string[];
+  collectInfo?: boolean;
+};
 
 // Pick readable foreground (dark or white) for a given hex background.
 function readable(bg: string): string {
@@ -47,11 +54,13 @@ function SuggestionChips({
   config,
   disabled,
   onPick,
+  rtl,
 }: {
   items: string[];
   config: WidgetConfig;
   disabled?: boolean;
   onPick: (q: string) => void;
+  rtl?: boolean;
 }) {
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
@@ -74,10 +83,12 @@ function SuggestionChips({
             borderRadius: 14,
             cursor: disabled ? "default" : "pointer",
             opacity: disabled ? 0.55 : 1,
-            textAlign: "left",
+            textAlign: "start",
           }}
         >
-          <span style={{ color: config.bubbleColor, fontWeight: 700 }}>›</span>
+          <span style={{ color: config.bubbleColor, fontWeight: 700 }}>
+            {rtl ? "\u2039" : "\u203A"}
+          </span>
           {q}
         </button>
       ))}
@@ -199,7 +210,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
       }
       const bk = "b" + b++;
       blocks.push(
-        <ul key={bk} style={{ margin: "2px 0 6px", paddingLeft: 18 }}>
+        <ul key={bk} style={{ margin: "2px 0 6px", paddingInlineStart: 18 }}>
           {items.map((it, j) => (
             <li key={j} style={{ margin: "2px 0" }}>
               {renderInline(it, config, bk + "-" + j)}
@@ -217,7 +228,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
       }
       const bk = "b" + b++;
       blocks.push(
-        <ol key={bk} style={{ margin: "2px 0 6px", paddingLeft: 20 }}>
+        <ol key={bk} style={{ margin: "2px 0 6px", paddingInlineStart: 20 }}>
           {items.map((it, j) => (
             <li key={j} style={{ margin: "2px 0" }}>
               {renderInline(it, config, bk + "-" + j)}
@@ -264,6 +275,161 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
   );
 }
 
+function LeadForm({
+  widgetKey,
+  conversationId,
+  contextMessage,
+  labels,
+  config,
+  font,
+  onCaptured,
+}: {
+  widgetKey: string;
+  conversationId: string | null;
+  contextMessage: string;
+  labels: WidgetLabels;
+  config: WidgetConfig;
+  font: string;
+  onCaptured: () => void;
+}) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const canSubmit = (email.trim() || phone.trim()) && !busy && !done;
+
+  const field: React.CSSProperties = {
+    width: "100%",
+    boxSizing: "border-box",
+    border: "1px solid rgba(0,0,0,.12)",
+    borderRadius: 10,
+    padding: "9px 11px",
+    fontSize: 16, // 16px so iOS doesn't zoom on focus
+    color: "#0f172a",
+    background: "#fff",
+    outline: "none",
+    fontFamily: font,
+  };
+
+  async function submit() {
+    const v = leadError({ name, email, phone });
+    if (v) {
+      setErr(v);
+      return;
+    }
+    setErr(null);
+    setBusy(true);
+    try {
+      const res = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          widgetKey,
+          conversationId,
+          name,
+          email,
+          phone,
+          message: contextMessage,
+          hp: "",
+        }),
+      });
+      if (!res.ok) throw new Error("bad status");
+      setDone(true);
+      onCaptured();
+    } catch {
+      setBusy(false);
+      setErr(labels.leadError);
+    }
+  }
+
+  if (done) {
+    return (
+      <div
+        style={{
+          marginTop: 8,
+          padding: "10px 12px",
+          borderRadius: 12,
+          background: config.assistantBubbleColor,
+          color: config.textColor,
+          fontSize: 15,
+        }}
+      >
+        {labels.leadSent}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        marginTop: 8,
+        display: "flex",
+        flexDirection: "column",
+        gap: 8,
+        padding: 12,
+        borderRadius: 14,
+        border: "1px solid rgba(0,0,0,.10)",
+        background: "#fff",
+        width: "100%",
+        boxSizing: "border-box",
+      }}
+    >
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder={labels.leadName}
+        maxLength={LEAD_LIMITS.name}
+        style={field}
+      />
+      <input
+        type="email"
+        inputMode="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder={labels.leadEmail}
+        maxLength={LEAD_LIMITS.email}
+        style={field}
+      />
+      <input
+        type="tel"
+        inputMode="tel"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder={labels.leadPhone}
+        maxLength={LEAD_LIMITS.phone}
+        style={field}
+      />
+      {err && (
+        <span style={{ fontSize: 13, color: "#dc2626" }} role="alert">
+          {err}
+        </span>
+      )}
+      <button
+        type="button"
+        onClick={submit}
+        disabled={!canSubmit}
+        style={{
+          border: "none",
+          borderRadius: 10,
+          padding: "10px 12px",
+          fontSize: 15,
+          fontWeight: 600,
+          color: "#fff",
+          background: config.bubbleColor,
+          cursor: canSubmit ? "pointer" : "default",
+          opacity: canSubmit ? 1 : 0.55,
+          fontFamily: font,
+        }}
+      >
+        {labels.leadSubmit}
+      </button>
+    </div>
+  );
+}
+
 export function ChatWidget({
   widgetKey,
   config,
@@ -283,6 +449,9 @@ export function ChatWidget({
   pendingQuestion?: string;
   onQuestionConsumed?: () => void;
 }) {
+  const rtl = isRtlLang(lang);
+  const dir = rtl ? "rtl" : "ltr";
+  const [leadCaptured, setLeadCaptured] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([
     { role: "assistant", content: config.greeting },
   ]);
@@ -411,6 +580,7 @@ export function ChatWidget({
           history,
           conversationId: convoIdRef.current,
           lang,
+          leadCaptured,
         }),
       });
       const data = await res.json();
@@ -421,9 +591,10 @@ export function ChatWidget({
             (s): s is string => typeof s === "string" && s.trim().length > 0
           )
         : undefined;
+      const collectInfo = data.collectInfo === true && !leadCaptured;
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: reply, suggestions },
+        { role: "assistant", content: reply, suggestions, collectInfo },
       ]);
     } catch {
       setMessages((m) => [
@@ -459,6 +630,7 @@ export function ChatWidget({
 
   return (
     <div
+      dir={dir}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -550,7 +722,9 @@ export function ChatWidget({
                 style={{
                   maxWidth: "82%",
                   borderRadius: 18,
-                  borderBottomRightRadius: 6,
+                  ...(rtl
+                    ? { borderBottomLeftRadius: 6 }
+                    : { borderBottomRightRadius: 6 }),
                   padding: "9px 13px",
                   fontSize: 16,
                   lineHeight: 1.45,
@@ -569,7 +743,9 @@ export function ChatWidget({
                   style={{
                     maxWidth: "100%",
                     borderRadius: 18,
-                    borderBottomLeftRadius: 6,
+                    ...(rtl
+                      ? { borderBottomRightRadius: 6 }
+                      : { borderBottomLeftRadius: 6 }),
                     padding: "9px 13px",
                     fontSize: 16,
                     lineHeight: 1.45,
@@ -584,7 +760,23 @@ export function ChatWidget({
                     items={m.suggestions}
                     config={config}
                     disabled={busy}
+                    rtl={rtl}
                     onPick={(q) => sendText(q)}
+                  />
+                )}
+                {m.collectInfo && !leadCaptured && (
+                  <LeadForm
+                    widgetKey={widgetKey}
+                    conversationId={convoIdRef.current}
+                    contextMessage={
+                      i > 0 && messages[i - 1]?.role === "user"
+                        ? messages[i - 1].content
+                        : ""
+                    }
+                    labels={labels}
+                    config={config}
+                    font={font}
+                    onCaptured={() => setLeadCaptured(true)}
                   />
                 )}
               </div>
@@ -599,7 +791,9 @@ export function ChatWidget({
                 display: "flex",
                 gap: 4,
                 borderRadius: 18,
-                borderBottomLeftRadius: 6,
+                ...(rtl
+                  ? { borderBottomRightRadius: 6 }
+                  : { borderBottomLeftRadius: 6 }),
                 padding: "12px 14px",
                 background: config.assistantBubbleColor,
               }}
@@ -630,7 +824,7 @@ export function ChatWidget({
             style={{
               position: "absolute",
               bottom: 12,
-              right: 12,
+              insetInlineEnd: 12,
               width: 34,
               height: 34,
               borderRadius: "50%",
@@ -669,7 +863,9 @@ export function ChatWidget({
             gap: 8,
             background: "#f1f5f9",
             borderRadius: 9999,
-            padding: "6px 6px 6px 16px",
+            paddingBlock: 6,
+            paddingInlineStart: 16,
+            paddingInlineEnd: 6,
           }}
         >
           <input
