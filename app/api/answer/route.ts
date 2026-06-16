@@ -302,11 +302,14 @@ export async function POST(req: Request) {
     let suggestions: string[] | undefined;
 
     // The model returns answered:false when the context doesn't cover the
-    // question (an empty answer is treated the same). Swap in friendly copy
-    // plus questions the site CAN answer.
+    // question. It now also writes a short, topic-aware "I don't have info on
+    // X" line, which we keep; we only fall back to the generic copy when the
+    // model gave nothing. Either way we attach questions the site CAN answer.
     if (!gen.answered || !answer.trim()) {
       suggestions = await suggestAnswerableQuestions(faqQuestions, contentSamples);
-      answer = noInfoText(suggestions.length > 0);
+      if (!answer.trim()) {
+        answer = noInfoText(suggestions.length > 0);
+      }
     }
 
     // 8. Account for spend and log the exchange (best-effort).
