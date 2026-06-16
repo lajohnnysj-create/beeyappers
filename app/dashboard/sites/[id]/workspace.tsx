@@ -6,9 +6,10 @@ import { KnowledgePanel, type KnowledgeItem } from "./knowledge-panel";
 import { TrainStatus } from "./train-status";
 import { DeleteSite } from "./delete-site";
 import { EmbedSnippet } from "@/app/dashboard/embed-snippet";
+import { LeadsPanel, type LeadItem } from "./leads-panel";
 import type { WidgetConfig } from "@/lib/widget-config";
 
-type Tab = "train" | "customize" | "code";
+type Tab = "train" | "customize" | "leads" | "code";
 
 type Props = {
   siteId: string;
@@ -22,6 +23,7 @@ type Props = {
   chunkCount: number;
   config: WidgetConfig;
   knowledge: KnowledgeItem[];
+  leads: LeadItem[];
   canRetrain: boolean;
   canRemoveBranding: boolean;
 };
@@ -39,6 +41,13 @@ const NAV: { id: Tab; label: string; icon: JSX.Element }[] = [
     label: "Customize",
     icon: (
       <path d="M12 2.5a9.5 9.5 0 1 0 0 19 2 2 0 0 0 2-2c0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.2a1.5 1.5 0 0 1 1.5-1.5H17a4 4 0 0 0 4-4c0-4.7-4-8.3-9-8.3Z" />
+    ),
+  },
+  {
+    id: "leads",
+    label: "Leads",
+    icon: (
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
     ),
   },
   {
@@ -113,6 +122,7 @@ export function Workspace(props: Props) {
             canRemoveBranding={props.canRemoveBranding}
           />
         )}
+        {tab === "leads" && <LeadsPanel leads={props.leads} />}
         {tab === "code" && (
           <CodePanel widgetKey={props.widgetKey} crawlStatus={props.crawlStatus} />
         )}
