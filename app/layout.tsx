@@ -43,7 +43,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${jakarta.variable}`}>{children}</body>
+      <body className={`${inter.className} ${jakarta.variable} app-shell`}>{children}</body>
     </html>
   );
 }
