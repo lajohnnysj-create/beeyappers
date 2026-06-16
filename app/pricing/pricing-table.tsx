@@ -28,6 +28,29 @@ function Check() {
   );
 }
 
+// Small "i" affordance with a tooltip that appears on hover AND keyboard focus
+// (hover-only would fail WCAG 1.4.13). The full text is also the button's
+// aria-label so screen-reader users get it without needing the visual popover.
+function InfoTip({ label }: { label: string }) {
+  return (
+    <span className="group relative inline-flex align-middle">
+      <button
+        type="button"
+        aria-label={label}
+        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-slate-300 text-[10px] font-semibold leading-none text-slate-500 transition hover:border-slate-400 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+      >
+        i
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-md bg-slate-900 px-3 py-2 text-xs font-medium leading-snug text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+      >
+        {label}
+      </span>
+    </span>
+  );
+}
+
 export function PricingTable({ canceled = false }: { canceled?: boolean }) {
   const [interval, setInterval] = useState<Interval>("month");
   const [loading, setLoading] = useState<PlanKey | null>(null);
@@ -168,7 +191,12 @@ export function PricingTable({ canceled = false }: { canceled?: boolean }) {
                 {plan.features.map((f) => (
                   <li key={f} className="flex gap-2.5 text-sm text-slate-700">
                     <Check />
-                    <span>{f}</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      {f}
+                      {/replies/i.test(f) && (
+                        <InfoTip label="Reply limits are measured over a rolling 30-day window." />
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -179,8 +207,7 @@ export function PricingTable({ canceled = false }: { canceled?: boolean }) {
 
       <p className="mt-8 text-sm text-slate-500">
         14-day free trial on every plan. Card required, cancel anytime before it
-        ends and you won&apos;t be charged. Reply limits are measured over a
-        rolling 30-day window.
+        ends and you won&apos;t be charged.
       </p>
     </div>
   );
