@@ -150,7 +150,7 @@ function renderInline(
 ): React.ReactNode[] {
   const out: React.ReactNode[] = [];
   const re =
-    /\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_/g;
+    /\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_|(https?:\/\/[^\s<]+)/g;
   let last = 0;
   let i = 0;
   let m: RegExpExecArray | null;
@@ -170,6 +170,32 @@ function renderInline(
       );
     } else if (m[6] !== undefined || m[7] !== undefined) {
       out.push(<em key={k}>{m[6] ?? m[7]}</em>);
+    } else if (m[8] !== undefined) {
+      // Bare URL: render a real link. http/https only (so no javascript: or
+      // other unsafe schemes), and no innerHTML, so this stays injection-safe.
+      let url = m[8];
+      const tm = url.match(/[.,!?:;)\]}'"]+$/);
+      let trail = "";
+      if (tm) {
+        trail = tm[0];
+        url = url.slice(0, url.length - trail.length);
+      }
+      out.push(
+        <a
+          key={k}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: config.bubbleColor,
+            textDecoration: "underline",
+            wordBreak: "break-word",
+          }}
+        >
+          {url}
+        </a>
+      );
+      if (trail) out.push(trail);
     }
     last = re.lastIndex;
   }
