@@ -17,7 +17,7 @@ export default async function PrivacyPage() {
   } = await supabase.auth.getUser();
 
   return (
-    <LegalShell signedIn={!!user} title="Privacy Policy" updated="June 16, 2026">
+    <LegalShell signedIn={!!user} title="Privacy Policy" updated="June 17, 2026">
       <p>
         This Privacy Policy explains how Bleviq, a product of{" "}
         <strong>MRLA Media LLC</strong> (&ldquo;Bleviq,&rdquo; &ldquo;we,&rdquo;
@@ -75,7 +75,13 @@ export default async function PrivacyPage() {
         </li>
         <li>
           <strong>Cookies.</strong> We use essential cookies to keep you signed
-          in. We do not use advertising cookies.
+          in. With your consent, we also use Google Analytics cookies to
+          understand how our site is used. We do not use advertising cookies. You
+          can opt out of analytics at any time on our{" "}
+          <a href="/do-not-share">
+            Do Not Sell or Share My Personal Information
+          </a>{" "}
+          page.
         </li>
       </ul>
 
@@ -139,6 +145,15 @@ export default async function PrivacyPage() {
         </li>
         <li>
           <strong>Google</strong> &mdash; sign-in, when you choose it.
+        </li>
+        <li>
+          <strong>Google Analytics</strong> &mdash; to understand how our
+          website is used. This loads only if you consent, and under California
+          law it may be considered &ldquo;sharing.&rdquo; You can opt out on our{" "}
+          <a href="/do-not-share">
+            Do Not Sell or Share My Personal Information
+          </a>{" "}
+          page.
         </li>
       </ul>
       <p>
@@ -205,7 +220,11 @@ export default async function PrivacyPage() {
         processing. California residents have rights under the CCPA/CPRA,
         including the right to know what we collect and to request deletion, and
         the right not to be discriminated against for exercising those rights.
-        To make a request, email us at the address below.
+        California residents can also opt out of analytics sharing on our{" "}
+        <a href="/do-not-share">
+          Do Not Sell or Share My Personal Information
+        </a>{" "}
+        page. To make a request, email us at the address below.
       </p>
 
       <h2>Changes to this policy</h2>
