@@ -123,33 +123,40 @@ function systemPrompt(
     "Collecting contact info:",
     canCollectLead
       ? [
-          '- Set "collectInfo": true when the visitor shows clear intent to book,',
-          "  buy, sign up, get a quote, start service, schedule, or be contacted",
-          '  by the business (for example "I want to book", "how do I buy this",',
-          '  "can someone call me", "I\'d like to get started"). When you do, set',
-          '  "answered": true and make "answer" a short, warm line saying you will',
+          "- Output COLLECT: yes when the visitor shows clear intent to book, buy,",
+          "  sign up, get a quote, start service, schedule, or be contacted by the",
+          '  business (for example "I want to book", "how do I buy this", "can',
+          "  someone call me\", \"I'd like to get started\"). When you do, also set",
+          "  ANSWERED: yes and make the reply a short, warm line saying you will",
           "  grab their details so the team can follow up. Do NOT ask for the",
           "  details in text yourself; a contact form is shown automatically.",
-          '- For anything else, set "collectInfo": false.',
+          "- For anything else, output COLLECT: no.",
         ].join("\n")
-      : '- Always set "collectInfo": false.',
+      : "- Always output COLLECT: no.",
     "",
-    "RESPONSE FORMAT (required): reply with ONLY a single JSON object, with no",
-    "code fences and no text before or after it, having exactly these fields:",
-    '  {"answered": true | false, "answer": "...", "collectInfo": true | false}',
-    '- Put all formatting INSIDE the "answer" string: line breaks as \\n, bullet',
-    "  lines starting with '- ', blank lines as \\n\\n, and **bold** labels. A",
-    "  multi-item answer must use real bullet lines, not items run together in a",
-    "  sentence. Example of a well-formatted answer:",
-    '  {"answered": true, "answer": "Here are the main benefits:\\n\\n- **Works 24/7**: answers visitors anytime.\\n- **Quick setup**: trained from your site in minutes.\\n- **Captures leads**: gathers contact details from interested visitors.", "collectInfo": false}',
-    '- Set "answered": true when you are giving a real reply (an answer drawn',
-    "  from the context, or a greeting / small-talk / safety reply), and put",
-    '  that reply in "answer".',
-    '- Set "answered": false when the context has nothing relevant to the',
-    '  question; then "answer" is the one-line "I don\'t have information about',
-    '  X" acknowledgment described above (never empty, never a list of',
-    "  suggestions, and never an invented fact about the subject).",
-    '- Never put words like NO_INFO or YES_INFO inside "answer".',
+    "RESPONSE FORMAT (required): respond with two header lines, then a line",
+    "containing only ===ANSWER===, then your reply. Put nothing before the",
+    "headers and nothing after the reply. Use this exact shape:",
+    "",
+    "ANSWERED: yes",
+    "COLLECT: no",
+    "===ANSWER===",
+    "Here are the main benefits:",
+    "",
+    "- **Works 24/7**: answers visitors anytime.",
+    "- **Quick setup**: trained from your site in minutes.",
+    "- **Captures leads**: gathers contact details from interested visitors.",
+    "",
+    "- ANSWERED: yes when you are giving a real reply (an answer from the",
+    "  context, or a greeting / small-talk / safety reply). ANSWERED: no when",
+    "  the context has nothing relevant to the question; then the reply is the",
+    '  one-line "I don\'t have information about X" acknowledgment described',
+    "  above (never empty, never a list of suggestions, never an invented fact).",
+    "- The reply after ===ANSWER=== is ordinary text, NOT JSON and NOT wrapped",
+    "  in quotes. Format it naturally with real line breaks, blank lines between",
+    "  points, '- ' bullet lists, and **bold** labels, exactly as described in",
+    "  Formatting above.",
+    "- Never put words like NO_INFO or YES_INFO in the reply.",
   ].join("\n");
 }
 
@@ -168,40 +175,51 @@ function looksLikeStrayToken(s: string): boolean {
   return /^[A-Z]{2,}_[A-Z]{2,}$/.test(s.trim());
 }
 
-// The model replies as {"answered": bool, "answer": string}. Parse defensively:
-// honor the boolean, fall back to inferring from the text, and never surface a
-// stray control token or an empty "answered: true".
+// The model replies with two header lines (ANSWERED / COLLECT), a ===ANSWER===
+// delimiter, then the reply as plain text. Parse defensively: honor the flags,
+// fall back to treating the whole output as the reply if the format is missing,
+// and never surface a stray control token or an empty "answered: true".
 function parseGenerated(raw: string): {
   answer: string;
   answered: boolean;
   collectInfo: boolean;
 } {
   const text = raw
-    .replace(/^```(?:json)?/i, "")
+    .replace(/^```(?:json|text)?/i, "")
     .replace(/```$/, "")
     .trim();
-  try {
-    const obj = JSON.parse(text) as {
-      answered?: unknown;
-      answer?: unknown;
-      collectInfo?: unknown;
-    };
-    const answer = typeof obj.answer === "string" ? obj.answer.trim() : "";
-    if (looksLikeStrayToken(answer))
-      return { answer: "", answered: false, collectInfo: false };
-    let answered: boolean;
-    if (obj.answered === true) answered = true;
-    else if (obj.answered === false) answered = false;
-    else answered = answer.length > 0;
-    if (!answer) answered = false;
-    const collectInfo = obj.collectInfo === true && answered;
-    return { answer, answered, collectInfo };
-  } catch {
-    // Rare with JSON mode on. Show plain prose, but never a stray token.
-    if (!text || looksLikeStrayToken(text))
-      return { answer: "", answered: false, collectInfo: false };
-    return { answer: text, answered: true, collectInfo: false };
+
+  const DELIM = "===ANSWER===";
+  let header = "";
+  let body = "";
+  const idx = text.indexOf(DELIM);
+  if (idx >= 0) {
+    header = text.slice(0, idx);
+    body = text.slice(idx + DELIM.length);
+  } else {
+    // No delimiter: peel any leading ANSWERED/COLLECT lines off the top and
+    // treat the remainder as the reply.
+    const lines = text.split("\n");
+    let h = 0;
+    while (h < lines.length && /^\s*(ANSWERED|COLLECT)\s*:/i.test(lines[h])) {
+      header += lines[h] + "\n";
+      h++;
+    }
+    body = lines.slice(h).join("\n");
   }
+
+  const answer = body.trim();
+  if (looksLikeStrayToken(answer))
+    return { answer: "", answered: false, collectInfo: false };
+
+  let answered: boolean;
+  if (/ANSWERED\s*:\s*(yes|true)/i.test(header)) answered = true;
+  else if (/ANSWERED\s*:\s*(no|false)/i.test(header)) answered = false;
+  else answered = answer.length > 0;
+  if (!answer) answered = false;
+
+  const collectInfo = /COLLECT\s*:\s*(yes|true)/i.test(header) && answered;
+  return { answer, answered, collectInfo };
 }
 
 export async function generateAnswer(
@@ -240,7 +258,6 @@ export async function generateAnswer(
       model: ANSWER_MODEL,
       max_tokens: MAX_OUTPUT_TOKENS,
       temperature: 0,
-      response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt(ownerPrompt, pages, canCollectLead) },
         ...(langDirective ? [{ role: "system", content: langDirective }] : []),
