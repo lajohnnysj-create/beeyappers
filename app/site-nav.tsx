@@ -135,15 +135,12 @@ export function SiteFooter() {
             <Link href="/ai-terms" className="transition hover:text-slate-900">
               AI Terms
             </Link>
-            <button
-              type="button"
-              onClick={() =>
-                window.dispatchEvent(new CustomEvent("bleviq:open-consent"))
-              }
-              className="text-left transition hover:text-slate-900 focus:outline-none focus-visible:underline"
+            <Link
+              href="/do-not-share"
+              className="transition hover:text-slate-900"
             >
-              Your Privacy Choices
-            </button>
+              Do Not Sell or Share My Personal Information
+            </Link>
           </nav>
         </div>
         <p className="mt-6 text-xs text-slate-500">

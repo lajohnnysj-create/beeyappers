@@ -64,8 +64,6 @@ export function analyticsAllowed(): boolean {
 
 export function CookieConsent() {
   const [visible, setVisible] = useState(false);
-  const [customize, setCustomize] = useState(false);
-  const [analytics, setAnalytics] = useState(false);
 
   useEffect(() => {
     if (readConsent()) return; // already decided
@@ -77,30 +75,14 @@ export function CookieConsent() {
     setVisible(true);
   }, []);
 
-  // Reopen from the footer "Your Privacy Choices" link.
-  useEffect(() => {
-    const open = () => {
-      const c = readConsent();
-      setAnalytics(c?.analytics ?? false);
-      setCustomize(true);
-      setVisible(true);
-    };
-    window.addEventListener("bleviq:open-consent", open);
-    return () => window.removeEventListener("bleviq:open-consent", open);
-  }, []);
-
-  const acceptAll = useCallback(() => {
+  const accept = useCallback(() => {
     writeConsent(true, gpcActive());
     setVisible(false);
   }, []);
-  const essentialOnly = useCallback(() => {
+  const decline = useCallback(() => {
     writeConsent(false, gpcActive());
     setVisible(false);
   }, []);
-  const savePrefs = useCallback(() => {
-    writeConsent(analytics, gpcActive());
-    setVisible(false);
-  }, [analytics]);
 
   if (!visible) return null;
 
@@ -111,87 +93,42 @@ export function CookieConsent() {
       className="fixed inset-x-0 bottom-4 z-[90] flex justify-center px-4"
     >
       <div className="w-full max-w-xl rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-lg">
-        <p className="text-sm leading-snug text-slate-600">
-          We use essential cookies to run the site. With your okay, we&apos;ll
-          also use analytics cookies to improve it.
+        <p className="text-sm font-semibold text-slate-900">
+          Cookies &amp; your data
         </p>
-        <p className="mt-1.5 text-xs text-slate-500">
+        <p className="mt-1.5 text-sm leading-snug text-slate-600">
+          We use essential cookies to keep you signed in and the service
+          running, plus Google Analytics to understand how our tools are used. No
+          advertising, no selling your data.
+        </p>
+        <p className="mt-2 text-xs text-slate-500">
           <Link href="/privacy" className="font-medium text-brand-600 underline">
-            Privacy Policy
+            Privacy policy
           </Link>
           <span aria-hidden="true"> · </span>
           <Link
             href="/do-not-share"
             className="font-medium text-brand-600 underline"
           >
-            Do Not Share My Info
+            Do Not Sell or Share My Personal Information
           </Link>
         </p>
-
-        {customize && (
-          <div className="mt-4 space-y-3 rounded-xl bg-slate-50 p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium text-slate-900">Essential</p>
-                <p className="text-xs text-slate-500">
-                  Required for the site to work. Always on.
-                </p>
-              </div>
-              <span className="mt-0.5 text-xs font-medium text-slate-400">
-                Always on
-              </span>
-            </div>
-            <label className="flex cursor-pointer items-start justify-between gap-3">
-              <span>
-                <span className="text-sm font-medium text-slate-900">Analytics</span>
-                <span className="block text-xs text-slate-500">
-                  Helps us understand usage. Off unless you turn it on.
-                </span>
-              </span>
-              <input
-                type="checkbox"
-                checked={analytics}
-                onChange={(e) => setAnalytics(e.target.checked)}
-                className="mt-1 h-4 w-4 shrink-0 accent-brand-600"
-              />
-            </label>
-          </div>
-        )}
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={acceptAll}
+            onClick={accept}
             className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
           >
-            Accept all
+            Accept
           </button>
-          {customize ? (
-            <button
-              type="button"
-              onClick={savePrefs}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-            >
-              Save choices
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={essentialOnly}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-            >
-              Essential only
-            </button>
-          )}
-          {!customize && (
-            <button
-              type="button"
-              onClick={() => setCustomize(true)}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
-            >
-              Customize
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={decline}
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+          >
+            Decline analytics
+          </button>
         </div>
       </div>
     </div>
