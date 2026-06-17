@@ -17,9 +17,6 @@ const WORDS: { word: string; color: string }[] = [
   { word: "joking", color: "text-orange-300" },
 ];
 
-// Widest word reserves the slot so the sentence never reflows as words swap.
-const WIDEST = WORDS.reduce((a, b) => (b.word.length > a.length ? b.word : a), "");
-
 function RotatingWord() {
   const [i, setI] = useState(0);
 
@@ -28,23 +25,31 @@ function RotatingWord() {
     return () => clearInterval(id);
   }, []);
 
-  // No pill/box. The word matches the sentence size (text-lg) so it stays on
-  // the baseline, and is bold with a soft glow in its own color (currentColor)
-  // so it pops on the dark hero rather than sitting in a button-like frame.
+  // No pill/box. The word matches the sentence size (text-lg), is bold, and
+  // carries a soft glow in its own color (currentColor) so it pops on the dark
+  // hero without a button-like frame.
   const base = "text-lg font-bold tracking-tight";
-  const { word, color } = WORDS[i];
 
   return (
-    <span className="relative mx-1 inline-block align-baseline">
-      {/* Invisible sizer reserves the width of the widest word AND sets the
-          line baseline, so the sentence never shifts as words swap. */}
-      <span aria-hidden className={`invisible ${base}`}>{WIDEST}</span>
-      <span
-        key={word}
-        className={`animate-bv-word-in absolute inset-x-0 top-0 text-center ${base} ${color} [text-shadow:0_0_16px_currentColor]`}
-      >
-        {word}
-      </span>
+    <span className="relative mx-1 inline-grid items-baseline align-baseline">
+      {/* Every word shares one grid cell, so the slot is always exactly the
+          width of the widest word: the sentence never reflows as words swap,
+          and no word can overflow into the text beside it. Only the current
+          word is shown; the rest stay invisible but still hold the width. */}
+      {WORDS.map((w, idx) => (
+        <span
+          key={w.word}
+          aria-hidden={idx !== i}
+          className={
+            `[grid-area:1/1] text-center ${base} ` +
+            (idx === i
+              ? `${w.color} animate-bv-word-in [text-shadow:0_0_16px_currentColor]`
+              : "invisible")
+          }
+        >
+          {w.word}
+        </span>
+      ))}
     </span>
   );
 }
