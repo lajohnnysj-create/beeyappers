@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import Script from "next/script";
 
 /**
  * Cookie consent for the marketing site.
@@ -17,10 +18,11 @@ import Link from "next/link";
 
 const STORE_KEY = "bleviq-consent";
 const VERSION = 1; // bump to re-prompt everyone after a material policy change
+const GA_ID = "G-T5TK5W2S1M"; // Google Analytics 4 measurement ID
 
 export type Consent = { analytics: boolean; gpc: boolean; ts: number; v: number };
 
-function readConsent(): Consent | null {
+export function readConsent(): Consent | null {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (!raw) return null;
@@ -31,7 +33,7 @@ function readConsent(): Consent | null {
   }
 }
 
-function writeConsent(analytics: boolean, gpc: boolean): Consent {
+export function writeConsent(analytics: boolean, gpc: boolean): Consent {
   const c: Consent = { analytics, gpc, ts: Date.now(), v: VERSION };
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(c));
@@ -43,7 +45,7 @@ function writeConsent(analytics: boolean, gpc: boolean): Consent {
   return c;
 }
 
-function gpcActive(): boolean {
+export function gpcActive(): boolean {
   try {
     return (
       (navigator as Navigator & { globalPrivacyControl?: boolean })
@@ -111,11 +113,19 @@ export function CookieConsent() {
       <div className="w-full max-w-xl rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-lg">
         <p className="text-sm leading-snug text-slate-600">
           We use essential cookies to run the site. With your okay, we&apos;ll
-          also use analytics cookies to improve it.{" "}
+          also use analytics cookies to improve it.
+        </p>
+        <p className="mt-1.5 text-xs text-slate-500">
           <Link href="/privacy" className="font-medium text-brand-600 underline">
             Privacy Policy
           </Link>
-          .
+          <span aria-hidden="true"> · </span>
+          <Link
+            href="/do-not-share"
+            className="font-medium text-brand-600 underline"
+          >
+            Do Not Share My Info
+          </Link>
         </p>
 
         {customize && (
@@ -189,30 +199,27 @@ export function CookieConsent() {
 }
 
 /**
- * Gated analytics loader. Renders nothing until the visitor has opted in. When
- * you choose a provider, return its script/component here instead of null, e.g.:
- *
- *   import Script from "next/script";
- *   return (
- *     <Script
- *       src="https://plausible.io/js/script.js"
- *       data-domain="bleviq.com"
- *       strategy="afterInteractive"
- *     />
- *   );
- *
- * or Vercel: import { Analytics } from "@vercel/analytics/react"; return <Analytics />;
- *
- * Because it reads consent and listens for changes, nothing loads without opt-in.
+ * Gated analytics loader. Loads Google Analytics 4 only after the visitor opts
+ * in, and listens for consent changes so a later opt-out (e.g. from the Do Not
+ * Share page) takes effect without a reload. Nothing about GA loads until
+ * consent is granted.
  */
 export function SiteAnalytics() {
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
-    setAllowed(analyticsAllowed());
+    const apply = (ok: boolean) => {
+      setAllowed(ok);
+      // Official GA opt-out switch. Setting this true stops Google Analytics
+      // even if gtag.js already loaded earlier this session, so opting out from
+      // the Do Not Share page takes effect without a reload.
+      (window as unknown as Record<string, boolean>)[`ga-disable-${GA_ID}`] =
+        !ok;
+    };
+    apply(analyticsAllowed());
     const onConsent = (e: Event) => {
       const c = (e as CustomEvent<Consent>).detail;
-      setAllowed(!!c && c.analytics === true);
+      apply(!!c && c.analytics === true);
     };
     window.addEventListener("bleviq:consent", onConsent);
     return () => window.removeEventListener("bleviq:consent", onConsent);
@@ -220,6 +227,21 @@ export function SiteAnalytics() {
 
   if (!allowed) return null;
 
-  // No provider wired yet. Drop it in here (see comment above); the gate is live.
-  return null;
+  // Google Analytics 4, loaded only after the visitor opts in to analytics.
+  return (
+    <>
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+        strategy="afterInteractive"
+      />
+      <Script id="ga-init" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${GA_ID}');
+        `}
+      </Script>
+    </>
+  );
 }
