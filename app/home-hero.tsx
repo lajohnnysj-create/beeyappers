@@ -35,15 +35,13 @@ function RotatingWord() {
   const { word, color } = WORDS[i];
 
   return (
-    <span className="relative mx-1 inline-grid align-middle">
-      {/* Invisible sizer reserves the width of the widest word so the rest of
-          the sentence never shifts as words swap. */}
-      <span aria-hidden className={`invisible [grid-area:1/1] ${base}`}>
-        {WIDEST}
-      </span>
+    <span className="relative mx-1 inline-block align-baseline">
+      {/* Invisible sizer reserves the width of the widest word AND sets the
+          line baseline, so the sentence never shifts as words swap. */}
+      <span aria-hidden className={`invisible ${base}`}>{WIDEST}</span>
       <span
         key={word}
-        className={`animate-bv-word-in flex items-center justify-center [grid-area:1/1] ${base} ${color} [text-shadow:0_0_16px_currentColor]`}
+        className={`animate-bv-word-in absolute inset-x-0 top-0 text-center ${base} ${color} [text-shadow:0_0_16px_currentColor]`}
       >
         {word}
       </span>
