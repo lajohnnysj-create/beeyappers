@@ -106,7 +106,7 @@ export default async function SiteWorkspacePage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-8 focus:outline-none">
         <div className="mb-6">
           <p className="text-xs font-medium uppercase tracking-wide text-brand-600">
             Site
