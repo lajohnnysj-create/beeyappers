@@ -18,6 +18,11 @@ const BURST_WINDOW = 60;
 const HOURLY_LIMIT = 60; // requests per hour, per IP per site (sustained cap)
 const HOURLY_WINDOW = 3600;
 const TOP_K = 8;
+// Reserve a few slots for owner-authored FAQ answers so they get combined with
+// crawled-page content even when page chunks outrank them. Gated by relevance
+// (a fraction of the best chunk's similarity) so unrelated FAQs add no noise.
+const FAQ_RESERVE = 3;
+const FAQ_RELEVANCE = 0.5;
 
 // Friendly copy shown when we have no answer. If we can suggest answerable
 // questions, the line sets them up; otherwise it stands alone.
@@ -279,6 +284,29 @@ export async function POST(req: Request) {
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, TOP_K);
 
+    // Make sure relevant owner-authored FAQ answers ride along even when page
+    // chunks fill the top slots. Pull FAQ-only matches, keep those at least
+    // half as similar as the best chunk, and merge them in (deduped).
+    const topSim = chunks.length ? chunks[0].similarity : 0;
+    const faqById = new Map<string, MatchedChunk>();
+    for (const emb of embeddings) {
+      const got = await retrieveChunks(admin, site.id, emb, FAQ_RESERVE, "faq");
+      for (const c of got) {
+        const prev = faqById.get(c.id);
+        if (!prev || c.similarity > prev.similarity) faqById.set(c.id, c);
+      }
+    }
+    const haveIds = new Set(chunks.map((c) => c.id));
+    const faqExtra = [...faqById.values()]
+      .filter(
+        (c) => !haveIds.has(c.id) && c.similarity >= topSim * FAQ_RELEVANCE
+      )
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, FAQ_RESERVE);
+    const merged = [...chunks, ...faqExtra].sort(
+      (a, b) => b.similarity - a.similarity
+    );
+
     // Page list (for linking + suggestions) and FAQ questions (for suggestions).
     const { data: pageRows } = await admin
       .from("pages")
@@ -333,7 +361,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const context = chunks.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n");
+    const context = merged.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n");
 
     // Lead capture: only let the model offer the form when the owner has it on
     // and this conversation hasn't already captured a lead. The DB flag is
@@ -443,7 +471,7 @@ export async function POST(req: Request) {
     return json(
       debugTrace(
         req,
-        { question, rewritten, queries, chunks, answered: gen.answered, rawAnswer: gen.answer },
+        { question, rewritten, queries, chunks: merged, answered: gen.answered, rawAnswer: gen.answer },
         {
           answer,
           ...(suggestions ? { suggestions } : {}),
