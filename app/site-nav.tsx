@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Wordmark } from "@/app/wordmark";
 import { SkipLink } from "@/app/skip-link";
+import { CookieConsent, SiteAnalytics } from "@/app/cookie-consent";
 
 /**
  * Single source of truth for the marketing chrome (header + footer).
@@ -134,12 +135,23 @@ export function SiteFooter() {
             <Link href="/ai-terms" className="transition hover:text-slate-900">
               AI Terms
             </Link>
+            <button
+              type="button"
+              onClick={() =>
+                window.dispatchEvent(new CustomEvent("bleviq:open-consent"))
+              }
+              className="text-left transition hover:text-slate-900 focus:outline-none focus-visible:underline"
+            >
+              Your Privacy Choices
+            </button>
           </nav>
         </div>
         <p className="mt-6 text-xs text-slate-500">
           © {year} MRLA Media LLC. Bleviq is a product of MRLA Media LLC.
         </p>
       </div>
+      <CookieConsent />
+      <SiteAnalytics />
     </footer>
   );
 }
