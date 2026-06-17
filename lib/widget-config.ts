@@ -96,6 +96,7 @@ export type WidgetLabels = {
   send: string;
   poweredBy: string;
   askAI: string;
+  thinking: string;
   leadName: string;
   leadEmail: string;
   leadPhone: string;
@@ -109,6 +110,7 @@ export const DEFAULT_LABELS: WidgetLabels = {
   send: "Send",
   poweredBy: "Powered by",
   askAI: "Ask AI",
+  thinking: "AI Thinking",
   leadName: "Name",
   leadEmail: "Email",
   leadPhone: "Phone",
