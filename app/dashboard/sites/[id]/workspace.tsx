@@ -28,7 +28,10 @@ type Props = {
   canRemoveBranding: boolean;
 };
 
-const NAV: { id: Tab; label: string; icon: JSX.Element }[] = [
+type NavEntry = { id: Tab; label: string; icon: JSX.Element };
+
+// The three setup steps, in order, kept together so they read as one flow.
+const SETUP: NavEntry[] = [
   {
     id: "train",
     label: "Train",
@@ -44,18 +47,60 @@ const NAV: { id: Tab; label: string; icon: JSX.Element }[] = [
     ),
   },
   {
+    id: "code",
+    label: "Get Code",
+    icon: <path d="m8 6-6 6 6 6m8-12 6 6-6 6" />,
+  },
+];
+
+// Ongoing management, separated from the setup flow. Analytics will join here.
+const MANAGE: NavEntry[] = [
+  {
     id: "leads",
     label: "Leads",
     icon: (
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
     ),
   },
-  {
-    id: "code",
-    label: "Get Code",
-    icon: <path d="m8 6-6 6 6 6m8-12 6 6-6 6" />,
-  },
 ];
+
+function NavButton({
+  item,
+  active,
+  onClick,
+}: {
+  item: NavEntry;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-current={active ? "page" : undefined}
+      className={
+        "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition " +
+        (active
+          ? "bg-brand-50 text-brand-700"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900")
+      }
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        {item.icon}
+      </svg>
+      {item.label}
+    </button>
+  );
+}
 
 export function Workspace(props: Props) {
   const [tab, setTab] = useState<Tab>("train");
@@ -65,37 +110,32 @@ export function Workspace(props: Props) {
       {/* Sidebar */}
       <nav className="lg:sticky lg:top-6 lg:self-start">
         <ul className="flex gap-1 lg:flex-col">
-          {NAV.map((item) => {
-            const active = tab === item.id;
-            return (
-              <li key={item.id}>
-                <button
-                  onClick={() => setTab(item.id)}
-                  className={
-                    "flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition " +
-                    (active
-                      ? "bg-brand-50 text-brand-700"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900")
-                  }
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    {item.icon}
-                  </svg>
-                  {item.label}
-                </button>
-              </li>
-            );
-          })}
+          {SETUP.map((item) => (
+            <li key={item.id} className="flex-1 lg:flex-none">
+              <NavButton
+                item={item}
+                active={tab === item.id}
+                onClick={() => setTab(item.id)}
+              />
+            </li>
+          ))}
+        </ul>
+
+        <hr className="my-3 border-slate-200" />
+        <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+          Manage
+        </p>
+
+        <ul className="flex gap-1 lg:flex-col">
+          {MANAGE.map((item) => (
+            <li key={item.id} className="flex-1 lg:flex-none">
+              <NavButton
+                item={item}
+                active={tab === item.id}
+                onClick={() => setTab(item.id)}
+              />
+            </li>
+          ))}
         </ul>
       </nav>
 
