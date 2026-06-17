@@ -258,13 +258,15 @@ export default async function Home() {
       {/* Dashboard showcase */}
       {/* What it does for you — dark, image-ready background */}
       <section className="relative isolate overflow-hidden bg-black">
-        {/*
-          Background image slot. When you have the image, drop it in here:
-          <img src="/your-background.webp" alt="" className="absolute inset-0 -z-20 h-full w-full object-cover" />
-        */}
-        {/* Overlays keep the cards and text legible over any image (and harmlessly sit over black for now). */}
-        <div className="absolute inset-0 -z-10 bg-black/70" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black via-black/40 to-black" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/heropagesplash4.webp"
+          alt=""
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+        />
+        {/* Overlays keep the cards and text legible while letting the image show. */}
+        <div className="absolute inset-0 -z-10 bg-black/55" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/80 via-black/25 to-black/80" />
 
         <div className="mx-auto max-w-6xl px-6 py-20 lg:py-24">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
