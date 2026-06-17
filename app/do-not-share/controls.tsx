@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { readConsent, writeConsent, gpcActive } from "@/app/cookie-consent";
 
 export function DoNotShareControls() {
@@ -15,69 +14,60 @@ export function DoNotShareControls() {
     setGpc(gpcActive());
   }, []);
 
-  const update = (next: boolean) => {
-    setAnalytics(next);
-    writeConsent(next, gpcActive());
+  // GPC forces opt-out; otherwise opted out whenever analytics is not allowed.
+  const optedOut = gpc || !analytics;
+
+  const toggle = () => {
+    if (gpc) return; // GPC overrides the on-page setting
+    const nextAnalytics = optedOut; // currently opted out -> turn analytics on
+    setAnalytics(nextAnalytics);
+    writeConsent(nextAnalytics, gpcActive());
     setSaved(true);
   };
 
-  return (
-    <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-      {gpc && (
-        <div className="mb-5 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          Your browser is sending a Global Privacy Control signal, so analytics
-          is turned off automatically. You can still change the setting below for
-          this site.
-        </div>
-      )}
+  const status = gpc
+    ? "Your browser is sending a Global Privacy Control signal, so Google Analytics will not load on this device, regardless of the setting here."
+    : optedOut
+      ? "You are opted out. Google Analytics will not load on this device."
+      : "Analytics may load on this device, subject to your cookie banner consent.";
 
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-base font-semibold text-slate-900">
-            Analytics cookies
-          </p>
-          <p className="mt-1 text-sm leading-relaxed text-slate-600">
-            Helps us understand how the site is used. Turn this off to opt out of
-            analytics on this device.
-          </p>
-        </div>
+  return (
+    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+      <p className="text-base font-semibold text-slate-900">
+        Analytics on this device
+      </p>
+      <p className="mt-1 text-sm leading-relaxed text-slate-600" aria-live="polite">
+        {status}
+      </p>
+
+      <div className="mt-5 flex items-center justify-between gap-4 border-t border-slate-100 pt-5">
+        <span className="text-sm font-medium text-slate-900">
+          Opt out of analytics on this device
+        </span>
         <button
           type="button"
           role="switch"
-          aria-checked={analytics}
-          aria-label="Analytics cookies"
-          onClick={() => update(!analytics)}
-          className={`relative mt-1 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 ${
-            analytics ? "bg-brand-600" : "bg-slate-300"
+          aria-checked={optedOut}
+          aria-label="Opt out of analytics on this device"
+          disabled={gpc}
+          onClick={toggle}
+          className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
+            optedOut ? "bg-brand-600" : "bg-slate-300"
           }`}
         >
           <span
             className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
-              analytics ? "translate-x-5" : "translate-x-0.5"
+              optedOut ? "translate-x-5" : "translate-x-0.5"
             }`}
           />
         </button>
       </div>
 
-      <p className="mt-5 text-sm font-medium" aria-live="polite">
-        {saved ? (
-          <span className="text-emerald-700">
-            Saved. Analytics is now {analytics ? "on" : "off"} on this device.
-          </span>
-        ) : (
-          <span className="text-slate-500">
-            Analytics is currently {analytics ? "on" : "off"} on this device.
-          </span>
-        )}
-      </p>
-
-      <p className="mt-6 text-sm text-slate-500">
-        See our{" "}
-        <Link href="/privacy" className="font-medium text-brand-600 underline">
-          Privacy Policy
-        </Link>{" "}
-        for details on what we collect.
-      </p>
+      {saved && !gpc && (
+        <p className="mt-4 text-sm font-medium text-emerald-700">
+          Saved on this device.
+        </p>
+      )}
     </div>
   );
 }
