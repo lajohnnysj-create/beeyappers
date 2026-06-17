@@ -203,6 +203,20 @@ function renderInline(
   return out;
 }
 
+// The answer model sometimes emits list markers inline without line breaks
+// ("Intro: * a * b * c"). The list parser below is line-anchored, so that would
+// render as one mangled paragraph (and the stray asterisks get eaten as italic
+// markers). Promote inline bullet markers to real lines. Safeguards: only fires
+// when there are 2+ space-delimited markers, uses horizontal whitespace so it
+// never crosses an existing newline, and leaves "*italic*"/"**bold**" (no
+// surrounding spaces) and already-newlined lists untouched.
+function normalizeInlineLists(text: string): string {
+  const inlineMarker = /(\S)[ \t]+[*•][ \t]+/g;
+  const count = (text.match(inlineMarker) || []).length;
+  if (count < 2) return text;
+  return text.replace(inlineMarker, "$1\n- ");
+}
+
 function MessageContent({ text, config }: { text: string; config: WidgetConfig }) {
   // Collect unique page links to render as buttons under the message.
   const links: { label: string; url: string }[] = [];
@@ -216,7 +230,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
     }
   }
 
-  const lines = text.replace(/\r/g, "").split("\n");
+  const lines = normalizeInlineLists(text).replace(/\r/g, "").split("\n");
   const blocks: React.ReactNode[] = [];
   let i = 0;
   let b = 0;
