@@ -56,8 +56,9 @@ export function gpcActive(): boolean {
   }
 }
 
-/** True only if the visitor has opted in to analytics. Import before loading any analytics. */
+/** True only if the visitor has opted in to analytics and GPC is not signaling opt-out. */
 export function analyticsAllowed(): boolean {
+  if (gpcActive()) return false;
   const c = readConsent();
   return !!c && c.analytics === true;
 }
@@ -90,9 +91,9 @@ export function CookieConsent() {
     <div
       role="region"
       aria-label="Cookie consent"
-      className="fixed inset-x-0 bottom-4 z-[90] flex justify-center px-4"
+      className="pointer-events-none fixed inset-x-0 bottom-4 z-[90] flex justify-center px-4"
     >
-      <div className="w-full max-w-xl rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-lg">
+      <div className="pointer-events-auto w-full max-w-xl rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-lg">
         <p className="text-sm font-semibold text-slate-900">
           Cookies &amp; your data
         </p>
@@ -154,10 +155,7 @@ export function SiteAnalytics() {
         !ok;
     };
     apply(analyticsAllowed());
-    const onConsent = (e: Event) => {
-      const c = (e as CustomEvent<Consent>).detail;
-      apply(!!c && c.analytics === true);
-    };
+    const onConsent = () => apply(analyticsAllowed());
     window.addEventListener("bleviq:consent", onConsent);
     return () => window.removeEventListener("bleviq:consent", onConsent);
   }, []);
