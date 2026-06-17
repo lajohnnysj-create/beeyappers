@@ -5,10 +5,13 @@ export type Extracted = { title: string; text: string };
 export function extractContent(html: string): Extracted {
   const $ = cheerio.load(html);
 
-  // Remove everything that is not real content.
+  // Remove non-content boilerplate only. We deliberately KEEP aria-hidden
+  // elements: accessible tabs, accordions, and carousels mark their inactive
+  // panels aria-hidden="true", and that hidden text is real content the
+  // assistant should learn (it was the reason toggled content went missing).
   $(
     "script, style, noscript, svg, nav, header, footer, form, iframe, " +
-      "[role='navigation'], [aria-hidden='true']"
+      "[role='navigation']"
   ).remove();
 
   const title =
