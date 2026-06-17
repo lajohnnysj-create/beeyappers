@@ -423,7 +423,7 @@ export default async function Home() {
             className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
           />
           {/* Darkening scrims for legibility */}
-          <div className="absolute inset-0 -z-10 bg-slate-950/72" />
+          <div className="absolute inset-0 -z-10 bg-slate-950/87" />
           <div className="absolute inset-0 -z-10 bg-gradient-to-t from-slate-950/85 via-slate-950/45 to-slate-950/65" />
 
           <h2 className="font-display text-3xl font-bold tracking-tight text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-4xl">
