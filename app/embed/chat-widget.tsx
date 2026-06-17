@@ -832,29 +832,43 @@ export function ChatWidget({
             <div
               style={{
                 display: "flex",
-                gap: 4,
+                alignItems: "center",
+                gap: 8,
                 borderRadius: 18,
                 ...(rtl
                   ? { borderBottomRightRadius: 6 }
                   : { borderBottomLeftRadius: 6 }),
-                padding: "12px 14px",
+                padding: "10px 14px",
                 background: config.assistantBubbleColor,
               }}
             >
-              {[0, 1, 2].map((d) => (
-                <span
-                  key={d}
-                  style={{
-                    height: 6,
-                    width: 6,
-                    borderRadius: "50%",
-                    background: config.textColor,
-                    opacity: 0.4,
-                    animation: "bvBlink 1.2s ease-in-out infinite",
-                    animationDelay: d * 0.15 + "s",
-                  }}
-                />
-              ))}
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: config.textColor,
+                  opacity: 0.7,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {labels.thinking}
+              </span>
+              <span style={{ display: "inline-flex", gap: 3 }}>
+                {[0, 1, 2].map((d) => (
+                  <span
+                    key={d}
+                    style={{
+                      height: 5,
+                      width: 5,
+                      borderRadius: "50%",
+                      background: config.textColor,
+                      opacity: 0.5,
+                      animation: "bvBounce 1s ease-in-out infinite",
+                      animationDelay: d * 0.16 + "s",
+                    }}
+                  />
+                ))}
+              </span>
             </div>
           </div>
         )}
@@ -1003,7 +1017,7 @@ export function ChatWidget({
       </div>
       </div>
 
-      <style>{`@keyframes bvBlink{0%,80%,100%{opacity:.25}40%{opacity:.9}}@keyframes bvFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}`}</style>
+      <style>{`@keyframes bvBlink{0%,80%,100%{opacity:.25}40%{opacity:.9}}@keyframes bvBounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-5px);opacity:.95}}@keyframes bvFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}`}</style>
     </div>
   );
 }
