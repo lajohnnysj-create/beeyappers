@@ -28,11 +28,10 @@ function RotatingWord() {
     return () => clearInterval(id);
   }, []);
 
-  // No pill/box. The word is 2px larger than the sentence (text-xl over the
-  // paragraph's text-lg) and bold; the visible copy adds a soft glow in its
-  // own color (currentColor) so it pops on the dark hero rather than sitting
-  // in a button-like frame.
-  const base = "text-xl font-bold tracking-tight";
+  // No pill/box. The word matches the sentence size (text-lg) so it stays on
+  // the baseline, and is bold with a soft glow in its own color (currentColor)
+  // so it pops on the dark hero rather than sitting in a button-like frame.
+  const base = "text-lg font-bold tracking-tight";
   const { word, color } = WORDS[i];
 
   return (
