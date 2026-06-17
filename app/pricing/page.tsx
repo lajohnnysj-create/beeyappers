@@ -27,6 +27,7 @@ export default async function PricingPage({
     <div className="min-h-screen bg-slate-50">
       <SiteHeader signedIn={!!user} />
 
+      <main id="main-content" tabIndex={-1} className="focus:outline-none">
       <section className="mx-auto max-w-5xl px-6 pb-24 pt-8 text-center">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
           Pricing that scales with your traffic
@@ -38,6 +39,7 @@ export default async function PricingPage({
 
         <PricingTable canceled={canceled} />
       </section>
+      </main>
 
       <SiteFooter />
       <BleviqWidget />
