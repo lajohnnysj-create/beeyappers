@@ -17,6 +17,11 @@
     return;
   }
 
+  // If a single-page-app host unmounted the widget while this script was still
+  // loading, skip mounting. And never mount the widget twice on one page.
+  if (window.__bleviqCancelled) { window.__bleviqCancelled = false; return; }
+  if (window.__bleviqWidget) return;
+
   var Z = "2147483000";
 
   // Everything (launcher + chat panel + all network calls) lives inside this
@@ -113,7 +118,7 @@
   frame.addEventListener("load", sendViewport);
   window.addEventListener("resize", sendViewport);
 
-  window.addEventListener("message", function (e) {
+  function onMessage(e) {
     if (e.origin !== origin) return;
     var d = e.data;
     if (!d) return;
@@ -127,7 +132,8 @@
     } else {
       place(d.side === "left" ? "left" : "right", Math.max(0, d.w | 0), Math.max(0, d.h | 0));
     }
-  });
+  }
+  window.addEventListener("message", onMessage);
 
   function mount() {
     document.body.appendChild(frame);
@@ -137,4 +143,18 @@
   } else {
     mount();
   }
+
+  // Teardown hook so a single-page-app host can remove the widget on route
+  // change, instead of letting the iframe persist onto pages that don't embed
+  // it. Plain HTML embeds never call this; behavior there is unchanged.
+  function destroy() {
+    try { window.removeEventListener("resize", sendViewport); } catch (e) {}
+    try { window.removeEventListener("message", onMessage); } catch (e) {}
+    try { frame.removeEventListener("load", sendViewport); } catch (e) {}
+    try { document.removeEventListener("DOMContentLoaded", mount); } catch (e) {}
+    unlockScroll();
+    if (frame && frame.parentNode) frame.parentNode.removeChild(frame);
+    window.__bleviqWidget = null;
+  }
+  window.__bleviqWidget = { destroy: destroy };
 })();
