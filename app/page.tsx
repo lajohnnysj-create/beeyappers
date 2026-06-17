@@ -213,6 +213,7 @@ export default async function Home() {
     <div className="min-h-screen bg-slate-50">
       <SiteHeader signedIn={signedIn} />
 
+      <main id="main-content" tabIndex={-1} className="focus:outline-none">
       <HomeHero />
 
       {/* How it works */}
@@ -453,6 +454,7 @@ export default async function Home() {
           </Link>
         </div>
       </section>
+      </main>
 
       <SiteFooter />
       <BleviqWidget />
