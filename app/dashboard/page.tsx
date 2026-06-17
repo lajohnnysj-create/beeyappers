@@ -66,7 +66,7 @@ export default async function DashboardPage() {
     return (
       <div className="min-h-screen">
         <Header email={user?.email} />
-        <main className="mx-auto flex min-h-[calc(100vh-80px)] max-w-2xl flex-col items-center justify-center px-4 pb-16 text-center">
+        <main id="main-content" tabIndex={-1} className="mx-auto flex min-h-[calc(100vh-80px)] max-w-2xl flex-col items-center justify-center px-4 pb-16 text-center focus:outline-none">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
             Let&apos;s get your website ready
           </h1>
@@ -87,7 +87,7 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen">
       <Header email={user?.email} />
-      <main className="mx-auto max-w-5xl px-4 py-10">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-10 focus:outline-none">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
           Your sites
         </h1>
