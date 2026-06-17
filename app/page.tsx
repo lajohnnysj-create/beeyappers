@@ -185,20 +185,20 @@ const WORK_FEATURES = [
   {
     img: "/feature-language.webp",
     alt: "Speech bubbles greeting visitors in many languages around a globe",
-    title: "Automatically detect visitor's language",
-    body: "Your chatbot immediately starts chatting with each visitor in their own language.",
+    title: "Automatically detect language",
+    body: "Your chatbot speaks to each visitor in their own language.",
   },
   {
     img: "/feature-leads.webp",
     alt: "Chat flow capturing a visitor's name and email as a lead",
     title: "Collect leads",
-    body: "Your chatbot detects intent from your visitors and collects their contact information.",
+    body: "Your chatbot spots interested visitors and collects their contact details.",
   },
   {
     img: "/feature-notify.webp",
     alt: "Email notification showing a new chat from your website",
     title: "Get notified of every chat",
-    body: "You'll get an email whenever a visitor messages your chatbot.",
+    body: "Get an email the moment someone starts a chat.",
   },
 ];
 
