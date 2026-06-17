@@ -4,17 +4,17 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-const WORDS: { word: string; pill: string }[] = [
-  { word: "chatting", pill: "border-indigo-400/40 bg-indigo-400/10 text-indigo-300" },
-  { word: "talking", pill: "border-sky-400/40 bg-sky-400/10 text-sky-300" },
-  { word: "vibing", pill: "border-fuchsia-400/40 bg-fuchsia-400/10 text-fuchsia-300" },
-  { word: "chilling", pill: "border-cyan-400/40 bg-cyan-400/10 text-cyan-300" },
-  { word: "hanging", pill: "border-rose-400/40 bg-rose-400/10 text-rose-300" },
-  { word: "engaging", pill: "border-emerald-400/40 bg-emerald-400/10 text-emerald-300" },
-  { word: "bonding", pill: "border-violet-400/40 bg-violet-400/10 text-violet-300" },
-  { word: "laughing", pill: "border-amber-400/40 bg-amber-400/10 text-amber-300" },
-  { word: "yapping", pill: "border-lime-400/40 bg-lime-400/10 text-lime-300" },
-  { word: "joking", pill: "border-orange-400/40 bg-orange-400/10 text-orange-300" },
+const WORDS: { word: string; color: string }[] = [
+  { word: "chatting", color: "text-indigo-300" },
+  { word: "talking", color: "text-sky-300" },
+  { word: "vibing", color: "text-fuchsia-300" },
+  { word: "chilling", color: "text-cyan-300" },
+  { word: "hanging", color: "text-rose-300" },
+  { word: "engaging", color: "text-emerald-300" },
+  { word: "bonding", color: "text-violet-300" },
+  { word: "laughing", color: "text-amber-300" },
+  { word: "yapping", color: "text-lime-300" },
+  { word: "joking", color: "text-orange-300" },
 ];
 
 // Widest word reserves the slot so the sentence never reflows as words swap.
@@ -28,8 +28,12 @@ function RotatingWord() {
     return () => clearInterval(id);
   }, []);
 
-  const base = "rounded-md border px-2 py-0.5 font-semibold";
-  const { word, pill } = WORDS[i];
+  // No pill/box. The word is 2px larger than the sentence (text-xl over the
+  // paragraph's text-lg) and bold; the visible copy adds a soft glow in its
+  // own color (currentColor) so it pops on the dark hero rather than sitting
+  // in a button-like frame.
+  const base = "text-xl font-bold tracking-tight";
+  const { word, color } = WORDS[i];
 
   return (
     <span className="relative mx-1 inline-grid align-middle">
@@ -40,7 +44,7 @@ function RotatingWord() {
       </span>
       <span
         key={word}
-        className={`animate-bv-word-in flex items-center justify-center [grid-area:1/1] ${base} ${pill}`}
+        className={`animate-bv-word-in flex items-center justify-center [grid-area:1/1] ${base} ${color} [text-shadow:0_0_16px_currentColor]`}
       >
         {word}
       </span>
