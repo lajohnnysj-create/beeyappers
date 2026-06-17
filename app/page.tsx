@@ -223,8 +223,8 @@ export default async function Home() {
             Live in a few steps
           </h2>
           <p className="mx-auto mt-3 max-w-md text-center text-slate-600">
-            From training your AI to a working chat widget on your website in
-            about the time it takes to grab a coffee.
+            From training your AI to a live widget on your site, about the time
+            it takes to grab a coffee.
           </p>
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             {STEPS.map((s, i) => (
