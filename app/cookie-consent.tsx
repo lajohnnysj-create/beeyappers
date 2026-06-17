@@ -106,14 +106,12 @@ export function CookieConsent() {
     <div
       role="region"
       aria-label="Cookie consent"
-      className="fixed bottom-4 left-4 right-4 z-[90] sm:right-auto sm:max-w-md"
+      className="fixed inset-x-0 bottom-4 z-[90] flex justify-center px-4"
     >
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
-        <h2 className="text-sm font-semibold text-slate-900">Cookies on Bleviq</h2>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          We use essential cookies to keep the site running, like keeping you
-          signed in. With your consent we&apos;d also use analytics cookies to
-          understand how the site is used and improve it. See our{" "}
+      <div className="w-full max-w-xl rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-lg">
+        <p className="text-sm leading-snug text-slate-600">
+          We use essential cookies to run the site. With your okay, we&apos;ll
+          also use analytics cookies to improve it.{" "}
           <Link href="/privacy" className="font-medium text-brand-600 underline">
             Privacy Policy
           </Link>
