@@ -842,17 +842,6 @@ export function ChatWidget({
                 background: config.assistantBubbleColor,
               }}
             >
-              <span
-                style={{
-                  fontSize: 13,
-                  fontWeight: 500,
-                  color: config.textColor,
-                  opacity: 0.7,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {labels.thinking}
-              </span>
               <span style={{ display: "inline-flex", gap: 3 }}>
                 {[0, 1, 2].map((d) => (
                   <span
@@ -868,6 +857,17 @@ export function ChatWidget({
                     }}
                   />
                 ))}
+              </span>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: config.textColor,
+                  opacity: 0.7,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {labels.thinking}
               </span>
             </div>
           </div>
