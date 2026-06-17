@@ -181,6 +181,27 @@ function FeatureIcon({ name }: { name: string }) {
   }
 }
 
+const WORK_FEATURES = [
+  {
+    img: "/feature-language.webp",
+    alt: "Speech bubbles greeting visitors in many languages around a globe",
+    title: "Automatically detect visitor's language",
+    body: "Your chatbot immediately starts chatting with each visitor in their own language.",
+  },
+  {
+    img: "/feature-leads.webp",
+    alt: "Chat flow capturing a visitor's name and email as a lead",
+    title: "Collect leads",
+    body: "Your chatbot detects intent from your visitors and collects their contact information.",
+  },
+  {
+    img: "/feature-notify.webp",
+    alt: "Email notification showing a new chat from your website",
+    title: "Get notified of every chat",
+    body: "You'll get an email whenever a visitor messages your chatbot.",
+  },
+];
+
 export default async function Home() {
   const supabase = createClient();
   const {
@@ -235,6 +256,43 @@ export default async function Home() {
       </section>
 
       {/* Dashboard showcase */}
+      {/* What it does for you — dark, image-ready background */}
+      <section className="relative isolate overflow-hidden bg-black">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/heropagesplash4.webp"
+          alt=""
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+        />
+        {/* Overlays keep the cards and text legible while letting the image show. */}
+        <div className="absolute inset-0 -z-10 bg-black/55" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/80 via-black/25 to-black/80" />
+
+        <div className="mx-auto max-w-6xl px-6 py-20 lg:py-24">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {WORK_FEATURES.map((f) => (
+              <div
+                key={f.title}
+                className="group rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-lg backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.1]"
+              >
+                <div className="relative overflow-hidden rounded-xl border border-white/10 shadow-lg ring-1 ring-black/20">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={f.img} alt={f.alt} className="block w-full" />
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-y-0 left-0 w-1/3 -translate-x-[160%] -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-[900ms] ease-out group-hover:translate-x-[420%]"
+                  />
+                </div>
+                <h3 className="mt-5 font-display text-lg font-semibold text-white">
+                  {f.title}
+                </h3>
+                <p className="mt-2 text-sm text-slate-300">{f.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="overflow-hidden border-t border-slate-200 bg-slate-50">
         <div className="mx-auto grid max-w-5xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:gap-16">
           {/* Tilted desktop mockup */}
