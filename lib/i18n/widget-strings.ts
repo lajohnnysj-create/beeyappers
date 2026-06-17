@@ -14,6 +14,7 @@ export type WidgetStrings = {
   send: string;
   poweredBy: string;
   askAI: string;
+  thinking: string;
   leadName: string;
   leadEmail: string;
   leadPhone: string;
@@ -48,6 +49,7 @@ function coalesce(
     send: pick("send"),
     poweredBy: pick("poweredBy"),
     askAI: pick("askAI"),
+    thinking: pick("thinking"),
     leadName: pick("leadName"),
     leadEmail: pick("leadEmail"),
     leadPhone: pick("leadPhone"),
