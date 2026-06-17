@@ -9,13 +9,13 @@ export async function retrieveChunks(
   siteId: string,
   queryEmbedding: number[],
   matchCount: number,
-  sourceType?: "faq" | "page" | "document"
+  manualOnly = false
 ): Promise<MatchedChunk[]> {
   const { data, error } = await admin.rpc("match_chunks", {
     p_site_id: siteId,
     p_query_embedding: toVectorLiteral(queryEmbedding),
     p_match_count: matchCount,
-    ...(sourceType ? { p_source_type: sourceType } : {}),
+    ...(manualOnly ? { p_manual_only: true } : {}),
   });
   if (error) throw new Error("Retrieval failed: " + error.message);
   return (data || []) as MatchedChunk[];
