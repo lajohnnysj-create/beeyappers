@@ -250,7 +250,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
       }
       const bk = "b" + b++;
       blocks.push(
-        <ul key={bk} style={{ margin: "2px 0 6px", paddingInlineStart: 18 }}>
+        <ul key={bk} style={{ margin: "2px 0 6px", paddingInlineStart: 22, listStyleType: "disc", listStylePosition: "outside" }}>
           {items.map((it, j) => (
             <li key={j} style={{ margin: "2px 0" }}>
               {renderInline(it, config, bk + "-" + j)}
@@ -268,7 +268,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
       }
       const bk = "b" + b++;
       blocks.push(
-        <ol key={bk} style={{ margin: "2px 0 6px", paddingInlineStart: 20 }}>
+        <ol key={bk} style={{ margin: "2px 0 6px", paddingInlineStart: 26, listStyleType: "decimal", listStylePosition: "outside" }}>
           {items.map((it, j) => (
             <li key={j} style={{ margin: "2px 0" }}>
               {renderInline(it, config, bk + "-" + j)}
