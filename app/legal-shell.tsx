@@ -14,7 +14,7 @@ export function LegalShell({
   return (
     <div className="min-h-screen bg-slate-50">
       <SiteHeader signedIn={signedIn} />
-      <main className="mx-auto max-w-3xl px-6 py-16">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-6 py-16 focus:outline-none">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">
           {title}
         </h1>

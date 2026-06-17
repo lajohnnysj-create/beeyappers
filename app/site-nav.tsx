@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Wordmark } from "@/app/wordmark";
+import { SkipLink } from "@/app/skip-link";
 
 /**
  * Single source of truth for the marketing chrome (header + footer).
@@ -25,7 +26,9 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
     : { href: "/login", label: "Start free trial" };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/80 backdrop-blur">
+    <>
+      <SkipLink />
+      <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
         <Link href="/" aria-label="Bleviq home" onClick={close}>
           <Wordmark />
@@ -104,6 +107,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
         </nav>
       )}
     </header>
+    </>
   );
 }
 
