@@ -15,7 +15,7 @@ export const maxDuration = 30;
 const MAX_QUESTION_CHARS = FIELD_LIMITS.chatMessage;
 const BURST_LIMIT = 20; // requests per minute, per IP per site (anti-flood)
 const BURST_WINDOW = 60;
-const HOURLY_LIMIT = 30; // requests per hour, per IP per site (sustained cap)
+const HOURLY_LIMIT = 60; // requests per hour, per IP per site (sustained cap)
 const HOURLY_WINDOW = 3600;
 const TOP_K = 8;
 
