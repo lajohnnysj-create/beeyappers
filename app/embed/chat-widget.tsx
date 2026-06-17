@@ -807,7 +807,7 @@ export function ChatWidget({
                     onPick={(q) => sendText(q)}
                   />
                 )}
-                {m.collectInfo && (
+                {m.collectInfo && i === messages.length - 1 && (
                   <LeadForm
                     widgetKey={widgetKey}
                     conversationId={convoIdRef.current}
