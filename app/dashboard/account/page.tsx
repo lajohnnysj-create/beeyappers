@@ -65,7 +65,7 @@ export default async function AccountSettingsPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 py-8">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-2xl px-4 py-8 focus:outline-none">
         <Link
           href="/dashboard"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition hover:text-slate-900"
