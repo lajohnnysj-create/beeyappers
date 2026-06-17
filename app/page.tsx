@@ -198,7 +198,7 @@ const WORK_FEATURES = [
     img: "/feature-notify.webp",
     alt: "Email notification showing a new chat from your website",
     title: "Get notified of every chat",
-    body: "Get an email the moment someone starts a chat.",
+    body: "Get the full conversation emailed to you after each chat ends.",
   },
 ];
 
