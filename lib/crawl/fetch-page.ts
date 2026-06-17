@@ -1,7 +1,7 @@
 const MAX_BYTES = 2_000_000; // 2 MB cap per page
 const TIMEOUT_MS = 12_000;
 const UA =
-  "BeeYappersBot/0.1 (+https://bee-yappers.example; AI site assistant)";
+  "BleviqBot/1.0 (+https://www.bleviq.com; AI site assistant)";
 
 import { safeFetch } from "./safe-fetch";
 

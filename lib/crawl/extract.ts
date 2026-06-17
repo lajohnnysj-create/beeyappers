@@ -5,13 +5,14 @@ export type Extracted = { title: string; text: string };
 export function extractContent(html: string): Extracted {
   const $ = cheerio.load(html);
 
-  // Remove non-content boilerplate only. We deliberately KEEP aria-hidden
-  // elements: accessible tabs, accordions, and carousels mark their inactive
-  // panels aria-hidden="true", and that hidden text is real content the
-  // assistant should learn (it was the reason toggled content went missing).
+  // Strip technical noise and navigation menus only. We KEEP <header>/<footer>
+  // containers and aria-hidden elements on purpose: footers carry real business
+  // info (hours, address, contact), and accessible tabs/accordions/carousels
+  // mark their inactive panels aria-hidden. Removing <nav> drops the actual
+  // menus wherever they sit (including inside header/footer), so the chrome goes
+  // without taking real content with it.
   $(
-    "script, style, noscript, svg, nav, header, footer, form, iframe, " +
-      "[role='navigation']"
+    "script, style, noscript, svg, iframe, form, nav, [role='navigation']"
   ).remove();
 
   const title =
@@ -19,16 +20,24 @@ export function extractContent(html: string): Extracted {
     $("h1").first().text().trim() ||
     "Untitled";
 
-  // Prefer a main/article region; fall back to body.
-  const root = $("main").length
+  // Prefer the primary content region, but always also capture the footer,
+  // since business hours / address / contact often live only there and sit
+  // outside <main>. When there's no semantic main/article, read the whole body.
+  const main = $("main").length
     ? $("main")
     : $("article").length
     ? $("article")
-    : $("body");
+    : null;
 
-  // Collapse whitespace and drop empty lines.
-  const text = root
-    .text()
+  let raw: string;
+  if (main) {
+    const footer = $("footer").text().trim();
+    raw = footer ? main.text() + "\n\n" + footer : main.text();
+  } else {
+    raw = $("body").text();
+  }
+
+  const text = raw
     .replace(/[ \t]+/g, " ")
     .replace(/\n\s*\n\s*\n+/g, "\n\n")
     .trim();
