@@ -117,17 +117,16 @@ function LinkButton({
       target="_blank"
       rel="noopener noreferrer"
       style={{
-        display: "flex",
+        display: "inline-flex",
         alignItems: "center",
-        justifyContent: "space-between",
-        gap: 10,
-        maxWidth: 280,
-        padding: "10px 14px",
-        borderRadius: 12,
+        gap: 7,
+        maxWidth: "100%",
+        padding: "8px 14px",
+        borderRadius: 999,
         background: config.bubbleColor,
         color: readable(config.bubbleColor),
         textDecoration: "none",
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: 600,
         boxShadow: "0 1px 2px rgba(0,0,0,.08)",
       }}
@@ -141,7 +140,7 @@ function LinkButton({
       >
         {label}
       </span>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
         <path d="M7 17 17 7M9 7h8v8" />
       </svg>
     </a>
@@ -199,11 +198,7 @@ function renderEmphasis(text: string, keyBase: string): React.ReactNode[] {
   return out;
 }
 
-function renderInline(
-  text: string,
-  config: WidgetConfig,
-  keyBase: string
-): React.ReactNode[] {
+function renderInline(text: string, keyBase: string): React.ReactNode[] {
   const out: React.ReactNode[] = [];
   let last = 0;
   let i = 0;
@@ -213,40 +208,13 @@ function renderInline(
     if (m.index > last) {
       out.push(...renderEmphasis(text.slice(last, m.index), keyBase + "p" + i));
     }
-    const k = keyBase + "l" + i++;
+    i++;
     if (m[1] !== undefined) {
       // Markdown link label stays inline; the clickable button renders below.
       out.push(m[1]);
-    } else if (m[3] !== undefined) {
-      // Bare URL: http/https kept as-is; a scheme-less www. address gets an
-      // https:// prefix. http/https only on the href (so no javascript: or
-      // other unsafe schemes), and no innerHTML, so this stays injection-safe.
-      let shown = m[3];
-      const tm = shown.match(/[.,!?:;)\]}'"]+$/);
-      let trail = "";
-      if (tm) {
-        trail = tm[0];
-        shown = shown.slice(0, shown.length - trail.length);
-      }
-      const href = /^https?:\/\//i.test(shown) ? shown : "https://" + shown;
-      out.push(
-        <a
-          key={k}
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            color: config.bubbleColor,
-            textDecoration: "underline",
-            wordBreak: "break-word",
-            overflowWrap: "anywhere",
-          }}
-        >
-          {shown}
-        </a>
-      );
-      if (trail) out.push(trail);
     }
+    // Bare URLs (m[3]) are shown as "Visit <domain>" buttons below the message
+    // (collected in MessageContent), so they are dropped from the inline flow.
     last = LINK_RE.lastIndex;
   }
   if (last < text.length) {
@@ -255,16 +223,41 @@ function renderInline(
   return out;
 }
 
+// Friendly button label for a bare URL: "Visit instagram.com" (host without www).
+function visitLabel(href: string): string {
+  try {
+    const host = new URL(href).hostname.replace(/^www\./i, "");
+    return host ? "Visit " + host : "Visit link";
+  } catch {
+    return "Visit link";
+  }
+}
+
 function MessageContent({ text, config }: { text: string; config: WidgetConfig }) {
-  // Collect unique page links to render as buttons under the message.
+  // Collect links to render as buttons under the message. Markdown links keep
+  // their given label; bare URLs become "Visit <domain>". One pass with the
+  // same LINK_RE used for inline rendering, so a URL inside [..](..) is not
+  // double-counted.
   const links: { label: string; url: string }[] = [];
   const seen = new Set<string>();
-  const linkRe = /\[([^\]]+)\]\(([^)\s]+)\)/g;
+  LINK_RE.lastIndex = 0;
   let lm: RegExpExecArray | null;
-  while ((lm = linkRe.exec(text)) !== null) {
-    if (/^https?:\/\//i.test(lm[2]) && !seen.has(lm[2])) {
-      seen.add(lm[2]);
-      links.push({ label: lm[1], url: lm[2] });
+  while ((lm = LINK_RE.exec(text)) !== null) {
+    if (lm[1] !== undefined) {
+      const url = lm[2];
+      if (/^https?:\/\//i.test(url) && !seen.has(url)) {
+        seen.add(url);
+        links.push({ label: lm[1], url });
+      }
+    } else if (lm[3] !== undefined) {
+      let shown = lm[3];
+      const tm = shown.match(/[.,!?:;)\]}'"]+$/);
+      if (tm) shown = shown.slice(0, shown.length - tm[0].length);
+      const href = /^https?:\/\//i.test(shown) ? shown : "https://" + shown;
+      if (!seen.has(href)) {
+        seen.add(href);
+        links.push({ label: visitLabel(href), url: href });
+      }
     }
   }
 
@@ -291,7 +284,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
         <ul key={bk} style={{ margin: "2px 0 6px", paddingInlineStart: 22, listStyleType: "disc", listStylePosition: "outside" }}>
           {items.map((it, j) => (
             <li key={j} style={{ margin: "2px 0" }}>
-              {renderInline(it, config, bk + "-" + j)}
+              {renderInline(it, bk + "-" + j)}
             </li>
           ))}
         </ul>
@@ -309,7 +302,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
         <ol key={bk} style={{ margin: "2px 0 6px", paddingInlineStart: 26, listStyleType: "decimal", listStylePosition: "outside" }}>
           {items.map((it, j) => (
             <li key={j} style={{ margin: "2px 0" }}>
-              {renderInline(it, config, bk + "-" + j)}
+              {renderInline(it, bk + "-" + j)}
             </li>
           ))}
         </ol>
@@ -331,7 +324,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
       <p key={bk} style={{ margin: "0 0 6px" }}>
         {para.map((ln, j) => (
           <span key={j}>
-            {renderInline(ln, config, bk + "-" + j)}
+            {renderInline(ln, bk + "-" + j)}
             {j < para.length - 1 ? <br /> : null}
           </span>
         ))}
@@ -343,7 +336,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
     <div style={{ marginBottom: links.length ? 0 : -6 }}>
       {blocks}
       {links.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6, marginTop: 8 }}>
           {links.map((l, j) => (
             <LinkButton key={j} href={l.url} label={l.label} config={config} />
           ))}
