@@ -155,7 +155,7 @@ function renderInline(
 ): React.ReactNode[] {
   const out: React.ReactNode[] = [];
   const re =
-    /\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_|(https?:\/\/[^\s<]+)/g;
+    /\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_|((?:https?:\/\/|www\.)[^\s<]+)/g;
   let last = 0;
   let i = 0;
   let m: RegExpExecArray | null;
@@ -176,28 +176,32 @@ function renderInline(
     } else if (m[6] !== undefined || m[7] !== undefined) {
       out.push(<em key={k}>{m[6] ?? m[7]}</em>);
     } else if (m[8] !== undefined) {
-      // Bare URL: render a real link. http/https only (so no javascript: or
-      // other unsafe schemes), and no innerHTML, so this stays injection-safe.
-      let url = m[8];
-      const tm = url.match(/[.,!?:;)\]}'"]+$/);
+      // Bare URL: render a real link. http/https kept as-is; a scheme-less
+      // www. address gets an https:// prefix. http/https only on the href (so
+      // no javascript: or other unsafe schemes), and no innerHTML, so this
+      // stays injection-safe.
+      let shown = m[8];
+      const tm = shown.match(/[.,!?:;)\]}'"]+$/);
       let trail = "";
       if (tm) {
         trail = tm[0];
-        url = url.slice(0, url.length - trail.length);
+        shown = shown.slice(0, shown.length - trail.length);
       }
+      const href = /^https?:\/\//i.test(shown) ? shown : "https://" + shown;
       out.push(
         <a
           key={k}
-          href={url}
+          href={href}
           target="_blank"
           rel="noopener noreferrer"
           style={{
             color: config.bubbleColor,
             textDecoration: "underline",
             wordBreak: "break-word",
+            overflowWrap: "anywhere",
           }}
         >
-          {url}
+          {shown}
         </a>
       );
       if (trail) out.push(trail);
@@ -833,6 +837,7 @@ export function ChatWidget({
               <div
                 style={{
                   maxWidth: "82%",
+                  overflowWrap: "anywhere",
                   borderRadius: 18,
                   ...(rtl
                     ? { borderBottomLeftRadius: 6 }
@@ -854,6 +859,7 @@ export function ChatWidget({
                 <div
                   style={{
                     maxWidth: "100%",
+                    overflowWrap: "anywhere",
                     borderRadius: 18,
                     ...(rtl
                       ? { borderBottomRightRadius: 6 }
