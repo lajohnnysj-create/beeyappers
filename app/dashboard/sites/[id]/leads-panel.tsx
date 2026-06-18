@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { deleteLead, setLeadAnswered } from "./actions";
+import { deleteLead, setLeadAnswered, setLeadNotes } from "./actions";
+import { FIELD_LIMITS } from "@/lib/field-limits";
+
+const NOTE_MAX = FIELD_LIMITS.leadNote;
 
 export type LeadItem = {
   id: string;
@@ -11,6 +14,7 @@ export type LeadItem = {
   message: string | null;
   created_at: string;
   answered_at: string | null;
+  notes: string | null;
 };
 
 function fmt(iso: string): string {
@@ -34,6 +38,22 @@ function LeadRow({
   const [answered, setAnswered] = useState(!!lead.answered_at);
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
+
+  const [notes, setNotes] = useState(lead.notes ?? "");
+  const [savedNotes, setSavedNotes] = useState(lead.notes ?? "");
+  const [savingNotes, setSavingNotes] = useState(false);
+  const notesDirty = notes !== savedNotes;
+
+  async function saveNotes() {
+    if (savingNotes || !notesDirty) return;
+    setSavingNotes(true);
+    const res = await setLeadNotes(lead.id, notes);
+    setSavingNotes(false);
+    if (res?.error) return; // leave the edit in place so nothing is lost
+    const stored = res?.notes ?? notes;
+    setNotes(stored);
+    setSavedNotes(stored);
+  }
 
   async function toggleAnswered() {
     if (busy) return;
@@ -104,6 +124,51 @@ function LeadRow({
           {lead.message}
         </p>
       )}
+
+      <div className="mt-3 border-t border-slate-100 pt-3">
+        <label
+          htmlFor={`lead-notes-${lead.id}`}
+          className="block text-xs font-medium text-slate-500"
+        >
+          Notes
+        </label>
+        <textarea
+          id={`lead-notes-${lead.id}`}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          maxLength={NOTE_MAX}
+          rows={2}
+          placeholder="Add a private note (only you can see this)"
+          className="mt-1 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+        />
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <span className="text-xs text-slate-400">
+            {notes.length}/{NOTE_MAX}
+          </span>
+          {notesDirty ? (
+            <span className="flex items-center gap-3 text-sm">
+              <button
+                type="button"
+                onClick={() => setNotes(savedNotes)}
+                disabled={savingNotes}
+                className="text-slate-500 hover:text-slate-700 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={saveNotes}
+                disabled={savingNotes}
+                className="font-medium text-brand-700 hover:text-brand-800 disabled:opacity-50"
+              >
+                {savingNotes ? "Saving…" : "Save note"}
+              </button>
+            </span>
+          ) : savedNotes ? (
+            <span className="text-xs text-slate-400">Saved</span>
+          ) : null}
+        </div>
+      </div>
 
       <div className="mt-3 flex items-center gap-4 border-t border-slate-100 pt-3 text-sm">
         <button

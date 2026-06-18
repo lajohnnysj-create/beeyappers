@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { FIELD_LIMITS, clampLen } from "@/lib/field-limits";
 import type { WidgetConfig } from "@/lib/widget-config";
 
 export async function saveBranding(siteId: string, config: WidgetConfig) {
@@ -97,6 +98,24 @@ export async function setLeadAnswered(leadId: string, answered: boolean) {
     .eq("id", leadId);
   if (error) return { error: error.message };
   return { ok: true };
+}
+
+export async function setLeadNotes(leadId: string, notes: string) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Signed out. Refresh and sign in again." };
+
+  // Clamp server-side; the textarea maxLength is trivially bypassed.
+  const clean = clampLen(notes, FIELD_LIMITS.leadNote);
+  // RLS confines this update to the caller's own leads.
+  const { error } = await supabase
+    .from("leads")
+    .update({ notes: clean })
+    .eq("id", leadId);
+  if (error) return { error: error.message };
+  return { ok: true, notes: clean };
 }
 
 export async function deleteSite(siteId: string) {

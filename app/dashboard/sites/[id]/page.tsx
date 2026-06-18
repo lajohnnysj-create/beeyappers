@@ -60,7 +60,7 @@ export default async function SiteWorkspacePage({
         .gte("created_at", since30),
       supabase
         .from("leads")
-        .select("id, name, email, phone, message, created_at, answered_at")
+        .select("id, name, email, phone, message, created_at, answered_at, notes")
         .eq("site_id", site.id)
         .order("created_at", { ascending: false })
         .limit(50),
