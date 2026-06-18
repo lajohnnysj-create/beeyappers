@@ -216,7 +216,8 @@ export function PricingTable({ canceled = false }: { canceled?: boolean }) {
         renews automatically at the price shown,{" "}
         {interval === "year" ? "billed once a year" : "billed every month"}, and
         continues until you cancel. You can cancel anytime from Settings &rarr;
-        Billing, including before the trial ends to avoid any charge. By starting
+        Manage billing, including before the trial ends to avoid any charge. By
+        starting
         a trial you agree to our{" "}
         <a href="/terms" className="font-medium text-brand-600 underline">
           Terms
