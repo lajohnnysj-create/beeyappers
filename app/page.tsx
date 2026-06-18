@@ -1,9 +1,9 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/server";
 import { SiteHeader, SiteFooter } from "@/app/site-nav";
 import { HomeHero } from "@/app/home-hero";
+import { SignupCtas } from "@/app/signup-ctas";
 import { BleviqWidget } from "@/app/bleviq-widget";
 
 export const metadata: Metadata = pageMetadata({
@@ -432,26 +432,7 @@ export default async function Home() {
           <p className="mx-auto mt-4 max-w-md text-base text-white/85">
             Train your assistant today and watch it start answering in minutes.
           </p>
-          <Link
-            href="/login"
-            className="group mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-base font-semibold text-slate-900 shadow-lg transition duration-200 hover:-translate-y-0.5 hover:shadow-xl"
-          >
-            Start your free trial
-            <svg
-              viewBox="0 0 20 20"
-              fill="none"
-              aria-hidden="true"
-              className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
-            >
-              <path
-                d="M4 10h12m0 0-4.5-4.5M16 10l-4.5 4.5"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </Link>
+          <SignupCtas centered />
         </div>
       </section>
       </main>
