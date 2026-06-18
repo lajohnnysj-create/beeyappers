@@ -466,6 +466,17 @@ function LeadForm({
     fontFamily: font,
   };
 
+  // Field with room on the left for an inline icon.
+  const fieldIcon: React.CSSProperties = { ...field, paddingLeft: 36 };
+  const iconWrap: React.CSSProperties = { position: "relative", width: "100%" };
+  const iconStyle: React.CSSProperties = {
+    position: "absolute",
+    left: 11,
+    top: "50%",
+    transform: "translateY(-50%)",
+    pointerEvents: "none",
+  };
+
   async function submit() {
     const v = leadError({ name, email, phone });
     if (v) {
@@ -546,31 +557,81 @@ function LeadForm({
         boxSizing: "border-box",
       }}
     >
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder={labels.leadName}
-        maxLength={LEAD_LIMITS.name}
-        style={field}
-      />
-      <input
-        type="email"
-        inputMode="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder={labels.leadEmail}
-        maxLength={LEAD_LIMITS.email}
-        style={field}
-      />
-      <input
-        type="tel"
-        inputMode="tel"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        placeholder={labels.leadPhone}
-        maxLength={LEAD_LIMITS.phone}
-        style={field}
-      />
+      <div style={iconWrap}>
+        <svg
+          style={iconStyle}
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#0f172a"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={labels.leadName}
+          maxLength={LEAD_LIMITS.name}
+          style={fieldIcon}
+        />
+      </div>
+      <div style={iconWrap}>
+        <svg
+          style={iconStyle}
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#0f172a"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <path d="m3 7 9 6 9-6" />
+        </svg>
+        <input
+          type="email"
+          inputMode="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder={labels.leadEmail}
+          maxLength={LEAD_LIMITS.email}
+          style={fieldIcon}
+        />
+      </div>
+      <div style={iconWrap}>
+        <svg
+          style={iconStyle}
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#0f172a"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+        </svg>
+        <input
+          type="tel"
+          inputMode="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder={labels.leadPhone}
+          maxLength={LEAD_LIMITS.phone}
+          style={fieldIcon}
+        />
+      </div>
       {err && (
         <span style={{ fontSize: 13, color: "#dc2626" }} role="alert">
           {err}
