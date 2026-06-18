@@ -608,6 +608,7 @@ export function ChatWidget({
   onClose,
   pendingQuestion,
   onQuestionConsumed,
+  visible = true,
 }: {
   widgetKey: string;
   config: WidgetConfig;
@@ -617,6 +618,7 @@ export function ChatWidget({
   onClose?: () => void;
   pendingQuestion?: string;
   onQuestionConsumed?: () => void;
+  visible?: boolean;
 }) {
   const rtl = isRtlLang(lang);
   const dir = rtl ? "rtl" : "ltr";
@@ -630,6 +632,10 @@ export function ChatWidget({
   const [atBottom, setAtBottom] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastMsgRef = useRef<HTMLDivElement>(null);
+  // Until the visitor sends their first live message, every message change
+  // (the greeting, then any restored history) should land at the bottom so a
+  // resumed chat opens where it left off rather than scrolled to the top.
+  const initialScrollRef = useRef(true);
   // One stable id per chat so every turn threads into a single server-side
   // conversation (instead of a new row per message). Persisted in localStorage
   // with a rolling TTL so the chat resumes across reloads and tab reopens.
@@ -740,7 +746,21 @@ export function ChatWidget({
 
   useEffect(() => {
     const sc = scrollRef.current;
-    if (!sc) return;
+    // The panel is always mounted but hidden when closed, so it has no layout
+    // (scrollHeight is 0) until it opens. Skip while hidden and let the visible
+    // transition re-run this.
+    if (!sc || !visible) return;
+    // Initial load or a resumed conversation: snap to the bottom once the
+    // restored messages have laid out, so the visitor sees the latest turn
+    // instead of the greeting at the top. Instant (no smooth animation).
+    if (initialScrollRef.current) {
+      const jump = () => {
+        const el = scrollRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
+      };
+      requestAnimationFrame(() => requestAnimationFrame(jump));
+      return;
+    }
     const last = messages[messages.length - 1];
     // While sending / waiting, keep the newest content in view.
     if (busy || !last || last.role === "user") {
@@ -756,7 +776,7 @@ export function ChatWidget({
     } else {
       sc.scrollTo({ top: sc.scrollHeight, behavior: "smooth" });
     }
-  }, [messages, busy]);
+  }, [messages, busy, visible]);
 
   function onScroll() {
     const sc = scrollRef.current;
@@ -785,6 +805,9 @@ export function ChatWidget({
   async function sendText(q: string) {
     q = q.trim();
     if (!q || busy) return;
+    // From the first live send on, use the read-from-top answer scrolling
+    // instead of the initial snap-to-bottom.
+    initialScrollRef.current = false;
     setInput("");
     // Prior turns (minus the opening greeting) so follow-ups keep context.
     const history = messages

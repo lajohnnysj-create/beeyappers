@@ -233,6 +233,7 @@ export function WidgetFrame({
           onClose={closeChat}
           pendingQuestion={pending}
           onQuestionConsumed={() => setPending(undefined)}
+          visible={open}
         />
       </div>
 
