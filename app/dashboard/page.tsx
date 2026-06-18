@@ -5,6 +5,8 @@ import { signOut } from "@/app/auth/actions";
 import { Wordmark } from "@/app/wordmark";
 import { NewSiteForm } from "./new-site-form";
 
+export const metadata = { title: "Dashboard | AI Chatbot by Bleviq" };
+
 // Authenticated, per-user page: never cache or statically render it.
 export const dynamic = "force-dynamic";
 
