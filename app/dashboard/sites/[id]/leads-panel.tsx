@@ -283,7 +283,21 @@ export function LeadsPanel({ leads }: { leads: LeadItem[] }) {
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
-      <h2 className="text-lg font-semibold text-slate-900">Leads</h2>
+      <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+        <svg
+          className="h-5 w-5 shrink-0 text-brand-600"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        Leads
+      </h2>
       <p className="mt-1 text-sm text-slate-600">
         Contact details visitors submit through the chat. Each one is also
         emailed to you.
