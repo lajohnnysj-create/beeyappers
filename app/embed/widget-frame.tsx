@@ -486,7 +486,7 @@ function BarLauncher({
               color: "#0f172a",
               width: expanded ? openW : restW,
               boxSizing: "border-box",
-              transition: "width .3s cubic-bezier(.34,1.4,.64,1)",
+              transition: "width .28s cubic-bezier(.4,0,.2,1)",
             }}
           />
           <button
