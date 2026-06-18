@@ -110,7 +110,7 @@ export const DEFAULT_LABELS: WidgetLabels = {
   send: "Send",
   poweredBy: "Powered by",
   askAI: "Ask AI",
-  thinking: "AI Thinking",
+  thinking: "Thinking",
   leadName: "Name",
   leadEmail: "Email",
   leadPhone: "Phone",
