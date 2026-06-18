@@ -139,7 +139,7 @@ export function SiteFooter() {
               href="/do-not-share"
               className="transition hover:text-slate-900"
             >
-              Do Not Sell or Share My Personal Information
+              Do Not Sell or Share
             </Link>
           </nav>
         </div>
