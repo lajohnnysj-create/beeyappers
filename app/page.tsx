@@ -109,6 +109,13 @@ const DASHBOARD_POINTS = [
   "Add documents and FAQs that work instantly and survive re-training.",
 ];
 
+const ANALYTICS_POINTS = [
+  "Messages, conversations, visitors, and leads at a glance.",
+  "Spot trends over time, by day or by hour.",
+  "See where visitors come from and what they use.",
+  "Privacy-first: no IP addresses, no personal profiles.",
+];
+
 function Glyph({ children }: { children: React.ReactNode }) {
   return (
     <svg
@@ -370,6 +377,66 @@ export default async function Home() {
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="overflow-hidden bg-white">
+        <div className="mx-auto grid max-w-5xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:gap-16">
+          {/* Copy */}
+          <div>
+            <h2 className="font-display text-3xl font-bold tracking-tight text-slate-900">
+              Analytics that show what&rsquo;s working
+            </h2>
+            <p className="mt-4 text-lg text-slate-600">
+              See how much your assistant is doing and who it&rsquo;s reaching,
+              all in one place and updated as visitors chat.
+            </p>
+            <ul className="mt-6 space-y-3">
+              {ANALYTICS_POINTS.map((p) => (
+                <li key={p} className="flex items-start gap-3 text-slate-700">
+                  <span className="mt-0.5 grid h-5 w-5 flex-shrink-0 place-items-center rounded-full bg-indigo-100 text-indigo-600">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  </span>
+                  <span>{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Tilted desktop mockup (mirrored) */}
+          <div className="lg:[perspective:1600px]">
+            <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl transition-transform duration-500 lg:[transform:rotateY(9deg)_rotateX(3deg)] lg:hover:[transform:rotateY(0deg)_rotateX(0deg)]">
+              {/* Browser chrome */}
+              <div className="flex items-center gap-1.5 border-b border-slate-200 bg-slate-100 px-3 py-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                <span className="ml-3 hidden flex-1 truncate rounded bg-white px-2 py-0.5 text-[11px] text-slate-500 sm:block">
+                  bleviq.com/dashboard
+                </span>
+              </div>
+              {/* Screenshot */}
+              <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/analyticsmockup.webp"
+                  alt="The Bleviq analytics dashboard: messages, conversations, visitors, and leads, with a trend chart and visitor locations and devices."
+                  className="block w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
