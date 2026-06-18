@@ -9,6 +9,7 @@ export const FIELD_LIMITS = {
   launcherLabel: 32, // chat bar / bubble label (kept short so the bar can't get too wide)
   faqQuestion: 200,
   faqAnswer: 2000,
+  leadNote: 2000, // owner's private note on a captured lead
   password: 72, // bcrypt's effective ceiling
   confirmWord: 12, // "DELETE" confirmation box
   chatMessage: 1000, // visitor's message in the public chat widget
