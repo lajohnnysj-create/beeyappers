@@ -6,7 +6,7 @@ export const FIELD_LIMITS = {
   siteName: 60,
   assistantName: 40, // AI assistant display name
   greeting: 300, // welcome message
-  launcherLabel: 40, // chat bubble label
+  launcherLabel: 32, // chat bar / bubble label (kept short so the bar can't get too wide)
   faqQuestion: 200,
   faqAnswer: 2000,
   password: 72, // bcrypt's effective ceiling
