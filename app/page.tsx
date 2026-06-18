@@ -113,7 +113,6 @@ const ANALYTICS_POINTS = [
   "Messages, conversations, visitors, and leads at a glance.",
   "Spot trends over time, by day or by hour.",
   "See where visitors come from and what they use.",
-  "Privacy-first: no IP addresses, no personal profiles.",
 ];
 
 function Glyph({ children }: { children: React.ReactNode }) {
@@ -435,6 +434,28 @@ export default async function Home() {
                   alt="The Bleviq analytics dashboard: messages, conversations, visitors, and leads, with a trend chart and visitor locations and devices."
                   className="block w-full"
                 />
+                {/* Pulsing point on the chart peak */}
+                <span
+                  className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+                  style={{ left: "63%", top: "27%" }}
+                  aria-hidden="true"
+                >
+                  <span className="relative flex h-3 w-3">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75" />
+                    <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-white bg-indigo-600" />
+                  </span>
+                </span>
+                {/* Floating tooltip echoing the live hover tooltip */}
+                <div
+                  className="bv-float pointer-events-none absolute"
+                  style={{ left: "63%", top: "27%" }}
+                  aria-hidden="true"
+                >
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs shadow-md">
+                    <span className="font-medium text-slate-700">Jun 16</span>
+                    <span className="text-slate-500"> &middot; 28 messages</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
