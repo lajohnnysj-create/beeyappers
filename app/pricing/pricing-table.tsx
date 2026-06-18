@@ -188,6 +188,10 @@ export function PricingTable({ canceled = false }: { canceled?: boolean }) {
                 {busy ? "Starting..." : "Start 14-day free trial"}
               </button>
 
+              <p className="mt-2 text-center text-xs text-slate-500">
+                Renews automatically until you cancel.
+              </p>
+
               <ul className="mt-6 space-y-3">
                 {plan.features.map((f) => (
                   <li key={f} className="flex gap-2.5 text-sm text-slate-700">
@@ -206,9 +210,18 @@ export function PricingTable({ canceled = false }: { canceled?: boolean }) {
         })}
       </div>
 
-      <p className="mt-8 text-sm text-slate-500">
-        14-day free trial on every plan. Card required, cancel anytime before it
-        ends and you won&apos;t be charged.
+      <p className="mx-auto mt-8 max-w-xl text-sm leading-relaxed text-slate-600">
+        Every plan starts with a 14-day free trial. We save your card now but
+        don&apos;t charge it during the trial. When the trial ends, your plan
+        renews automatically at the price shown,{" "}
+        {interval === "year" ? "billed once a year" : "billed every month"}, and
+        continues until you cancel. You can cancel anytime from Settings &rarr;
+        Billing, including before the trial ends to avoid any charge. By starting
+        a trial you agree to our{" "}
+        <a href="/terms" className="font-medium text-brand-600 underline">
+          Terms
+        </a>{" "}
+        and authorize this recurring charge.
       </p>
     </div>
   );
