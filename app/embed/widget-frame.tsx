@@ -101,6 +101,11 @@ export function WidgetFrame({
   const isMobile = vw > 0 && vw <= 640;
   const fullscreen = open && isMobile;
 
+  // Cap for the chat-bar launcher input so a longer label can widen the resting
+  // bar to fit it (matching the dashboard preview) without overflowing narrow
+  // screens. The iframe follows via the ResizeObserver below.
+  const barMax = Math.min(300, Math.max(110, vw - 2 * MARGIN - 120));
+
   // Track the visual viewport so the panel shrinks to the area above the
   // on-screen keyboard, keeping the input visible without scrolling the host.
   const [vvh, setVvh] = useState(0);
@@ -252,7 +257,7 @@ export function WidgetFrame({
           </button>
         )
       ) : config.launcherStyle === "bar" ? (
-        <BarLauncher config={config} labels={labels} rtl={rtl} left={left} onOpen={openChat} />
+        <BarLauncher config={config} labels={labels} rtl={rtl} left={left} onOpen={openChat} barMax={barMax} />
       ) : (
         <BubbleLauncher config={config} left={left} onOpen={() => openChat()} />
       )}
@@ -336,15 +341,24 @@ function BarLauncher({
   rtl,
   left,
   onOpen,
+  barMax,
 }: {
   config: WidgetConfig;
   labels: WidgetLabels;
   rtl: boolean;
   left: boolean;
   onOpen: (q?: string) => void;
+  barMax: number;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [val, setVal] = useState("");
+
+  // Resting width fits the label (approx 9px/char at 16px), capped so it can't
+  // overflow a narrow screen; the focused/typing width is at least a roomy
+  // 210px. This mirrors the dashboard preview, which sizes to the label.
+  const labelText = config.launcherLabel || labels.askAI;
+  const restW = Math.max(64, Math.min(barMax, Math.round(labelText.length * 9) + 6));
+  const openW = Math.max(restW, Math.min(barMax, 210));
 
   function submit() {
     const q = val.trim();
@@ -443,7 +457,7 @@ function BarLauncher({
               // focused (it expands on tap before the panel opens).
               fontSize: 16,
               color: "#0f172a",
-              width: expanded ? 210 : 74,
+              width: expanded ? openW : restW,
               boxSizing: "border-box",
               transition: "width .3s cubic-bezier(.34,1.4,.64,1)",
             }}
