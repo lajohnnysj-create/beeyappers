@@ -5,6 +5,7 @@ import { retrieveChunks, type MatchedChunk } from "@/lib/answer/retrieve";
 import { rewriteQuery } from "@/lib/answer/rewrite";
 import { generateAnswer, suggestAnswerableQuestions, type ChatTurn } from "@/lib/answer/generate";
 import { getClientIp, hashIp } from "@/lib/security/ip";
+import { countryFromReq, deviceFromUA, browserFromUA } from "@/lib/analytics/visitor";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { getEntitlementByUserId } from "@/lib/billing/entitlement";
 import { FIELD_LIMITS } from "@/lib/field-limits";
@@ -199,6 +200,11 @@ export async function POST(req: Request) {
   //    hourly cap so one visitor can't run up usage over a whole session.
   const ip = getClientIp(req);
   const ipHash = hashIp(ip);
+  // Privacy-safe visitor attributes for analytics (no IP stored).
+  const country = countryFromReq(req);
+  const ua = req.headers.get("user-agent");
+  const device = deviceFromUA(ua);
+  const browser = browserFromUA(ua);
   const burstOk = await checkRateLimit(
     admin,
     `answer:${site.id}:${ipHash}`,
@@ -446,6 +452,9 @@ export async function POST(req: Request) {
           ip_hash: ipHash,
           client_id: clientConvoId || null,
           last_message_at: nowIso,
+          country: country,
+          device: device,
+          browser: browser,
         })
         .select("id")
         .single();
