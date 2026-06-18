@@ -13,14 +13,13 @@ export async function extractDocText(
   }
 
   if (lower.endsWith(".pdf") || mime === "application/pdf") {
-    const { PDFParse } = await import("pdf-parse");
-    const parser = new PDFParse({ data: new Uint8Array(buf) });
-    try {
-      const res = await parser.getText();
-      return res?.text || "";
-    } finally {
-      await parser.destroy?.();
-    }
+    // unpdf ships a DOM-free pdfjs build, so it extracts text in the Node /
+    // serverless runtime without needing browser globals like DOMMatrix
+    // (which is what pdf-parse/pdfjs tripped on).
+    const { extractText, getDocumentProxy } = await import("unpdf");
+    const pdf = await getDocumentProxy(new Uint8Array(buf));
+    const { text } = await extractText(pdf, { mergePages: true });
+    return Array.isArray(text) ? text.join("\n") : text || "";
   }
 
   if (
