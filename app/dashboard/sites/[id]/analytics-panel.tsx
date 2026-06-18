@@ -139,10 +139,46 @@ function ChartTooltip({
   );
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function Icon({
+  children,
+  className = "h-4 w-4 shrink-0 text-slate-400",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  sub,
+  icon,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  icon?: React.ReactNode;
+}) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card">
-      <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
+      <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
+        {icon}
+        {label}
+      </div>
       <div className="mt-1 text-2xl font-semibold text-slate-900">{value}</div>
       {sub && <div className="mt-0.5 text-xs text-slate-500">{sub}</div>}
     </div>
@@ -163,15 +199,20 @@ function BarList({
   title,
   rows,
   renderKey,
+  icon,
 }: {
   title: string;
   rows: { k: string; v: number }[];
   renderKey?: (k: string) => string;
+  icon?: React.ReactNode;
 }) {
   const max = rows.reduce((m, r) => Math.max(m, r.v), 0) || 1;
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
-      <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+        {icon}
+        {title}
+      </h3>
       {rows.length === 0 ? (
         <p className="mt-3 text-sm text-slate-400">No data yet.</p>
       ) : (
@@ -207,23 +248,30 @@ function HoursPanel({ hours }: { hours: { k: number; v: number }[] }) {
   };
   return (
     <section className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
-      <h3 className="text-sm font-semibold text-slate-900">Busiest hours</h3>
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+        <Icon>
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 6v6l4 2" />
+        </Icon>
+        Busiest hours
+      </h3>
       <div className="mt-4 flex flex-1 items-end gap-[3px]" style={{ minHeight: 96 }}>
         {bars.map((v, h) => (
           <div key={h} className="group relative flex h-full flex-1 items-end">
             <div
-              className="w-full rounded-sm transition-colors"
+              className="relative w-full rounded-sm transition-colors"
               style={{
                 height: `${Math.max(2, (v / max) * 100)}%`,
                 background: v > 0 ? BRAND : "#e2e8f0",
               }}
-            />
-            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
-              <span className="font-medium">{fmtHour(h)}</span>
-              <span className="text-slate-500">
-                {" · "}
-                {v} message{v === 1 ? "" : "s"}
-              </span>
+            >
+              <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+                <span className="font-medium">{fmtHour(h)}</span>
+                <span className="text-slate-500">
+                  {" · "}
+                  {v} message{v === 1 ? "" : "s"}
+                </span>
+              </div>
             </div>
           </div>
         ))}
@@ -294,7 +342,15 @@ export function AnalyticsPanel({ siteId }: { siteId: string }) {
     <div className="space-y-6">
       {/* Header + range selector */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold text-slate-900">Analytics</h2>
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+          <Icon className="h-5 w-5 shrink-0 text-brand-600">
+            <path d="M3 3v18h18" />
+            <rect x="7" y="11" width="3" height="6" rx="0.5" />
+            <rect x="12" y="7" width="3" height="10" rx="0.5" />
+            <rect x="17" y="4" width="3" height="13" rx="0.5" />
+          </Icon>
+          Analytics
+        </h2>
         <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1">
           {RANGES.map((r) => (
             <button
@@ -348,26 +404,59 @@ export function AnalyticsPanel({ siteId }: { siteId: string }) {
 
       {/* Headline stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Messages" value={loading ? "…" : String(data?.messages_total ?? 0)} />
+        <StatCard
+          label="Messages"
+          value={loading ? "…" : String(data?.messages_total ?? 0)}
+          icon={
+            <Icon>
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </Icon>
+          }
+        />
         <StatCard
           label="Conversations"
           value={loading ? "…" : String(data?.conversations_total ?? 0)}
+          icon={
+            <Icon>
+              <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z" />
+              <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
+            </Icon>
+          }
         />
         <StatCard
           label="Visitors"
           value={loading ? "…" : String(data?.unique_visitors ?? 0)}
+          icon={
+            <Icon>
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+            </Icon>
+          }
         />
         <StatCard
           label="Leads"
           value={loading ? "…" : String(data?.leads_total ?? 0)}
           sub={data && data.conversations_total > 0 ? `${convRate}% of conversations` : undefined}
+          icon={
+            <Icon>
+              <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+              <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+            </Icon>
+          }
         />
       </div>
 
       {/* Line chart */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-900">Messages over time</h3>
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <Icon>
+              <path d="M3 3v18h18" />
+              <path d="m19 9-5 5-4-4-3 3" />
+            </Icon>
+            Messages over time
+          </h3>
           <button
             type="button"
             onClick={() => setShowConv((s) => !s)}
@@ -439,9 +528,36 @@ export function AnalyticsPanel({ siteId }: { siteId: string }) {
           title="Top countries"
           rows={data?.countries ?? []}
           renderKey={(k) => (k === "Unknown" ? "🌐 Unknown" : `${flag(k)} ${k}`)}
+          icon={
+            <Icon>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M2 12h20" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </Icon>
+          }
         />
-        <BarList title="Devices" rows={data?.devices ?? []} renderKey={(k) => cap(k)} />
-        <BarList title="Browsers" rows={data?.browsers ?? []} renderKey={(k) => cap(k)} />
+        <BarList
+          title="Devices"
+          rows={data?.devices ?? []}
+          renderKey={(k) => cap(k)}
+          icon={
+            <Icon>
+              <rect width="20" height="14" x="2" y="3" rx="2" />
+              <path d="M8 21h8M12 17v4" />
+            </Icon>
+          }
+        />
+        <BarList
+          title="Browsers"
+          rows={data?.browsers ?? []}
+          renderKey={(k) => cap(k)}
+          icon={
+            <Icon>
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88" />
+            </Icon>
+          }
+        />
         <HoursPanel hours={data?.hours ?? []} />
       </div>
 
