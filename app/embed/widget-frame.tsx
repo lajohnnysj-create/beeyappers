@@ -388,6 +388,7 @@ function BarLauncher({
         {config.avatarUrl ? (
           <button
             onClick={() => onOpen()}
+            onMouseDown={(e) => e.preventDefault()}
             aria-label="Open chat"
             style={{
               width: 36,
@@ -464,6 +465,7 @@ function BarLauncher({
           />
           <button
             onClick={submit}
+            onMouseDown={(e) => e.preventDefault()}
             aria-label={labels.send}
             style={{
               width: 30,
