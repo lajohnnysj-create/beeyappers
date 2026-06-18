@@ -486,7 +486,6 @@ function BarLauncher({
               color: "#0f172a",
               width: expanded ? openW : restW,
               boxSizing: "border-box",
-              transition: "width .28s cubic-bezier(.4,0,.2,1)",
             }}
           />
           <button
@@ -531,9 +530,7 @@ function BarLauncher({
           transform: expanded ? "translateY(0)" : "translateY(-4px)",
           marginTop: expanded ? 8 : 0,
           padding: expanded ? "8px 12px" : "0 12px",
-          transition:
-            "max-height .28s ease, opacity .2s ease, transform .28s ease, " +
-            "margin-top .28s ease, padding .28s ease",
+          transition: "opacity .22s ease, transform .22s ease",
         }}
       >
         You&rsquo;re chatting with an AI. Messages may be stored. By continuing,
