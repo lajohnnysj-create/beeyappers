@@ -12,6 +12,11 @@ import { FIELD_LIMITS } from "@/lib/field-limits";
 import { isRtlLang } from "@/lib/lang";
 import { leadError, LEAD_LIMITS } from "@/lib/lead";
 
+// Resume the same conversation for this long after the last message, across
+// page loads, navigations, and tab close/reopen. Rolling: refreshed on every
+// send. After this much inactivity, a new visit starts a fresh chat.
+const CONVO_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 type Msg = {
   role: "user" | "assistant";
   content: string;
@@ -504,9 +509,9 @@ export function ChatWidget({
   const [atBottom, setAtBottom] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastMsgRef = useRef<HTMLDivElement>(null);
-  // One stable id per chat session so every turn threads into a single
-  // server-side conversation (instead of a new row per message). Set on mount,
-  // persisted for the tab, reset on a fresh visit.
+  // One stable id per chat so every turn threads into a single server-side
+  // conversation (instead of a new row per message). Persisted in localStorage
+  // with a rolling TTL so the chat resumes across reloads and tab reopens.
   const convoIdRef = useRef<string>("");
   const font = resolveFont(config.fontFamily);
 
@@ -524,14 +529,29 @@ export function ChatWidget({
     document.head.appendChild(link);
   }, [config.fontFamily]);
 
-  // Establish the conversation id once per session (client-only).
+  // Establish the conversation id (client-only) and resume the chat if it's
+  // still within the TTL. Stored in localStorage as {id, ts} so it survives
+  // refreshes, navigations, and tab close/reopen until it goes quiet.
   useEffect(() => {
     const storeKey = "bv_convo_" + widgetKey;
     let id = "";
+    let resume = false;
     try {
-      id = sessionStorage.getItem(storeKey) || "";
+      const raw = localStorage.getItem(storeKey);
+      if (raw) {
+        const saved = JSON.parse(raw) as { id?: string; ts?: number };
+        if (
+          saved &&
+          typeof saved.id === "string" &&
+          typeof saved.ts === "number" &&
+          Date.now() - saved.ts < CONVO_TTL_MS
+        ) {
+          id = saved.id;
+          resume = true;
+        }
+      }
     } catch {
-      /* storage blocked; we'll keep an in-memory id for this load */
+      /* storage blocked or malformed; fall through to a fresh id */
     }
     if (!id) {
       id =
@@ -542,14 +562,54 @@ export function ChatWidget({
               const v = c === "x" ? r : (r & 0x3) | 0x8;
               return v.toString(16);
             });
-      try {
-        sessionStorage.setItem(storeKey, id);
-      } catch {
-        /* ignore */
-      }
     }
     convoIdRef.current = id;
-  }, [widgetKey]);
+    try {
+      localStorage.setItem(storeKey, JSON.stringify({ id, ts: Date.now() }));
+    } catch {
+      /* ignore */
+    }
+
+    if (!resume) return;
+
+    // Pull prior turns so the visitor sees the ongoing chat, not a blank one.
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/conversation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ widgetKey, conversationId: id }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        const prior = (Array.isArray(data.messages) ? data.messages : [])
+          .filter(
+            (m: unknown): m is { role: string; content: string } =>
+              !!m && typeof m === "object"
+          )
+          .map((m: { role: string; content: unknown }) => ({
+            role: m.role === "user" ? "user" : "assistant",
+            content: String(m.content ?? ""),
+          })) as Msg[];
+        if (prior.length > 0) {
+          // Only adopt history if the visitor hasn't already started typing a
+          // brand-new chat in the meantime.
+          setMessages((cur) =>
+            cur.length <= 1
+              ? [{ role: "assistant", content: config.greeting }, ...prior]
+              : cur
+          );
+        }
+        if (data.leadCaptured === true) setLeadCaptured(true);
+      } catch {
+        /* keep the fresh greeting on failure */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [widgetKey, config.greeting]);
 
   const headerBg = config.headerColor;
   const headerFg = readable(headerBg);
@@ -612,6 +672,15 @@ export function ChatWidget({
       .map((m) => ({ role: m.role, content: m.content }));
     setMessages((m) => [...m, { role: "user", content: q }]);
     setBusy(true);
+    // Roll the resume window forward so an active chat keeps surviving reloads.
+    try {
+      localStorage.setItem(
+        "bv_convo_" + widgetKey,
+        JSON.stringify({ id: convoIdRef.current, ts: Date.now() })
+      );
+    } catch {
+      /* ignore */
+    }
     try {
       const res = await fetch("/api/answer", {
         method: "POST",
