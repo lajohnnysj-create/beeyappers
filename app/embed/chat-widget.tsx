@@ -154,6 +154,18 @@ const LINK_RE = /\[([^\]]+)\]\(([^)\s]+)\)|((?:https?:\/\/|www\.)[^\s<]+)/g;
 // Emphasis + inline code on a link-free text segment.
 const EMPH_RE = /\*\*([^*]+)\*\*|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_/g;
 
+// Inline contact patterns, detected in link-free text. Email -> mailto. A full
+// US-style address anchored by ", City, ST ZIP" -> Google Maps (the ZIP anchor
+// keeps false positives rare). Phone numbers must be formatted (parentheses or
+// separators, or a leading +) so bare ID/number runs and date ranges aren't
+// matched.
+const EMAIL_SRC = "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}";
+const ADDRESS_SRC =
+  "\\d{1,6}\\s+[A-Za-z0-9.,'#\\s-]{3,60}?,?\\s+[A-Za-z .'-]+,\\s*[A-Za-z]{2}\\s+\\d{5}(?:-\\d{4})?";
+const PHONE_SRC =
+  "(?:\\+\\d[\\d\\s().-]{6,}\\d)|(?:(?:\\+?1[\\s.-]?)?(?:\\(\\d{3}\\)\\s?|\\d{3}[\\s.-])\\d{3}[\\s.-]\\d{4})";
+const CONTACT_RE = new RegExp(`(${EMAIL_SRC})|(${ADDRESS_SRC})|(${PHONE_SRC})`, "gi");
+
 function isWordChar(ch: string | undefined): boolean {
   return !!ch && /[A-Za-z0-9]/.test(ch);
 }
@@ -198,7 +210,76 @@ function renderEmphasis(text: string, keyBase: string): React.ReactNode[] {
   return out;
 }
 
-function renderInline(text: string, keyBase: string): React.ReactNode[] {
+// Within link-free text, turn emails into mailto:, full addresses into Google
+// Maps links, and formatted phone numbers into tel:. Anything else flows
+// through renderEmphasis so bold/italic/code still work around the contacts.
+function renderContacts(
+  text: string,
+  config: WidgetConfig,
+  keyBase: string
+): React.ReactNode[] {
+  const out: React.ReactNode[] = [];
+  const linkStyle: React.CSSProperties = {
+    color: config.bubbleColor,
+    textDecoration: "underline",
+    wordBreak: "break-word",
+    overflowWrap: "anywhere",
+  };
+  let last = 0;
+  let i = 0;
+  let m: RegExpExecArray | null;
+  CONTACT_RE.lastIndex = 0;
+  while ((m = CONTACT_RE.exec(text)) !== null) {
+    if (m.index > last) {
+      out.push(...renderEmphasis(text.slice(last, m.index), keyBase + "t" + i));
+    }
+    const k = keyBase + "c" + i++;
+    if (m[1] !== undefined) {
+      out.push(
+        <a key={k} href={"mailto:" + m[1]} style={linkStyle}>
+          {m[1]}
+        </a>
+      );
+    } else if (m[2] !== undefined) {
+      const q = encodeURIComponent(m[2].replace(/\s+/g, " ").trim());
+      out.push(
+        <a
+          key={k}
+          href={"https://www.google.com/maps/search/?api=1&query=" + q}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={linkStyle}
+        >
+          {m[2]}
+        </a>
+      );
+    } else if (m[3] !== undefined) {
+      const tel = m[3].replace(/[^\d+]/g, "");
+      const digitCount = tel.replace(/\D/g, "").length;
+      if (digitCount >= 7 && digitCount <= 15) {
+        out.push(
+          <a key={k} href={"tel:" + tel} style={linkStyle}>
+            {m[3]}
+          </a>
+        );
+      } else {
+        // Not a plausible phone number; leave the text as-is.
+        out.push(m[3]);
+      }
+    }
+    last = CONTACT_RE.lastIndex;
+  }
+  if (last < text.length) {
+    out.push(...renderEmphasis(text.slice(last), keyBase + "t" + i));
+  }
+  return out;
+}
+
+function renderInline(
+  text: string,
+  config: WidgetConfig,
+  keyBase: string
+): React.ReactNode[] {
   const out: React.ReactNode[] = [];
   let last = 0;
   let i = 0;
@@ -206,7 +287,7 @@ function renderInline(text: string, keyBase: string): React.ReactNode[] {
   LINK_RE.lastIndex = 0;
   while ((m = LINK_RE.exec(text)) !== null) {
     if (m.index > last) {
-      out.push(...renderEmphasis(text.slice(last, m.index), keyBase + "p" + i));
+      out.push(...renderContacts(text.slice(last, m.index), config, keyBase + "p" + i));
     }
     i++;
     if (m[1] !== undefined) {
@@ -218,7 +299,7 @@ function renderInline(text: string, keyBase: string): React.ReactNode[] {
     last = LINK_RE.lastIndex;
   }
   if (last < text.length) {
-    out.push(...renderEmphasis(text.slice(last), keyBase + "p" + i));
+    out.push(...renderContacts(text.slice(last), config, keyBase + "p" + i));
   }
   return out;
 }
@@ -284,7 +365,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
         <ul key={bk} style={{ margin: "2px 0 6px", paddingInlineStart: 22, listStyleType: "disc", listStylePosition: "outside" }}>
           {items.map((it, j) => (
             <li key={j} style={{ margin: "2px 0" }}>
-              {renderInline(it, bk + "-" + j)}
+              {renderInline(it, config, bk + "-" + j)}
             </li>
           ))}
         </ul>
@@ -302,7 +383,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
         <ol key={bk} style={{ margin: "2px 0 6px", paddingInlineStart: 26, listStyleType: "decimal", listStylePosition: "outside" }}>
           {items.map((it, j) => (
             <li key={j} style={{ margin: "2px 0" }}>
-              {renderInline(it, bk + "-" + j)}
+              {renderInline(it, config, bk + "-" + j)}
             </li>
           ))}
         </ol>
@@ -324,7 +405,7 @@ function MessageContent({ text, config }: { text: string; config: WidgetConfig }
       <p key={bk} style={{ margin: "0 0 6px" }}>
         {para.map((ln, j) => (
           <span key={j}>
-            {renderInline(ln, bk + "-" + j)}
+            {renderInline(ln, config, bk + "-" + j)}
             {j < para.length - 1 ? <br /> : null}
           </span>
         ))}
