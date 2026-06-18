@@ -17,7 +17,7 @@ export default async function PrivacyPage() {
   } = await supabase.auth.getUser();
 
   return (
-    <LegalShell signedIn={!!user} title="Privacy Policy" updated="June 17, 2026">
+    <LegalShell signedIn={!!user} title="Privacy Policy" updated="June 18, 2026">
       <p>
         This Privacy Policy explains how Bleviq, a product of{" "}
         <strong>MRLA Media LLC</strong> (&ldquo;Bleviq,&rdquo; &ldquo;we,&rdquo;
@@ -63,6 +63,17 @@ export default async function PrivacyPage() {
           performing.
         </li>
         <li>
+          <strong>Widget analytics.</strong> When a visitor uses a
+          customer&rsquo;s chat widget, we record coarse, non-identifying
+          details about the session: the visitor&rsquo;s approximate location
+          (country only, determined from the IP address at our edge and not
+          stored), device type (such as mobile or desktop), and browser, along
+          with message counts, conversation counts, and timestamps. We use these
+          to give the site owner aggregate analytics about how their widget is
+          used. We do not collect precise location, and we do not collect age,
+          gender, or similar demographic information about visitors.
+        </li>
+        <li>
           <strong>Usage and technical data.</strong> Basic request information
           such as timestamps and a one-way hashed version of the visitor&rsquo;s
           IP address, which we use for rate limiting and abuse prevention. We do
@@ -91,6 +102,10 @@ export default async function PrivacyPage() {
         <li>To authenticate you and secure your account.</li>
         <li>
           To read the content you submit and generate answers for your widget.
+        </li>
+        <li>
+          To produce aggregate usage analytics for site owners about how their
+          widget is used.
         </li>
         <li>To enforce usage limits and prevent abuse and fraud.</li>
         <li>To process payments and manage subscriptions.</li>
