@@ -148,39 +148,80 @@ function LinkButton({
   );
 }
 
+// Markdown link [label](url) or a bare URL (http/https or scheme-less www.),
+// matched BEFORE emphasis so URL characters (including underscores) are never
+// seen by the emphasis parser.
+const LINK_RE = /\[([^\]]+)\]\(([^)\s]+)\)|((?:https?:\/\/|www\.)[^\s<]+)/g;
+// Emphasis + inline code on a link-free text segment.
+const EMPH_RE = /\*\*([^*]+)\*\*|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_/g;
+
+function isWordChar(ch: string | undefined): boolean {
+  return !!ch && /[A-Za-z0-9]/.test(ch);
+}
+
+// Render bold/italic/code on a segment that contains no links. Underscore
+// emphasis follows the CommonMark rule and does NOT fire intraword, so handles
+// and identifiers like sprout_pediatric_dentistry or get_user_id stay literal
+// instead of turning the middle into italics.
+function renderEmphasis(text: string, keyBase: string): React.ReactNode[] {
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let i = 0;
+  let m: RegExpExecArray | null;
+  EMPH_RE.lastIndex = 0;
+  while ((m = EMPH_RE.exec(text)) !== null) {
+    const k = keyBase + "e" + i++;
+    // __ (m[2]) and _ (m[5]) are underscore emphasis: skip when intraword.
+    if (m[2] !== undefined || m[5] !== undefined) {
+      const before = text[m.index - 1];
+      const after = text[m.index + m[0].length];
+      if (isWordChar(before) && isWordChar(after)) {
+        out.push(text.slice(last, m.index + 1)); // keep through the opening _
+        last = m.index + 1;
+        EMPH_RE.lastIndex = m.index + 1;
+        continue;
+      }
+    }
+    if (m.index > last) out.push(text.slice(last, m.index));
+    if (m[1] !== undefined) out.push(<strong key={k}>{m[1]}</strong>);
+    else if (m[2] !== undefined) out.push(<strong key={k}>{m[2]}</strong>);
+    else if (m[3] !== undefined)
+      out.push(
+        <code key={k} style={{ background: "rgba(0,0,0,.06)", borderRadius: 4, padding: "0 4px", fontSize: 15 }}>
+          {m[3]}
+        </code>
+      );
+    else if (m[4] !== undefined) out.push(<em key={k}>{m[4]}</em>);
+    else if (m[5] !== undefined) out.push(<em key={k}>{m[5]}</em>);
+    last = EMPH_RE.lastIndex;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
 function renderInline(
   text: string,
   config: WidgetConfig,
   keyBase: string
 ): React.ReactNode[] {
   const out: React.ReactNode[] = [];
-  const re =
-    /\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*|__([^_]+)__|`([^`]+)`|\*([^*]+)\*|_([^_]+)_|((?:https?:\/\/|www\.)[^\s<]+)/g;
   let last = 0;
   let i = 0;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(text)) !== null) {
-    if (m.index > last) out.push(text.slice(last, m.index));
-    const k = keyBase + "-" + i++;
+  LINK_RE.lastIndex = 0;
+  while ((m = LINK_RE.exec(text)) !== null) {
+    if (m.index > last) {
+      out.push(...renderEmphasis(text.slice(last, m.index), keyBase + "p" + i));
+    }
+    const k = keyBase + "l" + i++;
     if (m[1] !== undefined) {
-      // Label stays inline as plain text; the clickable button renders below.
+      // Markdown link label stays inline; the clickable button renders below.
       out.push(m[1]);
-    } else if (m[3] !== undefined || m[4] !== undefined) {
-      out.push(<strong key={k}>{m[3] ?? m[4]}</strong>);
-    } else if (m[5] !== undefined) {
-      out.push(
-        <code key={k} style={{ background: "rgba(0,0,0,.06)", borderRadius: 4, padding: "0 4px", fontSize: 15 }}>
-          {m[5]}
-        </code>
-      );
-    } else if (m[6] !== undefined || m[7] !== undefined) {
-      out.push(<em key={k}>{m[6] ?? m[7]}</em>);
-    } else if (m[8] !== undefined) {
-      // Bare URL: render a real link. http/https kept as-is; a scheme-less
-      // www. address gets an https:// prefix. http/https only on the href (so
-      // no javascript: or other unsafe schemes), and no innerHTML, so this
-      // stays injection-safe.
-      let shown = m[8];
+    } else if (m[3] !== undefined) {
+      // Bare URL: http/https kept as-is; a scheme-less www. address gets an
+      // https:// prefix. http/https only on the href (so no javascript: or
+      // other unsafe schemes), and no innerHTML, so this stays injection-safe.
+      let shown = m[3];
       const tm = shown.match(/[.,!?:;)\]}'"]+$/);
       let trail = "";
       if (tm) {
@@ -206,9 +247,11 @@ function renderInline(
       );
       if (trail) out.push(trail);
     }
-    last = re.lastIndex;
+    last = LINK_RE.lastIndex;
   }
-  if (last < text.length) out.push(text.slice(last));
+  if (last < text.length) {
+    out.push(...renderEmphasis(text.slice(last), keyBase + "p" + i));
+  }
   return out;
 }
 
