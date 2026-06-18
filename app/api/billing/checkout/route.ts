@@ -74,6 +74,21 @@ export async function POST(req: NextRequest) {
     // Card required even though there's a trial.
     payment_method_collection: "always",
     allow_promotion_codes: true,
+    // Express affirmative consent to the renewal terms, recorded by Stripe.
+    // NOTE: requires a Terms of Service URL set in the Stripe Dashboard
+    // (Settings -> Business -> Public details). Without it, session creation
+    // fails. Point it at https://www.bleviq.com/terms.
+    consent_collection: { terms_of_service: "required" },
+    custom_text: {
+      terms_of_service_acceptance: {
+        message:
+          "I agree to the Terms and authorize Bleviq to charge my plan price automatically each billing period after the 14-day free trial, until I cancel. I can cancel anytime in Settings -> Billing.",
+      },
+      submit: {
+        message:
+          "After your 14-day free trial, this plan renews automatically at the price above until you cancel. Cancel anytime in Settings -> Billing.",
+      },
+    },
     client_reference_id: user.id,
     success_url: `${origin}/dashboard?checkout=success`,
     cancel_url: `${origin}/pricing?checkout=cancel`,
