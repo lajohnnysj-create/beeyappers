@@ -353,11 +353,22 @@ function BarLauncher({
   const [expanded, setExpanded] = useState(false);
   const [val, setVal] = useState("");
 
-  // Resting width fits the label (approx 9px/char at 16px), capped so it can't
-  // overflow a narrow screen; the focused/typing width is at least a roomy
-  // 210px. This mirrors the dashboard preview, which sizes to the label.
+  // Resting width hugs the label. Rather than estimate from character count
+  // (which overshoots and leaves trailing space), measure the actual rendered
+  // text via a hidden span that inherits the same font as the input, so the
+  // live bar is as snug as the dashboard preview. Until the span has been
+  // measured we fall back to a per-character estimate.
   const labelText = config.launcherLabel || labels.askAI;
-  const restW = Math.max(64, Math.min(barMax, Math.round(labelText.length * 9) + 6));
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const [textW, setTextW] = useState<number | null>(null);
+  useEffect(() => {
+    if (measureRef.current) {
+      setTextW(Math.ceil(measureRef.current.getBoundingClientRect().width));
+    }
+  }, [labelText]);
+  const approxW = Math.round(labelText.length * 9) + 6;
+  const fitW = (textW ?? approxW) + 2; // +2 caret/sub-pixel allowance
+  const restW = Math.max(40, Math.min(barMax, fitW));
   const openW = Math.max(restW, Math.min(barMax, 210));
 
   function submit() {
@@ -423,6 +434,21 @@ function BarLauncher({
             padding: "6px 6px 6px 14px",
           }}
         >
+          <span
+            ref={measureRef}
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: -9999,
+              top: 0,
+              visibility: "hidden",
+              whiteSpace: "pre",
+              fontSize: 16,
+              pointerEvents: "none",
+            }}
+          >
+            {labelText}
+          </span>
           <input
             value={val}
             onChange={(e) => setVal(e.target.value)}
