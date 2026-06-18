@@ -7,9 +7,10 @@ import { TrainStatus } from "./train-status";
 import { DeleteSite } from "./delete-site";
 import { EmbedSnippet } from "@/app/dashboard/embed-snippet";
 import { LeadsPanel, type LeadItem } from "./leads-panel";
+import { AnalyticsPanel } from "./analytics-panel";
 import type { WidgetConfig } from "@/lib/widget-config";
 
-type Tab = "train" | "customize" | "leads" | "code";
+type Tab = "train" | "customize" | "leads" | "analytics" | "code";
 
 type Props = {
   siteId: string;
@@ -61,6 +62,11 @@ const MANAGE: NavEntry[] = [
     icon: (
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
     ),
+  },
+  {
+    id: "analytics",
+    label: "Analytics",
+    icon: <path d="M3 3v18h18M7 14l3-3 3 3 5-5" />,
   },
 ];
 
@@ -163,6 +169,7 @@ export function Workspace(props: Props) {
           />
         )}
         {tab === "leads" && <LeadsPanel leads={props.leads} />}
+        {tab === "analytics" && <AnalyticsPanel siteId={props.siteId} />}
         {tab === "code" && (
           <CodePanel widgetKey={props.widgetKey} crawlStatus={props.crawlStatus} />
         )}

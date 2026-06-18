@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { FIELD_LIMITS, clampLen } from "@/lib/field-limits";
+import type { Analytics, Bucket } from "@/lib/analytics/types";
 import type { WidgetConfig } from "@/lib/widget-config";
 
 export async function saveBranding(siteId: string, config: WidgetConfig) {
@@ -116,6 +117,67 @@ export async function setLeadNotes(leadId: string, notes: string) {
     .eq("id", leadId);
   if (error) return { error: error.message };
   return { ok: true, notes: clean };
+}
+
+// Best-effort 60s cache, keyed by user+site+range (minute-rounded). Module-level
+// so it survives across requests on a warm serverless instance.
+const analyticsCache = new Map<string, { at: number; data: Analytics }>();
+
+const EMPTY_ANALYTICS: Analytics = {
+  messages_total: 0,
+  conversations_total: 0,
+  leads_total: 0,
+  unique_visitors: 0,
+  msg_series: [],
+  conv_series: [],
+  countries: [],
+  devices: [],
+  browsers: [],
+  hours: [],
+};
+
+export async function getAnalytics(
+  siteId: string,
+  fromIso: string,
+  toIso: string,
+  bucket: string,
+  tz: string
+): Promise<{ data?: Analytics; error?: string }> {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Signed out. Refresh and sign in again." };
+
+  const trunc: Bucket = bucket === "hour" || bucket === "week" ? bucket : "day";
+  const zone =
+    typeof tz === "string" && tz.length > 0 && tz.length < 64 ? tz : "UTC";
+  const from = new Date(fromIso);
+  const to = new Date(toIso);
+  if (isNaN(from.getTime()) || isNaN(to.getTime()) || from >= to) {
+    return { error: "Invalid date range." };
+  }
+
+  const key = `${user.id}:${siteId}:${trunc}:${zone}:${Math.round(
+    from.getTime() / 60000
+  )}:${Math.round(to.getTime() / 60000)}`;
+  const hit = analyticsCache.get(key);
+  if (hit && Date.now() - hit.at < 60_000) return { data: hit.data };
+
+  // RLS confines the RPC to the caller's own rows; passing a foreign site id
+  // simply yields zeros.
+  const { data, error } = await supabase.rpc("analytics_overview", {
+    p_site_id: siteId,
+    p_from: from.toISOString(),
+    p_to: to.toISOString(),
+    p_trunc: trunc,
+    p_tz: zone,
+  });
+  if (error) return { error: error.message };
+
+  const payload = (data ?? EMPTY_ANALYTICS) as Analytics;
+  analyticsCache.set(key, { at: Date.now(), data: payload });
+  return { data: payload };
 }
 
 export async function deleteSite(siteId: string) {
