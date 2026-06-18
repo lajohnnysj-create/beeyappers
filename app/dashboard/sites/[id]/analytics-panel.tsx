@@ -200,21 +200,31 @@ function HoursPanel({ hours }: { hours: { k: number; v: number }[] }) {
   const map = new Map(hours.map((h) => [h.k, h.v]));
   const max = hours.reduce((m, h) => Math.max(m, h.v), 0) || 1;
   const bars = Array.from({ length: 24 }, (_, h) => map.get(h) ?? 0);
-  const fmtH = (h: number) => (h === 0 ? "12a" : h === 12 ? "12p" : h < 12 ? `${h}a` : `${h - 12}p`);
+  const fmtHour = (h: number) => {
+    const ap = h < 12 ? "AM" : "PM";
+    const hr = h % 12 === 0 ? 12 : h % 12;
+    return `${hr} ${ap}`;
+  };
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+    <section className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
       <h3 className="text-sm font-semibold text-slate-900">Busiest hours</h3>
-      <div className="mt-4 flex h-24 items-end gap-[3px]">
+      <div className="mt-4 flex flex-1 items-end gap-[3px]" style={{ minHeight: 96 }}>
         {bars.map((v, h) => (
-          <div key={h} className="flex h-full flex-1 items-end">
+          <div key={h} className="group relative flex h-full flex-1 items-end">
             <div
-              className="w-full rounded-sm"
+              className="w-full rounded-sm transition-colors"
               style={{
                 height: `${Math.max(2, (v / max) * 100)}%`,
                 background: v > 0 ? BRAND : "#e2e8f0",
               }}
-              title={`${fmtH(h)}: ${v}`}
             />
+            <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+              <span className="font-medium">{fmtHour(h)}</span>
+              <span className="text-slate-500">
+                {" · "}
+                {v} message{v === 1 ? "" : "s"}
+              </span>
+            </div>
           </div>
         ))}
       </div>
