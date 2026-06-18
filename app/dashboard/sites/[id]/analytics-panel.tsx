@@ -206,7 +206,7 @@ function HoursPanel({ hours }: { hours: { k: number; v: number }[] }) {
       <h3 className="text-sm font-semibold text-slate-900">Busiest hours</h3>
       <div className="mt-4 flex h-24 items-end gap-[3px]">
         {bars.map((v, h) => (
-          <div key={h} className="group relative flex-1">
+          <div key={h} className="flex h-full flex-1 items-end">
             <div
               className="w-full rounded-sm"
               style={{
@@ -436,8 +436,7 @@ export function AnalyticsPanel({ siteId }: { siteId: string }) {
       </div>
 
       <p className="text-xs text-slate-400">
-        Times shown in your local timezone. Country and device are derived from request
-        headers; no IP address is stored.
+        Times shown in your local timezone.
       </p>
     </div>
   );
