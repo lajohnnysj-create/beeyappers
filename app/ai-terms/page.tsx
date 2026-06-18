@@ -20,7 +20,7 @@ export default async function AiTermsPage() {
     <LegalShell
       signedIn={!!user}
       title="AI Terms of Use"
-      updated="June 16, 2026"
+      updated="June 18, 2026"
     >
       <p>
         These AI Terms of Use (&ldquo;AI Terms&rdquo;) govern your use of the AI
@@ -175,7 +175,9 @@ export default async function AiTermsPage() {
         You are responsible for the information and data you collect from your
         visitors through your assistant, and for what you do with it. You
         authorize us to access and process Input, Output, and that data as needed
-        to provide and support the AI Features, to protect our service and other
+        to provide and support the AI Features, including producing aggregate usage
+        analytics for you (such as message volume, approximate visitor location by
+        country, and device and browser type), to protect our service and other
         users, and to meet our legal obligations. We do not sell personal
         information. See our <a href="/privacy">Privacy Policy</a> for details.
       </p>
