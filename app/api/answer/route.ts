@@ -5,7 +5,7 @@ import { retrieveChunks, type MatchedChunk } from "@/lib/answer/retrieve";
 import { rewriteQuery } from "@/lib/answer/rewrite";
 import { generateAnswer, suggestAnswerableQuestions, type ChatTurn } from "@/lib/answer/generate";
 import { getClientIp, hashIp } from "@/lib/security/ip";
-import { countryFromReq, deviceFromUA, browserFromUA } from "@/lib/analytics/visitor";
+import { countryFromReq, cityFromReq, deviceFromUA, browserFromUA } from "@/lib/analytics/visitor";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { getEntitlementByUserId } from "@/lib/billing/entitlement";
 import { FIELD_LIMITS } from "@/lib/field-limits";
@@ -202,6 +202,7 @@ export async function POST(req: Request) {
   const ipHash = hashIp(ip);
   // Privacy-safe visitor attributes for analytics (no IP stored).
   const country = countryFromReq(req);
+  const city = cityFromReq(req);
   const ua = req.headers.get("user-agent");
   const device = deviceFromUA(ua);
   const browser = browserFromUA(ua);
@@ -453,6 +454,7 @@ export async function POST(req: Request) {
           client_id: clientConvoId || null,
           last_message_at: nowIso,
           country: country,
+          city: city,
           device: device,
           browser: browser,
         })
