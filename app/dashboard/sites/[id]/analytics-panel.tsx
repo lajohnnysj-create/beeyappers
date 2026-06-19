@@ -223,6 +223,90 @@ function CountryLabel({ code }: { code: string }) {
   );
 }
 
+function DeviceLabel({ name }: { name: string }) {
+  const n = name.toLowerCase();
+  let icon: React.ReactNode;
+  if (n === "mobile") {
+    icon = (
+      <Icon>
+        <rect width="14" height="20" x="5" y="2" rx="2" />
+        <path d="M12 18h.01" />
+      </Icon>
+    );
+  } else if (n === "tablet") {
+    icon = (
+      <Icon>
+        <rect width="16" height="20" x="4" y="2" rx="2" />
+        <path d="M12 18h.01" />
+      </Icon>
+    );
+  } else if (n === "desktop") {
+    icon = (
+      <Icon>
+        <rect width="20" height="14" x="2" y="3" rx="2" />
+        <path d="M8 21h8M12 17v4" />
+      </Icon>
+    );
+  } else {
+    icon = (
+      <Icon>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" />
+        <path d="M12 17h.01" />
+      </Icon>
+    );
+  }
+  return (
+    <span className="flex items-center gap-2">
+      {icon}
+      <span>{cap(name)}</span>
+    </span>
+  );
+}
+
+function BrowserLabel({ name }: { name: string }) {
+  const n = name.toLowerCase();
+  let icon: React.ReactNode;
+  if (n === "chrome") {
+    icon = (
+      <Icon>
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="4" />
+        <line x1="21.17" y1="8" x2="12" y2="8" />
+        <line x1="3.95" y1="6.06" x2="8.54" y2="14" />
+        <line x1="10.88" y1="21.94" x2="15.46" y2="8" />
+      </Icon>
+    );
+  } else if (n === "safari") {
+    icon = (
+      <Icon>
+        <circle cx="12" cy="12" r="10" />
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88" />
+      </Icon>
+    );
+  } else if (n === "firefox") {
+    icon = (
+      <Icon>
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+      </Icon>
+    );
+  } else {
+    icon = (
+      <Icon>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M2 12h20" />
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+      </Icon>
+    );
+  }
+  return (
+    <span className="flex items-center gap-2">
+      {icon}
+      <span>{cap(name)}</span>
+    </span>
+  );
+}
+
 function BarList({
   title,
   rows,
@@ -283,7 +367,7 @@ function HoursPanel({ hours }: { hours: { k: number; v: number }[] }) {
         </Icon>
         Busiest hours
       </h3>
-      <div className="mt-4 flex flex-1 items-end gap-[3px]" style={{ minHeight: 96 }}>
+      <div className="mt-4 flex h-32 items-end gap-[3px]">
         {bars.map((v, h) => (
           <div key={h} className="group relative flex h-full flex-1 items-end">
             <div
@@ -577,7 +661,7 @@ export function AnalyticsPanel({ siteId }: { siteId: string }) {
         <BarList
           title="Devices"
           rows={data?.devices ?? []}
-          renderKey={(k) => cap(k)}
+          renderKey={(k) => <DeviceLabel name={k} />}
           icon={
             <Icon>
               <rect width="20" height="14" x="2" y="3" rx="2" />
@@ -588,7 +672,7 @@ export function AnalyticsPanel({ siteId }: { siteId: string }) {
         <BarList
           title="Browsers"
           rows={data?.browsers ?? []}
-          renderKey={(k) => cap(k)}
+          renderKey={(k) => <BrowserLabel name={k} />}
           icon={
             <Icon>
               <circle cx="12" cy="12" r="10" />
