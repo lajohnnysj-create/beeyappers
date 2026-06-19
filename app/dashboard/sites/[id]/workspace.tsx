@@ -6,6 +6,7 @@ import { KnowledgePanel, type KnowledgeItem } from "./knowledge-panel";
 import { TrainStatus } from "./train-status";
 import { DeleteSite } from "./delete-site";
 import { EmbedSnippet } from "@/app/dashboard/embed-snippet";
+import { InstallationInstructions } from "@/app/dashboard/installation-instructions";
 import { LeadsPanel, type LeadItem } from "./leads-panel";
 import { AnalyticsPanel } from "./analytics-panel";
 import type { WidgetConfig } from "@/lib/widget-config";
@@ -295,6 +296,8 @@ function CodePanel({
           </p>
         )}
       </section>
+
+      <InstallationInstructions />
     </div>
   );
 }
