@@ -131,6 +131,7 @@ const EMPTY_ANALYTICS: Analytics = {
   msg_series: [],
   conv_series: [],
   countries: [],
+  cities: [],
   devices: [],
   browsers: [],
   hours: [],

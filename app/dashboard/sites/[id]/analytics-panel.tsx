@@ -565,6 +565,16 @@ export function AnalyticsPanel({ siteId }: { siteId: string }) {
           }
         />
         <BarList
+          title="Top cities"
+          rows={data?.cities ?? []}
+          icon={
+            <Icon>
+              <path d="M12 21s-6-5.686-6-10a6 6 0 0 1 12 0c0 4.314-6 10-6 10z" />
+              <circle cx="12" cy="11" r="2.5" />
+            </Icon>
+          }
+        />
+        <BarList
           title="Devices"
           rows={data?.devices ?? []}
           renderKey={(k) => cap(k)}
@@ -586,7 +596,9 @@ export function AnalyticsPanel({ siteId }: { siteId: string }) {
             </Icon>
           }
         />
-        <HoursPanel hours={data?.hours ?? []} />
+        <div className="sm:col-span-2">
+          <HoursPanel hours={data?.hours ?? []} />
+        </div>
       </div>
 
       <p className="text-xs text-slate-400">
