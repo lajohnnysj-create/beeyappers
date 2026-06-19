@@ -13,6 +13,7 @@ export type Analytics = {
   msg_series: Point[];
   conv_series: Point[];
   countries: Slice[];
+  cities: Slice[];
   devices: Slice[];
   browsers: Slice[];
   hours: HourSlice[];
