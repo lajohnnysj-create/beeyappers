@@ -437,7 +437,7 @@ export default async function Home() {
                 {/* Pulsing point on the chart peak */}
                 <span
                   className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-                  style={{ left: "63%", top: "27%" }}
+                  style={{ left: "64.5%", top: "44%" }}
                   aria-hidden="true"
                 >
                   <span className="relative flex h-3 w-3">
@@ -448,12 +448,12 @@ export default async function Home() {
                 {/* Floating tooltip echoing the live hover tooltip */}
                 <div
                   className="bv-float pointer-events-none absolute"
-                  style={{ left: "63%", top: "27%" }}
+                  style={{ left: "64.5%", top: "44%" }}
                   aria-hidden="true"
                 >
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs shadow-md">
                     <span className="font-medium text-slate-700">Jun 16</span>
-                    <span className="text-slate-500"> &middot; 28 messages</span>
+                    <span className="text-slate-500"> &middot; 96 messages</span>
                   </div>
                 </div>
               </div>
