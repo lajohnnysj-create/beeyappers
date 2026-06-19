@@ -88,6 +88,18 @@ const PLATFORMS: Platform[] = [
     note: "GoDaddy's current Website Builder has no site-wide code field, so add the HTML section to each page you want the widget on. If your site is GoDaddy-hosted WordPress or HTML hosting instead, use that platform's steps.",
   },
   {
+    name: "Webflow",
+    abbr: "Wf",
+    color: "#4353ff",
+    steps: [
+      "In the Webflow Designer, open your project's Site settings.",
+      "Go to the \"Custom code\" tab.",
+      "Paste your Bleviq snippet into the \"Footer Code\" box (this loads it before </body>).",
+      "Click Save Changes, then publish your site.",
+    ],
+    note: "Site-wide custom code requires a paid Site plan.",
+  },
+  {
     name: "Google Sites",
     abbr: "GS",
     color: "#3367d6",
