@@ -259,9 +259,9 @@ export default async function Home() {
           </div>
 
           {/* Chat micro-demo, matching the real Bleviq widget */}
-          <div className="bv-float mx-auto w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
+          <div className="bv-float mx-auto w-full max-w-sm rounded-2xl shadow-2xl ring-1 ring-black/5">
             {/* Header (brand purple) */}
-            <div className="flex items-center gap-2.5 bg-brand-600 px-4 py-3">
+            <div className="flex items-center gap-2.5 rounded-t-2xl bg-brand-600 px-4 py-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/agent/1.webp"
@@ -278,7 +278,7 @@ export default async function Home() {
               </span>
             </div>
             {/* Messages (white body) */}
-            <div className="space-y-3 px-4 pb-4">
+            <div className="space-y-3 rounded-b-2xl bg-white px-4 pb-4 pt-4">
               {/* Assistant greeting */}
               <div className="flex items-start gap-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
