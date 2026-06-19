@@ -222,6 +222,101 @@ export default async function Home() {
       <main id="main-content" tabIndex={-1} className="focus:outline-none">
       <HomeHero />
 
+      {/* Key selling point: the AI expectation, with a live-chat micro-demo */}
+      <section className="relative isolate overflow-hidden bg-[#070713]">
+        {/* Decorative brand glows */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-24 top-0 -z-10 h-72 w-72 rounded-full bg-brand-600/20 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-16 bottom-0 -z-10 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl"
+        />
+
+        <div className="mx-auto grid max-w-5xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:gap-16 lg:py-24">
+          {/* Copy */}
+          <div className="text-center sm:text-left">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-200">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2l1.9 5.8a2 2 0 0 0 1.3 1.3L21 11l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 20l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 11l5.8-1.9a2 2 0 0 0 1.3-1.3z" />
+              </svg>
+              The new expectation
+            </span>
+            <h2 className="mt-5 font-display text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl">
+              Your visitors expect instant answers
+            </h2>
+            <p className="mx-auto mt-4 max-w-md text-lg leading-relaxed text-slate-300 sm:mx-0">
+              As the world shifts to AI, the moment someone lands on your site they
+              expect a quick answer, not a wait. Bleviq lets you add that AI to your
+              website, easily.
+            </p>
+          </div>
+
+          {/* Animated chat micro-demo */}
+          <div className="bv-float mx-auto w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-4 shadow-2xl backdrop-blur-sm">
+            {/* Header */}
+            <div className="flex items-center gap-2.5 border-b border-white/10 pb-3">
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-indigo-600 text-white">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 8V4H8" />
+                  <rect width="16" height="12" x="4" y="8" rx="2" />
+                  <path d="M2 14h2M20 14h2M15 13v2M9 13v2" />
+                </svg>
+              </span>
+              <span className="text-sm font-semibold text-white">Bleviq</span>
+              <span className="ml-auto flex items-center gap-1.5 text-xs text-slate-400">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                </span>
+                Online
+              </span>
+            </div>
+            {/* Messages */}
+            <div className="space-y-3 pt-4">
+              <div className="flex justify-end">
+                <p className="max-w-[80%] rounded-2xl rounded-br-sm bg-brand-600 px-3.5 py-2 text-sm text-white">
+                  Do you offer same-day delivery?
+                </p>
+              </div>
+              <div className="flex justify-start">
+                <p className="max-w-[85%] rounded-2xl rounded-bl-sm bg-white/10 px-3.5 py-2 text-sm text-slate-100">
+                  Yes! Same-day delivery is available on orders placed before 2pm.
+                </p>
+              </div>
+              {/* Typing indicator */}
+              <div className="flex justify-start">
+                <span className="inline-flex items-center gap-1 rounded-2xl rounded-bl-sm bg-white/10 px-3.5 py-3">
+                  <span
+                    className="bv-typing-dot h-1.5 w-1.5 rounded-full bg-slate-300"
+                    style={{ animationDelay: "0s" }}
+                  />
+                  <span
+                    className="bv-typing-dot h-1.5 w-1.5 rounded-full bg-slate-300"
+                    style={{ animationDelay: "0.15s" }}
+                  />
+                  <span
+                    className="bv-typing-dot h-1.5 w-1.5 rounded-full bg-slate-300"
+                    style={{ animationDelay: "0.3s" }}
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How it works */}
       <section className="border-t border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-20">
