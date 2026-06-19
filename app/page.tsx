@@ -223,11 +223,16 @@ export default async function Home() {
       <HomeHero />
 
       {/* Key selling point: the AI expectation, with a live-chat micro-demo */}
-      <section className="relative isolate overflow-hidden bg-[#070713]">
-        {/* Decorative brand glows */}
+      <section className="relative isolate overflow-hidden bg-gradient-to-b from-[#070713] via-[#0b0b1a] to-[#070713]">
+        {/* Seamless blend out of the hero: a soft bloom straddling the top edge
+            so light appears to spill down from the hero, plus low side glows. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -left-24 top-0 -z-10 h-72 w-72 rounded-full bg-brand-600/20 blur-3xl"
+          className="pointer-events-none absolute left-1/2 top-0 -z-10 h-64 w-[85%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600/15 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-24 top-1/3 -z-10 h-72 w-72 rounded-full bg-brand-600/15 blur-3xl"
         />
         <div
           aria-hidden="true"
@@ -253,64 +258,58 @@ export default async function Home() {
             </p>
           </div>
 
-          {/* Animated chat micro-demo */}
-          <div className="bv-float mx-auto w-full max-w-sm rounded-2xl border border-white/10 bg-white/5 p-4 shadow-2xl backdrop-blur-sm">
-            {/* Header */}
-            <div className="flex items-center gap-2.5 border-b border-white/10 pb-3">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-indigo-600 text-white">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M12 8V4H8" />
-                  <rect width="16" height="12" x="4" y="8" rx="2" />
-                  <path d="M2 14h2M20 14h2M15 13v2M9 13v2" />
+          {/* Chat micro-demo, matching the real Bleviq widget */}
+          <div className="bv-float mx-auto w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
+            {/* Header (white, like the live widget) */}
+            <div className="flex items-center gap-2.5 px-4 py-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/agent/1.webp"
+                alt=""
+                className="h-9 w-9 rounded-[12px] object-cover"
+              />
+              <span className="flex-1 text-[17px] font-bold tracking-tight text-slate-900">
+                Assistant
+              </span>
+              <span aria-hidden="true" className="text-slate-400">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <path d="M6 6l12 12M18 6L6 18" />
                 </svg>
               </span>
-              <span className="text-sm font-semibold text-white">Bleviq</span>
-              <span className="ml-auto flex items-center gap-1.5 text-xs text-slate-400">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                </span>
-                Online
-              </span>
             </div>
-            {/* Messages */}
-            <div className="space-y-3 pt-4">
+            {/* Messages (white body) */}
+            <div className="space-y-3 px-4 pb-4">
+              {/* Assistant greeting */}
+              <div className="flex items-start gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/agent/1.webp"
+                  alt=""
+                  className="h-[26px] w-[26px] shrink-0 rounded-[8px] object-cover"
+                />
+                <div className="max-w-[82%] rounded-[18px] rounded-bl-[6px] bg-[#f1f5f9] px-3.5 py-2 text-[15px] leading-snug text-[#0f172a]">
+                  Hi! Ask me anything about this site.
+                </div>
+              </div>
+              {/* Visitor question */}
               <div className="flex justify-end">
-                <p className="max-w-[80%] rounded-2xl rounded-br-sm bg-brand-600 px-3.5 py-2 text-sm text-white">
+                <div className="max-w-[82%] rounded-[18px] rounded-br-[6px] bg-[#2563eb] px-3.5 py-2 text-[15px] leading-snug text-white">
                   Do you offer same-day delivery?
-                </p>
+                </div>
               </div>
-              <div className="flex justify-start">
-                <p className="max-w-[85%] rounded-2xl rounded-bl-sm bg-white/10 px-3.5 py-2 text-sm text-slate-100">
-                  Yes! Same-day delivery is available on orders placed before 2pm.
-                </p>
-              </div>
-              {/* Typing indicator */}
-              <div className="flex justify-start">
-                <span className="inline-flex items-center gap-1 rounded-2xl rounded-bl-sm bg-white/10 px-3.5 py-3">
-                  <span
-                    className="bv-typing-dot h-1.5 w-1.5 rounded-full bg-slate-300"
-                    style={{ animationDelay: "0s" }}
-                  />
-                  <span
-                    className="bv-typing-dot h-1.5 w-1.5 rounded-full bg-slate-300"
-                    style={{ animationDelay: "0.15s" }}
-                  />
-                  <span
-                    className="bv-typing-dot h-1.5 w-1.5 rounded-full bg-slate-300"
-                    style={{ animationDelay: "0.3s" }}
-                  />
-                </span>
+              {/* Assistant typing */}
+              <div className="flex items-start gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/agent/1.webp"
+                  alt=""
+                  className="h-[26px] w-[26px] shrink-0 rounded-[8px] object-cover"
+                />
+                <div className="inline-flex items-center gap-1 rounded-[18px] rounded-bl-[6px] bg-[#f1f5f9] px-3.5 py-3">
+                  <span className="bv-typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: "0s" }} />
+                  <span className="bv-typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: "0.15s" }} />
+                  <span className="bv-typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: "0.3s" }} />
+                </div>
               </div>
             </div>
           </div>
