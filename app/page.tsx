@@ -224,7 +224,7 @@ export default async function Home() {
       <HomeHero />
 
       {/* Key selling point: the AI expectation, with a live-chat micro-demo */}
-      <section className="relative isolate overflow-hidden bg-[#070713]">
+      <section className="relative isolate z-10 -mt-8 overflow-hidden rounded-t-[2.5rem] bg-[#070713] sm:-mt-12 sm:rounded-t-[3.5rem]">
         {/* Background: dark futuristic lab, darkened for legibility. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -237,6 +237,12 @@ export default async function Home() {
         <div
           aria-hidden="true"
           className="absolute inset-0 -z-10 bg-gradient-to-r from-black/80 via-black/40 to-transparent"
+        />
+        {/* Luminous rim along the rounded top edge so the wrap reads as a clean
+            break from the (same-colored) hero above. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-28 rounded-t-[2.5rem] bg-gradient-to-b from-white/12 to-transparent sm:rounded-t-[3.5rem]"
         />
         {/* Soft bloom straddling the top edge so light appears to spill from the hero. */}
         <div
@@ -328,7 +334,7 @@ export default async function Home() {
                     <span className="bv-typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: "0.15s" }} />
                     <span className="bv-typing-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: "0.3s" }} />
                   </span>
-                  <span className="text-[14px] font-medium text-slate-500">Thinking</span>
+                  <span className="text-[14px] font-medium text-slate-600">Thinking</span>
                 </div>
               </div>
             </div>
