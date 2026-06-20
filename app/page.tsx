@@ -5,7 +5,6 @@ import { SiteHeader, SiteFooter } from "@/app/site-nav";
 import { HomeHero } from "@/app/home-hero";
 import { SignupCtas } from "@/app/signup-ctas";
 import { BleviqWidget } from "@/app/bleviq-widget";
-import { MatrixRain } from "@/app/matrix-rain";
 
 export const metadata: Metadata = pageMetadata({
   title: "24/7 AI Chatbot that Works While you Sleep | Bleviq",
@@ -394,8 +393,6 @@ export default async function Home() {
         {/* Overlays keep the cards and text legible while letting the image show. */}
         <div className="absolute inset-0 -z-10 bg-black/55" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/80 via-black/25 to-black/80" />
-        <MatrixRain className="pointer-events-none absolute inset-0 -z-10 h-full w-full opacity-65 mix-blend-screen" />
-
 
         <div className="mx-auto max-w-6xl px-6 py-20 lg:py-24">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
