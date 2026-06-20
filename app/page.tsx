@@ -224,7 +224,7 @@ export default async function Home() {
       <HomeHero />
 
       {/* Key selling point: the AI expectation, with a live-chat micro-demo */}
-      <section className="relative isolate z-10 -mt-8 overflow-hidden rounded-t-[2.5rem] bg-[#070713] sm:-mt-12 sm:rounded-t-[3.5rem]">
+      <section className="relative isolate z-10 -mt-12 overflow-hidden rounded-t-[2.5rem] bg-[#070713] sm:-mt-16 sm:rounded-t-[3.5rem]">
         {/* Background: dark futuristic lab, darkened for legibility. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
