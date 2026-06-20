@@ -101,6 +101,45 @@ function SuggestionChips({
   );
 }
 
+// The host page's hostname, passed by widget.js as ?host= on this iframe's URL.
+// Lets us tell internal links (the business's own site -> open in the visitor's
+// current tab) from external ones (open in a new tab). Falls back to the iframe
+// referrer, then to "" (unknown), in which case every link is treated as
+// external, which is the safe default and matches the old behavior. Computed
+// once and cached.
+let _hostDomain: string | null = null;
+function hostDomain(): string {
+  if (_hostDomain !== null) return _hostDomain;
+  let h = "";
+  try {
+    if (typeof window !== "undefined") {
+      const fromParam = new URLSearchParams(window.location.search).get("host");
+      if (fromParam) h = fromParam;
+      else if (document.referrer) h = new URL(document.referrer).hostname;
+    }
+  } catch {
+    h = "";
+  }
+  _hostDomain = h.toLowerCase().replace(/^www\./, "");
+  return _hostDomain;
+}
+
+// Internal when the link's host matches the host page's, or is a subdomain of
+// it (or vice versa). Unknown host or unparseable URL -> not internal.
+function isInternalHref(href: string, host: string): boolean {
+  if (!host) return false;
+  try {
+    const linkHost = new URL(href).hostname.toLowerCase().replace(/^www\./, "");
+    return (
+      linkHost === host ||
+      linkHost.endsWith("." + host) ||
+      host.endsWith("." + linkHost)
+    );
+  } catch {
+    return false;
+  }
+}
+
 function LinkButton({
   href,
   label,
@@ -111,11 +150,12 @@ function LinkButton({
   config: WidgetConfig;
 }) {
   if (!/^https?:\/\//i.test(href)) return null;
+  const internal = isInternalHref(href, hostDomain());
   return (
     <a
       href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+      target={internal ? "_top" : "_blank"}
+      rel={internal ? undefined : "noopener noreferrer"}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -140,9 +180,15 @@ function LinkButton({
       >
         {label}
       </span>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-        <path d="M7 17 17 7M9 7h8v8" />
-      </svg>
+      {internal ? (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      ) : (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+          <path d="M7 17 17 7M9 7h8v8" />
+        </svg>
+      )}
     </a>
   );
 }
