@@ -384,7 +384,7 @@ export default async function Home() {
         {/* Overlays keep the cards and text legible while letting the image show. */}
         <div className="absolute inset-0 -z-10 bg-black/55" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/80 via-black/25 to-black/80" />
-        <MatrixRain className="pointer-events-none absolute inset-0 -z-10 h-full w-full opacity-70 mix-blend-screen" />
+        <MatrixRain className="pointer-events-none absolute inset-0 -z-10 h-full w-full opacity-40 mix-blend-screen" />
 
 
         <div className="mx-auto max-w-6xl px-6 py-20 lg:py-24">

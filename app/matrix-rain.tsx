@@ -18,7 +18,8 @@ export function MatrixRain({ className = "" }: { className?: string }) {
     const g: CanvasRenderingContext2D = g0;
 
     const fontSize = 14;
-    const TRAIL = 11;
+    const colGap = fontSize * 2.4; // wider spacing = far fewer columns
+    const TRAIL = 7;
     let width = 0;
     let height = 0;
     let cols = 0;
@@ -32,7 +33,7 @@ export function MatrixRain({ className = "" }: { className?: string }) {
         y: dir === 1 ? -Math.random() * height : height + Math.random() * height,
         dir,
         alpha: 0.35 + Math.random() * 0.65,
-        active: Math.random() > 0.25, // keep it sparse / "light"
+        active: Math.random() > 0.5, // mostly at rest; just a faint scatter
       };
     }
 
@@ -40,13 +41,13 @@ export function MatrixRain({ className = "" }: { className?: string }) {
       const rect = cv.getBoundingClientRect();
       width = Math.max(1, rect.width);
       height = Math.max(1, rect.height);
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       cv.width = Math.floor(width * dpr);
       cv.height = Math.floor(height * dpr);
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
       g.font = `${fontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
       g.textBaseline = "top";
-      cols = Math.ceil(width / fontSize);
+      cols = Math.ceil(width / colGap);
       columns = Array.from({ length: cols }, makeCol);
     }
 
@@ -55,16 +56,16 @@ export function MatrixRain({ className = "" }: { className?: string }) {
       for (let i = 0; i < cols; i++) {
         const c = columns[i];
         if (!c.active) continue;
-        const x = i * fontSize + 1;
+        const x = i * colGap + 1;
         for (let k = 0; k < TRAIL; k++) {
           const cy = c.y - c.dir * k * fontSize;
           if (cy < -fontSize || cy > height) continue;
           const fade = 1 - k / TRAIL;
           const ch = CHARS[(Math.random() * CHARS.length) | 0];
           if (k === 0) {
-            g.fillStyle = `rgba(199, 210, 254, ${0.85 * c.alpha})`; // bright head
+            g.fillStyle = `rgba(199, 210, 254, ${0.55 * c.alpha})`; // bright head
           } else {
-            g.fillStyle = `rgba(129, 140, 248, ${0.33 * fade * c.alpha})`; // trail
+            g.fillStyle = `rgba(129, 140, 248, ${0.2 * fade * c.alpha})`; // trail
           }
           g.fillText(ch, x, cy);
         }
@@ -96,7 +97,7 @@ export function MatrixRain({ className = "" }: { className?: string }) {
     let raf = 0;
     let last = 0;
     let running = false;
-    const STEP_MS = 70;
+    const STEP_MS = 100;
 
     function loop(t: number) {
       if (!running) return;
