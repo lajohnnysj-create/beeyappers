@@ -125,9 +125,6 @@ export default async function UseCasePage({
               {uc.subhead}
             </p>
             <SignupCtas centered />
-            <p className="mt-4 text-sm text-slate-400">
-              Free to start. No credit card required.
-            </p>
           </div>
         </section>
 
@@ -308,9 +305,6 @@ export default async function UseCasePage({
               Train Bleviq on your site and add it in minutes.
             </p>
             <SignupCtas centered />
-            <p className="mt-4 text-sm text-slate-400">
-              Free to start. No credit card required.
-            </p>
           </div>
         </section>
       </main>
