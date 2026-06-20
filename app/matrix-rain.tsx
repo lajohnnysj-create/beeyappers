@@ -63,9 +63,9 @@ export function MatrixRain({ className = "" }: { className?: string }) {
           const fade = 1 - k / TRAIL;
           const ch = CHARS[(Math.random() * CHARS.length) | 0];
           if (k === 0) {
-            g.fillStyle = `rgba(199, 210, 254, ${0.55 * c.alpha})`; // bright head
+            g.fillStyle = `rgba(199, 210, 254, ${0.8 * c.alpha})`; // bright head
           } else {
-            g.fillStyle = `rgba(129, 140, 248, ${0.2 * fade * c.alpha})`; // trail
+            g.fillStyle = `rgba(129, 140, 248, ${0.32 * fade * c.alpha})`; // trail
           }
           g.fillText(ch, x, cy);
         }

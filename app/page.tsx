@@ -224,20 +224,24 @@ export default async function Home() {
       <HomeHero />
 
       {/* Key selling point: the AI expectation, with a live-chat micro-demo */}
-      <section className="relative isolate overflow-hidden bg-gradient-to-b from-[#070713] via-[#0b0b1a] to-[#070713]">
-        {/* Seamless blend out of the hero: a soft bloom straddling the top edge
-            so light appears to spill down from the hero, plus low side glows. */}
+      <section className="relative isolate overflow-hidden bg-[#070713]">
+        {/* Background: dark futuristic lab, darkened for legibility. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/homepagesplash5.webp"
+          alt=""
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+        />
+        {/* Darkening overlays, heavier on the left where the copy sits. */}
+        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-black/50" />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 bg-gradient-to-r from-black/80 via-black/40 to-transparent"
+        />
+        {/* Soft bloom straddling the top edge so light appears to spill from the hero. */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 top-0 -z-10 h-64 w-[85%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-600/15 blur-3xl"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-24 top-1/3 -z-10 h-72 w-72 rounded-full bg-brand-600/15 blur-3xl"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-16 bottom-0 -z-10 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl"
         />
 
         <div className="mx-auto grid max-w-5xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:gap-16 lg:py-24">
@@ -384,7 +388,7 @@ export default async function Home() {
         {/* Overlays keep the cards and text legible while letting the image show. */}
         <div className="absolute inset-0 -z-10 bg-black/55" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/80 via-black/25 to-black/80" />
-        <MatrixRain className="pointer-events-none absolute inset-0 -z-10 h-full w-full opacity-40 mix-blend-screen" />
+        <MatrixRain className="pointer-events-none absolute inset-0 -z-10 h-full w-full opacity-65 mix-blend-screen" />
 
 
         <div className="mx-auto max-w-6xl px-6 py-20 lg:py-24">
