@@ -27,7 +27,7 @@ export const PLANS: Record<PlanKey, Plan> = {
     features: [
       "1,000 AI replies",
       "GPT-4-class intelligence",
-      "1 trained site",
+      "1 trained site up to 100 pages",
       "Custom branding, colors & fonts",
       "No Bleviq branding",
     ],
