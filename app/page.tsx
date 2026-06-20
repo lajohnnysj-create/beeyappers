@@ -355,14 +355,17 @@ export default async function Home() {
             {STEPS.map((s, i) => (
               <div
                 key={s.n}
-                className={`group rounded-2xl border p-6 shadow-card transition duration-300 hover:-translate-y-2 hover:shadow-xl ${s.card}`}
+                className="bv-float"
+                style={{ animationDelay: `${i * 0.3}s` }}
               >
                 <div
-                  className={`bv-float grid h-11 w-11 place-items-center rounded-full text-base font-bold text-white ${s.badge}`}
-                  style={{ animationDelay: `${i * 0.3}s` }}
+                  className={`group rounded-2xl border p-6 shadow-card transition duration-300 hover:-translate-y-2 hover:shadow-xl ${s.card}`}
                 >
-                  {s.n}
-                </div>
+                  <div
+                    className={`grid h-11 w-11 place-items-center rounded-full text-base font-bold text-white ${s.badge}`}
+                  >
+                    {s.n}
+                  </div>
                 <h3 className="mt-4 font-display text-lg font-semibold text-slate-900">
                   {s.title}
                 </h3>
@@ -374,6 +377,7 @@ export default async function Home() {
                     aria-hidden="true"
                     className="pointer-events-none absolute inset-y-0 left-0 w-1/3 -translate-x-[160%] -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-[900ms] ease-out group-hover:translate-x-[420%]"
                   />
+                </div>
                 </div>
               </div>
             ))}
