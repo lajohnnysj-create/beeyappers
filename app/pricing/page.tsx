@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { pageMetadata } from "@/lib/seo";
 import { SiteHeader, SiteFooter } from "@/app/site-nav";
 import { PricingTable } from "./pricing-table";
+import { NeedMore } from "./need-more";
 import { BleviqWidget } from "@/app/bleviq-widget";
 
 export const metadata = pageMetadata({
@@ -38,6 +39,7 @@ export default async function PricingPage({
         </p>
 
         <PricingTable canceled={canceled} />
+        <NeedMore />
       </section>
       </main>
 
