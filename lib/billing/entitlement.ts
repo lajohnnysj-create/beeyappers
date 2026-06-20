@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { type PlanKey, planMessageCap, planMaxSites } from "./plans";
+import { MAX_PAGES } from "@/lib/crawl/limits";
 
 export type Entitlement = {
   plan: PlanKey | null;
@@ -10,6 +11,8 @@ export type Entitlement = {
   messageCap: number;
   messageCapOverridden: boolean; // true when an admin override is in effect
   maxSites: number;
+  pageCap: number; // crawl page limit (default, or a per-account override)
+  pageCapOverridden: boolean; // true when an admin page-cap override is in effect
 };
 
 // A subscription that entitles the account to serve answers.
@@ -21,7 +24,7 @@ export async function getEntitlementByUserId(
   const admin = createAdminClient();
   const { data } = await admin
     .from("subscriptions")
-    .select("plan, status, stripe_customer_id, message_cap_override")
+    .select("plan, status, stripe_customer_id, message_cap_override, page_cap_override")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -37,6 +40,13 @@ export async function getEntitlementByUserId(
       ? data.message_cap_override
       : null;
 
+  // Page-cap override works the same way, but applies regardless of plan status
+  // so a new account can train its site during setup/trial. NULL = default cap.
+  const pageOverride =
+    typeof data?.page_cap_override === "number"
+      ? data.page_cap_override
+      : null;
+
   return {
     plan,
     status,
@@ -47,5 +57,7 @@ export async function getEntitlementByUserId(
     // One site is allowed even before subscribing so a new user can set up and
     // preview; serving live answers still requires an active plan.
     maxSites: active ? planMaxSites(plan) : 1,
+    pageCap: pageOverride ?? MAX_PAGES,
+    pageCapOverridden: pageOverride !== null,
   };
 }
