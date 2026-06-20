@@ -43,7 +43,9 @@
     origin +
     "/frame?key=" +
     encodeURIComponent(key) +
-    (lang ? "&lang=" + encodeURIComponent(lang) : "");
+    (lang ? "&lang=" + encodeURIComponent(lang) : "") +
+    "&host=" +
+    encodeURIComponent(location.hostname);
   frame.style.cssText =
     "position:fixed;bottom:0;right:0;left:auto;width:0;height:0;border:0;" +
     "background:transparent;z-index:" + Z + ";opacity:0;" +
