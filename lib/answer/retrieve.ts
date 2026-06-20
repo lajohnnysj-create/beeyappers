@@ -2,7 +2,12 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { toVectorLiteral } from "@/lib/embed/openai";
 
-export type MatchedChunk = { id: string; content: string; similarity: number };
+export type MatchedChunk = {
+  id: string;
+  content: string;
+  similarity: number;
+  url: string | null;
+};
 
 export async function retrieveChunks(
   admin: SupabaseClient,
