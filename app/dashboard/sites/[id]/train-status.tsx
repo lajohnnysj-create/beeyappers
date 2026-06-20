@@ -27,6 +27,7 @@ export function TrainStatus({
   domain,
   pageCount,
   canRetrain = true,
+  pageCap = MAX_PAGES,
 }: {
   siteId: string;
   status: string;
@@ -34,6 +35,7 @@ export function TrainStatus({
   domain?: string | null;
   pageCount?: number;
   canRetrain?: boolean;
+  pageCap?: number;
 }) {
   const router = useRouter();
   const [training, setTraining] = useState(
@@ -137,11 +139,11 @@ export function TrainStatus({
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
             <dt className="flex items-center gap-1 text-xs font-medium text-slate-500">
               Pages trained
-              <InfoTip text="Trains on up to 100 public pages found in your sitemap. Add any pages you want included there, your main pages like pricing and FAQ are prioritized automatically." />
+              <InfoTip text={`Trains on up to ${pageCap} public pages found in your sitemap. Add any pages you want included there, your main pages like pricing and FAQ are prioritized automatically.`} />
             </dt>
             <dd className="mt-0.5 text-lg font-semibold text-slate-900">
               {pageCount ?? 0}
-              {(pageCount ?? 0) >= MAX_PAGES && (
+              {(pageCount ?? 0) >= pageCap && (
                 <span className="ml-1 text-xs font-medium text-slate-500">
                   (Max)
                 </span>
