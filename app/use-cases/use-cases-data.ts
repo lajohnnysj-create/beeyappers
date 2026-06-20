@@ -651,8 +651,8 @@ export const USE_CASES: UseCase[] = [
     ],
     faqs: [
       {
-        q: "Can I use it on multiple client sites?",
-        a: "Yes. Each site gets its own widget trained on that site's content.",
+        q: "Will my clients see Bleviq's branding?",
+        a: "No. On a paid plan the 'Powered by Bleviq' badge is removed, so the widget looks like a native part of your client's site.",
       },
       {
         q: "Does it match each client's branding?",
