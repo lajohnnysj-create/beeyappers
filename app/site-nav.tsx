@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Wordmark } from "@/app/wordmark";
 import { SkipLink } from "@/app/skip-link";
 import { CookieConsent, SiteAnalytics } from "@/app/cookie-consent";
+import { USE_CASES } from "@/app/use-cases/use-cases-data";
+import { UCIcon } from "@/app/use-cases/icons";
 
 /**
  * Single source of truth for the marketing chrome (header + footer).
@@ -22,6 +24,31 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
+  const [ucOpen, setUcOpen] = useState(false);
+  const ucRef = useRef<HTMLDivElement>(null);
+  const ucBtnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!ucOpen) return;
+    function onDown(e: MouseEvent) {
+      if (ucRef.current && !ucRef.current.contains(e.target as Node)) {
+        setUcOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setUcOpen(false);
+        ucBtnRef.current?.focus();
+      }
+    }
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [ucOpen]);
+
   const cta = signedIn
     ? { href: "/dashboard", label: "Dashboard" }
     : { href: "/login", label: "Start free trial" };
@@ -37,6 +64,70 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-5 text-base font-medium text-slate-600 sm:flex sm:gap-6">
+          <div className="relative" ref={ucRef}>
+            <button
+              ref={ucBtnRef}
+              type="button"
+              onClick={() => setUcOpen((o) => !o)}
+              aria-expanded={ucOpen}
+              aria-haspopup="true"
+              aria-controls="use-cases-menu"
+              className="inline-flex items-center gap-1 transition hover:text-slate-900"
+            >
+              Use Cases
+              <svg
+                className={"h-4 w-4 transition-transform " + (ucOpen ? "rotate-180" : "")}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            {ucOpen && (
+              <div
+                id="use-cases-menu"
+                role="menu"
+                className="absolute right-0 top-full z-40 mt-3 w-[26rem] max-w-[calc(100vw-1.5rem)] rounded-2xl border border-slate-200 bg-white p-3 shadow-xl"
+              >
+                <div className="grid grid-cols-2 gap-1">
+                  {USE_CASES.map((u) => (
+                    <Link
+                      key={u.slug}
+                      href={`/use-cases/${u.slug}`}
+                      role="menuitem"
+                      onClick={() => setUcOpen(false)}
+                      className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    >
+                      <span
+                        className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-white"
+                        style={{ backgroundColor: u.accent }}
+                        aria-hidden="true"
+                      >
+                        <UCIcon name={u.icon} className="h-4 w-4" />
+                      </span>
+                      <span className="truncate">{u.name}</span>
+                    </Link>
+                  ))}
+                </div>
+                <Link
+                  href="/use-cases"
+                  role="menuitem"
+                  onClick={() => setUcOpen(false)}
+                  className="mt-2 flex items-center justify-center gap-1 border-t border-slate-100 px-3 pt-3 text-sm font-semibold text-brand-600 transition hover:text-brand-700"
+                >
+                  View all use cases
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
+              </div>
+            )}
+          </div>
           <Link href="/pricing" className="transition hover:text-slate-900">
             Pricing
           </Link>
@@ -81,6 +172,13 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
           className="border-t border-slate-200/70 bg-white/95 backdrop-blur sm:hidden"
         >
           <div className="mx-auto flex max-w-5xl flex-col gap-1 px-6 py-3 text-sm font-medium text-slate-700">
+            <Link
+              href="/use-cases"
+              onClick={close}
+              className="rounded-lg px-2 py-2.5 transition hover:bg-slate-100"
+            >
+              Use Cases
+            </Link>
             <Link
               href="/pricing"
               onClick={close}
