@@ -8,7 +8,7 @@ import { extractContent } from "@/lib/crawl/extract";
 import { chunkText } from "@/lib/crawl/chunk";
 import { embedTexts, toVectorLiteral } from "@/lib/embed/openai";
 import { checkRateLimit } from "@/lib/security/rate-limit";
-import { MAX_PAGES } from "@/lib/crawl/limits";
+import { getEntitlementByUserId } from "@/lib/billing/entitlement";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // raise to 300 on Pro for larger sites
@@ -116,8 +116,10 @@ export async function POST(req: Request) {
       .update({ crawl_status: "crawling" })
       .eq("id", siteId);
 
-    // 4. Discover and harvest.
-    const urls = await discoverUrls(origin, MAX_PAGES);
+    // 4. Discover and harvest. The page cap is the account default unless an
+    //    admin set a per-account override (subscriptions.page_cap_override).
+    const ent = await getEntitlementByUserId(user.id);
+    const urls = await discoverUrls(origin, ent.pageCap);
     const pages = await harvest(urls);
 
     if (pages.length === 0) {
