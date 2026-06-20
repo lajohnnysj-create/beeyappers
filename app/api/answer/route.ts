@@ -292,6 +292,34 @@ export async function POST(req: Request) {
       .sort((a, b) => a.url.length - b.url.length)
       .slice(0, 30);
 
+    // Linkable pages, ordered by relevance to THIS question: the pages whose
+    // chunks actually matched come first, so the model can send the visitor to
+    // the exact product or topic they asked about (for example a specific
+    // product page). A few short top-level pages follow as fallback so general
+    // asks (contact, pricing) still resolve. Manual FAQ/document chunks have a
+    // null url and are skipped here.
+    const titleByUrl = new Map<string, string>();
+    for (const p of pageRows ?? []) {
+      const u = String((p as { url?: string }).url || "");
+      if (u) titleByUrl.set(u, String((p as { title?: string }).title || u));
+    }
+    const seenLinkUrl = new Set<string>();
+    const linkablePages: { title: string; url: string }[] = [];
+    for (const c of merged) {
+      const u = (c.url || "").trim();
+      if (u && /^https?:\/\//i.test(u) && !seenLinkUrl.has(u)) {
+        seenLinkUrl.add(u);
+        linkablePages.push({ title: titleByUrl.get(u) || u, url: u });
+      }
+    }
+    for (const p of pages) {
+      if (!seenLinkUrl.has(p.url)) {
+        seenLinkUrl.add(p.url);
+        linkablePages.push(p);
+      }
+    }
+    const linkPages = linkablePages.slice(0, 12);
+
     const { data: faqRows } = await admin
       .from("chunks")
       .select("source_label")
@@ -352,7 +380,7 @@ export async function POST(req: Request) {
       site.system_prompt,
       context,
       question,
-      pages,
+      linkPages,
       history,
       lang,
       canCollectLead
