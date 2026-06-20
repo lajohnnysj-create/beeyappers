@@ -41,7 +41,7 @@ export const USE_CASES: UseCase[] = [
     questions: [
       "How do I reset my password?",
       "What is your refund policy?",
-      "Where is my order?",
+      "How do I track my order?",
       "How do I cancel or change my plan?",
       "Do you offer support on weekends?",
       "How do I contact a real person?",
@@ -171,7 +171,7 @@ export const USE_CASES: UseCase[] = [
     questions: [
       "Do you ship to my country?",
       "What is your return policy?",
-      "Is this in stock in my size?",
+      "How do I find my size?",
       "How long does delivery take?",
       "Do you offer discounts or bundles?",
       "Is this product right for me?",
@@ -364,11 +364,11 @@ export const USE_CASES: UseCase[] = [
     intro:
       "Property searches happen late at night and on weekends. Bleviq answers questions about your listings and areas, and grabs contact details from serious buyers and renters.",
     questions: [
-      "Is this property still available?",
+      "What is the application process?",
       "Can I schedule a viewing?",
       "What is the monthly payment or rent?",
       "What are the schools and amenities nearby?",
-      "Do you have anything in my budget?",
+      "What areas do you cover?",
       "Are pets allowed?",
     ],
     benefits: [
@@ -378,7 +378,7 @@ export const USE_CASES: UseCase[] = [
       },
       {
         title: "Answer listing questions",
-        body: "Pricing, availability, and area questions get answered from your site instantly.",
+        body: "Pricing, features, and area questions get answered from your site instantly.",
       },
       {
         title: "Work nights and weekends",
@@ -430,7 +430,7 @@ export const USE_CASES: UseCase[] = [
       "You are on a job, not at the phone. Bleviq answers the common questions and captures new job requests so leads do not go to the next contractor.",
     questions: [
       "Do you service my area?",
-      "Can you come out today?",
+      "Do you offer same-day or emergency service?",
       "How much do you charge for a call-out?",
       "Do you offer free estimates?",
       "Are you licensed and insured?",
@@ -443,7 +443,7 @@ export const USE_CASES: UseCase[] = [
       },
       {
         title: "Answer the usual questions",
-        body: "Service area, pricing, and availability get answered without a phone call.",
+        body: "Service area, pricing, and what you offer get answered without a phone call.",
       },
       {
         title: "Be there after hours",
