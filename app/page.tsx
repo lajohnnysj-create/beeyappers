@@ -319,6 +319,12 @@ export default async function Home() {
                   Yes! Same-day delivery is available on orders placed before 2pm.
                 </div>
               </div>
+              {/* Visitor follow-up */}
+              <div className="flex justify-end">
+                <div className="max-w-[82%] rounded-[18px] rounded-br-[6px] bg-[#2563eb] px-3.5 py-2 text-[15px] leading-snug text-white">
+                  What's your return policy?
+                </div>
+              </div>
               {/* Assistant thinking */}
               <div className="flex items-start gap-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
