@@ -74,9 +74,9 @@ export function HomeHero() {
             24/7 AI Chatbot that works while you sleep
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-slate-200 [text-shadow:0_1px_14px_rgba(0,0,0,0.55)]">
-            Add an AI Chatbot in minutes and{" "}
+            Add an AI Chatbot trained on your website in minutes,{" "}
             <br className="hidden sm:block" />
-            start <RotatingWord /> with your visitors.
+            and start <RotatingWord /> with your visitors.
           </p>
 
           <SignupCtas />
