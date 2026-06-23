@@ -206,12 +206,13 @@ export async function POST(req: Request) {
   }
 
   // Rolling 30-day message cap, per account (across all the owner's sites).
+  // Counts the per-user usage ledger, not public.messages, so deleting a site
+  // (which cascade-deletes its messages) can't reset the count.
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const { count: msgsUsed } = await admin
-    .from("messages")
+    .from("message_usage")
     .select("id", { count: "exact", head: true })
     .eq("user_id", site.user_id)
-    .eq("role", "assistant")
     .gte("created_at", since30);
   if ((msgsUsed ?? 0) >= entitlement.messageCap) {
     return json(
@@ -451,6 +452,11 @@ export async function POST(req: Request) {
         .single();
       convoId = convo?.id ?? null;
     }
+
+    // Record one unit of usage for the monthly cap. This lives in a per-user
+    // ledger with no site/conversation link, so deleting a site can't reset it.
+    // Written for every reply, even when conversation logging is skipped below.
+    await admin.from("message_usage").insert({ user_id: site.user_id });
 
     if (convoId) {
       await admin.from("messages").insert([
