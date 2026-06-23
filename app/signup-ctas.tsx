@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 // The signup CTA pair (Continue with Google + Continue with Email) and the
-// "Free 14-day trial" line. Shared by the hero and the bottom CTA so the two
+// "Free to start" line. Shared by the hero and the bottom CTA so the two
 // are always identical. Styled for a dark background.
 // `centered` keeps the button column centered on all breakpoints (for the
 // centered bottom CTA); the default left-aligns on sm+ to match the hero.
@@ -70,7 +70,7 @@ export function SignupCtas({ centered = false }: { centered?: boolean }) {
       </div>
 
       <p className="mt-3 text-sm text-slate-300">
-        Free 14-day trial. Cancel anytime.
+        Free to start. No credit card required.
       </p>
     </>
   );

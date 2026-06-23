@@ -51,7 +51,7 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
 
   const cta = signedIn
     ? { href: "/dashboard", label: "Dashboard" }
-    : { href: "/login", label: "Start free trial" };
+    : { href: "/login", label: "Start for free" };
 
   return (
     <>
