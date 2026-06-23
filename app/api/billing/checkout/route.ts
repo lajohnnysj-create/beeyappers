@@ -68,10 +68,8 @@ export async function POST(req: NextRequest) {
     customer: customerId,
     line_items: [{ price, quantity: 1 }],
     subscription_data: {
-      trial_period_days: 14,
       metadata: { user_id: user.id },
     },
-    // Card required even though there's a trial.
     payment_method_collection: "always",
     allow_promotion_codes: true,
     // Express affirmative consent to the renewal terms, recorded by Stripe.
@@ -82,11 +80,11 @@ export async function POST(req: NextRequest) {
     custom_text: {
       terms_of_service_acceptance: {
         message:
-          "I agree to the Terms and authorize Bleviq to charge my plan price automatically each billing period after the 14-day free trial, until I cancel. I can cancel anytime in Settings -> Billing.",
+          "I agree to the Terms and authorize Bleviq to charge my plan price automatically each billing period, until I cancel. I can cancel anytime in Settings -> Manage billing.",
       },
       submit: {
         message:
-          "After your 14-day free trial, this plan renews automatically at the price above until you cancel. Cancel anytime in Settings -> Billing.",
+          "This plan renews automatically at the price above until you cancel. Cancel anytime in Settings -> Manage billing.",
       },
     },
     client_reference_id: user.id,
