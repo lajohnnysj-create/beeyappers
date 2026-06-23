@@ -55,7 +55,7 @@ function RotatingWord() {
 
 export function HomeHero() {
   return (
-    <section className="relative isolate flex min-h-[860px] items-center overflow-hidden bg-[#070713] lg:min-h-[832px]">
+    <section className="relative isolate flex min-h-[730px] items-center overflow-hidden bg-[#070713] lg:min-h-[832px]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/herosplash.webp"
@@ -68,7 +68,7 @@ export function HomeHero() {
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#070713] via-[#070713]/85 to-transparent" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-[#070713] via-[#070713]/40 to-transparent" />
 
-      <div className="mx-auto w-full max-w-5xl px-6 py-20 lg:py-24">
+      <div className="mx-auto w-full max-w-5xl px-6 pt-10 pb-36 lg:pt-24 lg:pb-44">
         <div className="mx-auto max-w-xl text-center sm:mx-0 sm:text-left">
           <h1 className="font-display text-4xl font-bold leading-[1.1] tracking-tight text-white [text-shadow:0_2px_24px_rgba(0,0,0,0.55)] sm:text-5xl lg:text-[52px]">
             24/7 AI Chatbot that works while you sleep
