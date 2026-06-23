@@ -1,21 +1,25 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { type PlanKey, planMessageCap, planMaxSites } from "./plans";
+import { type PlanKey, type TierKey, PLANS } from "./plans";
 import { MAX_PAGES } from "@/lib/crawl/limits";
 
 export type Entitlement = {
-  plan: PlanKey | null;
+  tier: TierKey; // effective tier: free (the floor), basic, or pro
+  paidPlan: PlanKey | null; // the paid plan from billing, null on free
   status: string;
-  active: boolean; // entitled to serve answers (trial or paid, in good standing)
+  active: boolean; // the widget serves answers (true on the free floor)
+  paid: boolean; // on a paid plan in good standing (unlocks paid perks)
+  canRemoveBranding: boolean; // paid perk: hide the "Powered by Bleviq" badge
   hasBilling: boolean; // has a Stripe customer (can open the billing portal)
   messageCap: number;
   messageCapOverridden: boolean; // true when an admin override is in effect
   maxSites: number;
+  model: string; // OpenAI model used to answer on this tier
   pageCap: number; // crawl page limit (default, or a per-account override)
   pageCapOverridden: boolean; // true when an admin page-cap override is in effect
 };
 
-// A subscription that entitles the account to serve answers.
+// Subscription statuses that keep a paid plan's perks active.
 const ENTITLED = new Set(["active", "trialing"]);
 
 export async function getEntitlementByUserId(
@@ -29,34 +33,38 @@ export async function getEntitlementByUserId(
     .maybeSingle();
 
   const status = data?.status ?? "none";
-  const plan = (data?.plan as PlanKey | null) ?? null;
-  const active = ENTITLED.has(status) && !!plan;
+  const paidPlan = (data?.plan as PlanKey | null) ?? null;
+
+  // A paid plan in good standing unlocks paid perks. Anything else (no row,
+  // canceled, lapsed) falls to the free floor, which still serves answers.
+  const paid = ENTITLED.has(status) && !!paidPlan;
+  const tier: TierKey = paid ? (paidPlan as TierKey) : "free";
 
   // A per-account override (set by an admin for customers who negotiate a
-  // larger allowance) wins over the plan default whenever the account is
-  // active. NULL = no override = use the plan's cap.
+  // larger allowance) wins over the tier default. NULL = no override.
   const override =
     typeof data?.message_cap_override === "number"
       ? data.message_cap_override
       : null;
-
-  // Page-cap override works the same way, but applies regardless of plan status
-  // so a new account can train its site during setup/trial. NULL = default cap.
   const pageOverride =
     typeof data?.page_cap_override === "number"
       ? data.page_cap_override
       : null;
 
   return {
-    plan,
+    tier,
+    paidPlan,
     status,
-    active,
+    // Free is the floor: every account serves answers. Gating is by message
+    // cap, not by plan status. (A future suspended state could set this false.)
+    active: true,
+    paid,
+    canRemoveBranding: paid,
     hasBilling: !!data?.stripe_customer_id,
-    messageCap: active ? override ?? planMessageCap(plan) : 0,
-    messageCapOverridden: active && override !== null,
-    // One site is allowed even before subscribing so a new user can set up and
-    // preview; serving live answers still requires an active plan.
-    maxSites: active ? planMaxSites(plan) : 1,
+    messageCap: override ?? PLANS[tier].messageCap,
+    messageCapOverridden: override !== null,
+    maxSites: PLANS[tier].maxSites,
+    model: PLANS[tier].model,
     pageCap: pageOverride ?? MAX_PAGES,
     pageCapOverridden: pageOverride !== null,
   };
