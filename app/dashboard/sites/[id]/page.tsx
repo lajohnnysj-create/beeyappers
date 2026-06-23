@@ -31,10 +31,8 @@ export default async function SiteWorkspacePage({
   if (!site || !user) notFound();
 
   const entitlement = await getEntitlementByUserId(user.id);
-  const planLabel = entitlement.plan ? PLANS[entitlement.plan].name : null;
-  // Show the active cap; fall back to the entry plan's cap so the usage meter
-  // has a sensible denominator before the user subscribes.
-  const cap = entitlement.active ? entitlement.messageCap : PLANS.basic.messageCap;
+  const planLabel = PLANS[entitlement.tier].name;
+  const cap = entitlement.messageCap;
 
   const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -93,7 +91,10 @@ export default async function SiteWorkspacePage({
             <Wordmark />
           </Link>
           <div className="flex items-center gap-4">
-            <AgentStatus active={entitlement.active} />
+            <AgentStatus
+              active={entitlement.active}
+              limitReached={(messagesUsed || 0) >= cap}
+            />
             <SettingsMenu
               email={user.email || ""}
               used={messagesUsed || 0}
@@ -131,7 +132,7 @@ export default async function SiteWorkspacePage({
           knowledge={knowledge}
           leads={leadRows ?? []}
           canRetrain={entitlement.active}
-          canRemoveBranding={entitlement.active}
+          canRemoveBranding={entitlement.canRemoveBranding}
         />
       </main>
     </div>
