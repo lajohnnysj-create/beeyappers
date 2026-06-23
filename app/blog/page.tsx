@@ -10,6 +10,7 @@ import {
   postsInCategory,
   categoryLabel,
   formatDate,
+  postImage,
   type Post,
 } from "./blog-data";
 
@@ -24,20 +25,28 @@ function Card({ post }: { post: Post }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-card transition hover:border-slate-300 hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card transition hover:border-slate-300 hover:shadow-md"
     >
-      <span className="text-xs font-semibold uppercase tracking-wide text-brand-600">
-        {categoryLabel(post.category)}
-      </span>
-      <h3 className="mt-2 text-lg font-bold leading-snug text-slate-900 group-hover:text-brand-700">
-        {post.title}
-      </h3>
-      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-600">
-        {post.excerpt}
-      </p>
-      <span className="mt-4 text-xs font-medium text-slate-400">
-        {formatDate(post.date)} &middot; {post.readingTime} min read
-      </span>
+      <img
+        src={postImage(post)}
+        alt=""
+        loading="lazy"
+        className="aspect-[16/9] w-full object-cover"
+      />
+      <div className="flex flex-1 flex-col p-6">
+        <span className="text-xs font-semibold uppercase tracking-wide text-brand-600">
+          {categoryLabel(post.category)}
+        </span>
+        <h3 className="mt-2 text-lg font-bold leading-snug text-slate-900 group-hover:text-brand-700">
+          {post.title}
+        </h3>
+        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-600">
+          {post.excerpt}
+        </p>
+        <span className="mt-4 text-xs font-medium text-slate-400">
+          {formatDate(post.date)} &middot; {post.readingTime} min read
+        </span>
+      </div>
     </Link>
   );
 }
@@ -73,23 +82,29 @@ export default async function BlogHubPage() {
             {/* Featured spans two columns on large screens */}
             <Link
               href={`/blog/${featured.slug}`}
-              className="group flex flex-col justify-between rounded-3xl border border-slate-200 bg-gradient-to-br from-[#070713] to-[#1a1a3a] p-8 text-white shadow-card transition hover:shadow-lg lg:col-span-2"
+              className="group relative flex min-h-[20rem] flex-col justify-end overflow-hidden rounded-3xl border border-slate-200 shadow-card transition hover:shadow-lg lg:col-span-2"
             >
-              <div>
-                <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-200">
+              <img
+                src={postImage(featured)}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#070713] via-[#070713]/75 to-[#070713]/10" />
+              <div className="relative p-8 text-white">
+                <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white backdrop-blur">
                   Featured &middot; {categoryLabel(featured.category)}
                 </span>
-                <h2 className="mt-5 text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
+                <h2 className="mt-4 text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
                   {featured.title}
                 </h2>
-                <p className="mt-4 max-w-xl text-slate-300">
+                <p className="mt-3 max-w-xl text-slate-200">
                   {featured.excerpt}
                 </p>
+                <span className="mt-6 block text-sm font-medium text-slate-300">
+                  {formatDate(featured.date)} &middot; {featured.readingTime} min
+                  read
+                </span>
               </div>
-              <span className="mt-8 text-sm font-medium text-slate-400">
-                {formatDate(featured.date)} &middot; {featured.readingTime} min
-                read
-              </span>
             </Link>
 
             <div className="grid gap-6">
