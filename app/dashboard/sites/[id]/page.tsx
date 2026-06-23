@@ -51,10 +51,9 @@ export default async function SiteWorkspacePage({
         .eq("site_id", site.id)
         .in("source_type", ["document", "faq"]),
       supabase
-        .from("messages")
+        .from("message_usage")
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id)
-        .eq("role", "assistant")
         .gte("created_at", since30),
       supabase
         .from("leads")
