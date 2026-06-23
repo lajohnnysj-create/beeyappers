@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { USE_CASES } from "./use-cases/use-cases-data";
+import { POSTS } from "./blog/blog-data";
 
 // Generated at /sitemap.xml. Only public, indexable pages belong here:
 // the dashboard and auth pages are private, and /frame and /embed are noindex
@@ -27,6 +28,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "monthly" as const,
       priority: 0.7,
+    })),
+    {
+      url: `${BASE}/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    ...POSTS.map((p) => ({
+      url: `${BASE}/blog/${p.slug}`,
+      lastModified: new Date(p.date),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
     })),
     {
       url: `${BASE}/terms`,

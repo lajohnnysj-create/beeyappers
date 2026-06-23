@@ -131,6 +131,9 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
           <Link href="/pricing" className="transition hover:text-slate-900">
             Pricing
           </Link>
+          <Link href="/blog" className="transition hover:text-slate-900">
+            Blog
+          </Link>
           {!signedIn && (
             <Link href="/login" className="transition hover:text-slate-900">
               Sign in
@@ -186,6 +189,13 @@ export function SiteHeader({ signedIn }: { signedIn: boolean }) {
             >
               Pricing
             </Link>
+            <Link
+              href="/blog"
+              onClick={close}
+              className="rounded-lg px-2 py-2.5 transition hover:bg-slate-100"
+            >
+              Blog
+            </Link>
             {!signedIn && (
               <Link
                 href="/login"
@@ -223,6 +233,9 @@ export function SiteFooter() {
           <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-slate-600">
             <Link href="/pricing" className="transition hover:text-slate-900">
               Pricing
+            </Link>
+            <Link href="/blog" className="transition hover:text-slate-900">
+              Blog
             </Link>
             <Link href="/privacy" className="transition hover:text-slate-900">
               Privacy
