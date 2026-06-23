@@ -9,10 +9,12 @@ export function pageMetadata({
   title,
   description,
   path = "/",
+  image = OG_IMAGE,
 }: {
   title: string;
   description: string;
   path?: string;
+  image?: string;
 }): Metadata {
   return {
     title,
@@ -24,13 +26,13 @@ export function pageMetadata({
       url: path,
       siteName: "Bleviq",
       type: "website",
-      images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Bleviq" }],
+      images: [{ url: image, width: 1200, height: 630, alt: "Bleviq" }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [OG_IMAGE],
+      images: [image],
     },
   };
 }
