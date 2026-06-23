@@ -29,10 +29,9 @@ export default async function AccountSettingsPage() {
     Date.now() - 30 * 24 * 60 * 60 * 1000
   ).toISOString();
   const { count: messagesUsed } = await supabase
-    .from("messages")
+    .from("message_usage")
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
-    .eq("role", "assistant")
     .gte("created_at", since30);
 
   // Sites the user owns, for the transcript-email toggles (RLS-confined).
