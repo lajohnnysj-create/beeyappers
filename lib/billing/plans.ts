@@ -24,7 +24,7 @@ export const PLANS: Record<TierKey, Plan> = {
   free: {
     key: "free",
     name: "Free",
-    tagline: "Try Bleviq on your site, no card needed.",
+    tagline: "For personal sites and side projects.",
     messageCap: 75,
     maxSites: 1,
     monthly: 0,
