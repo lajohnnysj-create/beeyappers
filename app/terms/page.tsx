@@ -46,23 +46,25 @@ export default async function TermsPage() {
         Bleviq.
       </p>
 
-      <h2>Plans, free trial, and billing</h2>
+      <h2>Plans and billing</h2>
       <ul>
         <li>
-          <strong>Free trial.</strong> Paid plans begin with a 14-day free
-          trial. A payment method is required to start the trial. If you
-          don&rsquo;t cancel before the trial ends, your subscription begins and
-          your payment method is charged.
+          <strong>Free plan.</strong> Bleviq offers a free plan with a monthly
+          allowance of AI replies and one trained site, at no cost and with no
+          payment method required. Paid plans add higher limits and remove
+          Bleviq branding.
         </li>
         <li>
-          <strong>Subscriptions.</strong> Plans are billed in advance on a
-          monthly or annual basis and renew automatically until canceled.
+          <strong>Paid subscriptions.</strong> When you start a paid plan, your
+          payment method is charged immediately. Plans are billed in advance on
+          a monthly or annual basis and renew automatically until canceled.
           Payments are handled by Stripe.
         </li>
         <li>
           <strong>Cancellation.</strong> You can cancel anytime from your
           billing settings. Cancellation stops future renewals and takes effect
-          at the end of the current billing period; you keep access until then.
+          at the end of the current billing period; you keep paid access until
+          then, after which your account returns to the free plan.
         </li>
         <li>
           <strong>Usage limits.</strong> Each plan includes a number of AI
@@ -72,8 +74,8 @@ export default async function TermsPage() {
         </li>
         <li>
           <strong>Refunds.</strong> Except where required by law, fees are
-          non-refundable. The free trial is provided so you can evaluate the
-          service before being charged.
+          non-refundable. The free plan is provided so you can evaluate the
+          service before paying.
         </li>
         <li>
           <strong>Price changes.</strong> We may change prices. We&rsquo;ll give
