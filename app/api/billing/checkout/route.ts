@@ -41,6 +41,30 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Block a second subscription. A user with a live subscription must change it
+  // through the billing portal, never a fresh checkout, which would create a
+  // duplicate subscription at Stripe and double-bill them. Canceled or expired
+  // rows are allowed through so a lapsed user can resubscribe.
+  const admin = createAdminClient();
+  const { data: existingSub } = await admin
+    .from("subscriptions")
+    .select("status, stripe_subscription_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const DEAD_STATUSES = ["canceled", "incomplete_expired"];
+  if (
+    existingSub?.stripe_subscription_id &&
+    !DEAD_STATUSES.includes(existingSub.status)
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "You already have a subscription. Manage or change it from the billing portal.",
+      },
+      { status: 409 }
+    );
+  }
+
   let plan: unknown;
   let interval: unknown;
   try {
