@@ -7,7 +7,8 @@ import { SignupCtas } from "@/app/signup-ctas";
 import { BleviqWidget } from "@/app/bleviq-widget";
 
 export const metadata: Metadata = pageMetadata({
-  title: "24/7 AI Chatbot that Works While you Sleep | Bleviq",
+  title:
+    "Bleviq learns your website and answers your visitors' questions 24/7. Set it up for free in minutes with one line of code.",
   description:
     "Bleviq learns your website and answers your visitors' questions 24/7. Set it up in minutes with one line of code. 14-day free trial.",
   path: "/",
