@@ -39,12 +39,25 @@ export async function getOrCreateCustomer(
     metadata: { user_id: userId },
   });
 
-  await admin
-    .from("subscriptions")
-    .upsert(
-      { user_id: userId, stripe_customer_id: customer.id },
-      { onConflict: "user_id" }
-    );
+  // Persist the id, and FAIL LOUDLY if the write does not land. A swallowed
+  // write here means every checkout mints a fresh customer (the back-button
+  // "new checkout, blank form" bug). Insert and update are split on purpose:
+  // a new row sets status explicitly so it can't be blocked by a missing DB
+  // default, while an existing row's real status is never overwritten.
+  const result = existing
+    ? await admin
+        .from("subscriptions")
+        .update({ stripe_customer_id: customer.id })
+        .eq("user_id", userId)
+    : await admin.from("subscriptions").insert({
+        user_id: userId,
+        stripe_customer_id: customer.id,
+        status: "none",
+      });
+
+  if (result.error) {
+    throw new Error(`Could not save Stripe customer: ${result.error.message}`);
+  }
 
   return customer.id;
 }
