@@ -41,9 +41,9 @@ export default async function FramePage({
     if (data) config = mergeConfig(data.widget_config);
 
     // Removing the "Powered by Bleviq" badge is a paid feature. If the site
-    // owner isn't on an active plan or trial, force branding on regardless of
-    // their saved setting. This is the source of truth (the dashboard toggle
-    // is just UI), so a canceled account can't keep branding hidden.
+    // owner isn't on a paid plan, force branding on regardless of their saved
+    // setting. This is the source of truth (the dashboard toggle is just UI),
+    // so free and canceled accounts can't keep branding hidden.
     const admin = createAdminClient();
     const { data: site } = await admin
       .from("sites")
@@ -52,7 +52,7 @@ export default async function FramePage({
       .maybeSingle();
     if (site?.user_id) {
       const ent = await getEntitlementByUserId(site.user_id);
-      if (!ent.active) config = { ...config, showBranding: true };
+      if (!ent.canRemoveBranding) config = { ...config, showBranding: true };
     }
 
     // Localize the greeting + UI chrome to the visitor's language (cached;
