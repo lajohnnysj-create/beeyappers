@@ -232,7 +232,8 @@ export async function generateAnswer(
   pages: { title: string; url: string }[] = [],
   history: ChatTurn[] = [],
   lang: string = "",
-  canCollectLead: boolean = false
+  canCollectLead: boolean = false,
+  model: string = ANSWER_MODEL
 ): Promise<Generated> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error("Missing OPENAI_API_KEY");
@@ -258,7 +259,7 @@ export async function generateAnswer(
       Authorization: `Bearer ${key}`,
     },
     body: JSON.stringify({
-      model: ANSWER_MODEL,
+      model,
       max_tokens: MAX_OUTPUT_TOKENS,
       temperature: 0,
       messages: [
