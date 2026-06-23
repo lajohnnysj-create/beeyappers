@@ -57,11 +57,11 @@ function InfoTip({ label }: { label: string }) {
 export function PricingTable({
   canceled = false,
   currentTier = null,
-  hasBilling = false,
+  paid = false,
 }: {
   canceled?: boolean;
   currentTier?: TierKey | null;
-  hasBilling?: boolean;
+  paid?: boolean;
 }) {
   const [interval, setInterval] = useState<Interval>("month");
   const [loading, setLoading] = useState<PlanKey | null>(null);
@@ -240,7 +240,7 @@ export function PricingTable({
                   <button
                     type="button"
                     onClick={
-                      isFree || hasBilling
+                      isFree || paid
                         ? openPortal
                         : () => subscribe(key as PlanKey)
                     }
@@ -257,7 +257,7 @@ export function PricingTable({
                   <p className="mt-2 text-center text-xs text-slate-500">
                     {isFree
                       ? "Downgrade in the billing portal."
-                      : hasBilling
+                      : paid
                         ? "Change your plan in the billing portal."
                         : "Renews automatically until you cancel."}
                   </p>

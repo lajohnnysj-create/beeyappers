@@ -44,7 +44,7 @@ export default async function PricingPage({
         <PricingTable
           canceled={canceled}
           currentTier={entitlement?.tier ?? null}
-          hasBilling={entitlement?.hasBilling ?? false}
+          paid={entitlement?.paid ?? false}
         />
         <NeedMore />
       </section>
