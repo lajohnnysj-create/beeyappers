@@ -383,7 +383,8 @@ export async function POST(req: Request) {
       linkPages,
       history,
       lang,
-      canCollectLead
+      canCollectLead,
+      entitlement.model
     );
     const collectInfo = canCollectLead && gen.collectInfo;
     let answer = gen.answer;
