@@ -871,3 +871,8 @@ export function formatDate(iso: string): string {
     day: "numeric",
   });
 }
+
+// Each post's header/card image lives at /public/blog/<slug>.webp.
+export function postImage(post: Post): string {
+  return `/blog/${post.slug}.webp`;
+}
