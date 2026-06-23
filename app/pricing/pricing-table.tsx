@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   PLANS,
-  PLAN_ORDER,
+  TIER_ORDER,
   annualTotal,
   type PlanKey,
+  type TierKey,
   type Interval,
 } from "@/lib/billing/plans";
 
@@ -138,13 +140,18 @@ export function PricingTable({ canceled = false }: { canceled?: boolean }) {
       )}
 
       {/* Plan cards */}
-      <div className="mx-auto mt-10 grid max-w-3xl gap-6 sm:grid-cols-2">
-        {PLAN_ORDER.map((key) => {
+      <div className="mx-auto mt-10 grid max-w-5xl gap-6 sm:grid-cols-3">
+        {TIER_ORDER.map((key: TierKey) => {
           const plan = PLANS[key];
+          const isFree = key === "free";
           const popular = key === "pro";
-          const perMonth = interval === "month" ? plan.monthly : plan.annualMonthly;
-          const save = Math.round((1 - plan.annualMonthly / plan.monthly) * 100);
-          const busy = loading === key;
+          const perMonth =
+            interval === "month" ? plan.monthly : plan.annualMonthly;
+          const save =
+            plan.monthly > 0
+              ? Math.round((1 - plan.annualMonthly / plan.monthly) * 100)
+              : 0;
+          const busy = loading === (key as PlanKey);
           return (
             <div
               key={key}
@@ -169,27 +176,40 @@ export function PricingTable({ canceled = false }: { canceled?: boolean }) {
                 <span className="text-sm text-slate-500">/mo</span>
               </div>
               <p className="mt-1 h-5 text-sm text-slate-500">
-                {interval === "year"
-                  ? `Billed $${annualTotal(plan)}/year · save ${save}%`
-                  : "Billed monthly"}
+                {isFree
+                  ? "Free forever"
+                  : interval === "year"
+                    ? `Billed $${annualTotal(plan)}/year · save ${save}%`
+                    : "Billed monthly"}
               </p>
 
-              <button
-                type="button"
-                onClick={() => subscribe(key)}
-                disabled={busy}
-                className={
-                  "mt-6 w-full rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-60 " +
-                  (popular
-                    ? "bg-brand-600 text-white hover:bg-brand-700"
-                    : "bg-slate-900 text-white hover:bg-slate-800")
-                }
-              >
-                {busy ? "Starting..." : "Start 14-day free trial"}
-              </button>
+              {isFree ? (
+                <Link
+                  href="/login?mode=signup"
+                  className="mt-6 block w-full rounded-lg bg-slate-900 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Get started free
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => subscribe(key as PlanKey)}
+                  disabled={busy}
+                  className={
+                    "mt-6 w-full rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-60 " +
+                    (popular
+                      ? "bg-brand-600 text-white hover:bg-brand-700"
+                      : "bg-slate-900 text-white hover:bg-slate-800")
+                  }
+                >
+                  {busy ? "Starting..." : `Subscribe to ${plan.name}`}
+                </button>
+              )}
 
               <p className="mt-2 text-center text-xs text-slate-500">
-                Renews automatically until you cancel.
+                {isFree
+                  ? "No credit card required."
+                  : "Renews automatically until you cancel."}
               </p>
 
               <ul className="mt-6 space-y-3">
@@ -211,14 +231,10 @@ export function PricingTable({ canceled = false }: { canceled?: boolean }) {
       </div>
 
       <p className="mx-auto mt-8 max-w-xl text-sm leading-relaxed text-slate-600">
-        Every plan starts with a 14-day free trial. We save your card now but
-        don&apos;t charge it during the trial. When the trial ends, your plan
-        renews automatically at the price shown,{" "}
-        {interval === "year" ? "billed once a year" : "billed every month"}, and
-        continues until you cancel. You can cancel anytime from Settings &rarr;
-        Manage billing, including before the trial ends to avoid any charge. By
-        starting
-        a trial you agree to our{" "}
+        Start free with no credit card. Paid plans are billed{" "}
+        {interval === "year" ? "once a year" : "every month"} and renew
+        automatically at the price shown until you cancel. You can cancel anytime
+        from Settings &rarr; Manage billing. By subscribing you agree to our{" "}
         <a href="/terms" className="font-medium text-brand-600 underline">
           Terms
         </a>{" "}
