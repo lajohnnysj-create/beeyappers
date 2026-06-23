@@ -217,7 +217,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <SiteHeader signedIn={signedIn} />
+      <SiteHeader signedIn={signedIn} overHero />
 
       <main id="main-content" tabIndex={-1} className="focus:outline-none">
       <HomeHero />
