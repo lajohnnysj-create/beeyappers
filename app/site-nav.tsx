@@ -117,7 +117,7 @@ export function SiteHeader({
           (hidden ? "-translate-y-[140%]" : "translate-y-0")
         }
       >
-        <div className="pointer-events-auto flex items-center gap-4 rounded-full border border-slate-200/80 bg-white/80 py-2 pl-5 pr-3 shadow-[0_8px_30px_rgba(2,6,23,0.12)] backdrop-blur-md sm:gap-6">
+        <div className="pointer-events-auto flex w-full items-center justify-between gap-4 rounded-full border border-slate-200/80 bg-white/80 py-2 pl-5 pr-3 shadow-[0_8px_30px_rgba(2,6,23,0.12)] backdrop-blur-md sm:w-auto sm:justify-start sm:gap-8">
           <Link
             href="/"
             aria-label="Bleviq home"
@@ -212,25 +212,34 @@ export function SiteHeader({
             </Link>
           </nav>
 
-          {/* Mobile hamburger */}
-          <button
-            type="button"
-            onClick={() => setOpen((o) => !o)}
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
-            aria-controls="site-mobile-menu"
-            className="-mr-1 inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100 sm:hidden"
-          >
-            {open ? (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M18 6 6 18M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M3 6h18M3 12h18M3 18h18" />
-              </svg>
-            )}
-          </button>
+          {/* Mobile: CTA + hamburger */}
+          <div className="flex items-center gap-2 sm:hidden">
+            <Link
+              href={cta.href}
+              onClick={close}
+              className="rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700"
+            >
+              {cta.label}
+            </Link>
+            <button
+              type="button"
+              onClick={() => setOpen((o) => !o)}
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              aria-controls="site-mobile-menu"
+              className="-mr-1 inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100"
+            >
+              {open ? (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M3 6h18M3 12h18M3 18h18" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -271,13 +280,6 @@ export function SiteHeader({
                 Sign in
               </Link>
             )}
-            <Link
-              href={cta.href}
-              onClick={close}
-              className="mt-1 rounded-lg bg-brand-600 px-3 py-2.5 text-center text-white transition hover:bg-brand-700"
-            >
-              {cta.label}
-            </Link>
           </div>
         </nav>
       )}

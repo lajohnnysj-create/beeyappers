@@ -55,7 +55,7 @@ function RotatingWord() {
 
 export function HomeHero() {
   return (
-    <section className="relative isolate flex min-h-[560px] items-center overflow-hidden bg-[#070713] lg:min-h-[640px]">
+    <section className="relative isolate flex min-h-[860px] items-center overflow-hidden bg-[#070713] lg:min-h-[832px]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/herosplash.webp"
