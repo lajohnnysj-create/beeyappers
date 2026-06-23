@@ -12,6 +12,7 @@ import {
   relatedPosts,
   categoryLabel,
   formatDate,
+  postImage,
   type Block,
   type Span,
   type Post,
@@ -32,6 +33,7 @@ export function generateMetadata({
     title: post.metaTitle,
     description: post.metaDescription,
     path: `/blog/${post.slug}`,
+    image: postImage(post),
   });
 }
 
@@ -108,18 +110,26 @@ function RelatedCard({ post }: { post: Post }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-card transition hover:border-slate-300 hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card transition hover:border-slate-300 hover:shadow-md"
     >
-      <span className="text-xs font-semibold uppercase tracking-wide text-brand-600">
-        {categoryLabel(post.category)}
-      </span>
-      <h3 className="mt-2 text-base font-bold leading-snug text-slate-900 group-hover:text-brand-700">
-        {post.title}
-      </h3>
-      <p className="mt-2 line-clamp-2 text-sm text-slate-600">{post.excerpt}</p>
-      <span className="mt-4 text-sm font-medium text-slate-400">
-        {post.readingTime} min read
-      </span>
+      <img
+        src={postImage(post)}
+        alt=""
+        loading="lazy"
+        className="aspect-[16/9] w-full object-cover"
+      />
+      <div className="flex flex-1 flex-col p-6">
+        <span className="text-xs font-semibold uppercase tracking-wide text-brand-600">
+          {categoryLabel(post.category)}
+        </span>
+        <h3 className="mt-2 text-base font-bold leading-snug text-slate-900 group-hover:text-brand-700">
+          {post.title}
+        </h3>
+        <p className="mt-2 line-clamp-2 text-sm text-slate-600">{post.excerpt}</p>
+        <span className="mt-4 text-sm font-medium text-slate-400">
+          {post.readingTime} min read
+        </span>
+      </div>
     </Link>
   );
 }
@@ -176,6 +186,12 @@ export default async function BlogPostPage({
               {post.readingTime} min read
             </p>
           </header>
+
+          <img
+            src={postImage(post)}
+            alt=""
+            className="mt-8 aspect-[16/9] w-full rounded-2xl object-cover"
+          />
 
           <div className="mt-2">
             {post.body.map((block, i) => (
