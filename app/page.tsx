@@ -9,7 +9,7 @@ import { BleviqWidget } from "@/app/bleviq-widget";
 export const metadata: Metadata = pageMetadata({
   title: "24/7 AI Chatbot that Works While you Sleep | Bleviq",
   description:
-    "Bleviq learns your website and answers your visitors' questions 24/7. Set it up for free in minutes with one line of code.",
+    "Bleviq learns your website and answers visitor questions 24/7. Set it up for free in minutes with one line of code.",
   path: "/",
 });
 
