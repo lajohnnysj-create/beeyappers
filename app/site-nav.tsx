@@ -117,7 +117,7 @@ export function SiteHeader({
           (hidden ? "-translate-y-[140%]" : "translate-y-0")
         }
       >
-        <div className="pointer-events-auto flex w-full items-center justify-between gap-4 rounded-full border border-slate-200/80 bg-white/80 py-2 pl-5 pr-3 shadow-[0_8px_30px_rgba(2,6,23,0.12)] backdrop-blur-md sm:w-auto sm:justify-start sm:gap-8">
+        <div className="pointer-events-auto flex w-full items-center justify-between gap-4 rounded-full border border-slate-200/80 bg-white/80 py-2 pl-5 pr-3 shadow-[0_8px_30px_rgba(2,6,23,0.12)] backdrop-blur-md sm:w-auto sm:justify-start sm:gap-6">
           <Link
             href="/"
             aria-label="Bleviq home"
