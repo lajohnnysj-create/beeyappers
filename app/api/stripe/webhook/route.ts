@@ -73,6 +73,10 @@ async function syncSubscription(sub: Stripe.Subscription, eventCreated: number) 
   // land a stale event after a newer one. Never let an older event overwrite
   // newer state (e.g. a late "updated:active" resurrecting a "deleted:canceled"
   // account). Apply only if this event is at least as new as the last applied.
+  // Note: event.created is second-resolution, so two events in the same second
+  // can still apply in arbitrary order. That is inherent (Stripe exposes no
+  // finer sequence) and low-impact; this guards the realistic case of a retry
+  // arriving much later.
   const { data: current } = await admin
     .from("subscriptions")
     .select("last_event_ts")
@@ -84,13 +88,32 @@ async function syncSubscription(sub: Stripe.Subscription, eventCreated: number) 
 
   const priceId = sub.items.data[0]?.price.id;
   const mapped = priceId ? planFromPriceId(priceId) : null;
-  const periodEndUnix = (sub as unknown as { current_period_end?: number })
-    .current_period_end;
+
+  // A live status with no mapped plan means this price isn't in our price map
+  // for the current Stripe mode (a config error). Log loudly: the entitlement
+  // layer reads "active but no plan" as free, so a paying customer would be
+  // silently under-served. We still record the status so the row isn't stale.
+  if (!mapped && (sub.status === "active" || sub.status === "trialing")) {
+    console.error(
+      `[stripe-webhook] subscription ${sub.id} is "${sub.status}" but price ` +
+        `${priceId ?? "(none)"} maps to no plan; customer ${customerId} will ` +
+        `read as free until the price map is corrected.`
+    );
+  }
+
+  // current_period_end moved from the subscription onto its items in recent
+  // Stripe API versions. Read whichever is present so a version bump can't
+  // silently null this out.
+  const periodEndUnix =
+    (sub as unknown as { current_period_end?: number }).current_period_end ??
+    (sub.items.data[0] as unknown as { current_period_end?: number } | undefined)
+      ?.current_period_end ??
+    null;
   const periodEnd = periodEndUnix
     ? new Date(periodEndUnix * 1000).toISOString()
     : null;
 
-  await admin.from("subscriptions").upsert(
+  const { error } = await admin.from("subscriptions").upsert(
     {
       user_id: userId,
       stripe_customer_id: customerId,
@@ -104,4 +127,10 @@ async function syncSubscription(sub: Stripe.Subscription, eventCreated: number) 
     },
     { onConflict: "user_id" }
   );
+  // Throw on write failure so the route returns 500 and Stripe retries. A
+  // swallowed error here would lose billing state permanently: the customer
+  // paid, Stripe has the subscription, and the app would still read them as free.
+  if (error) {
+    throw new Error(`subscriptions upsert failed: ${error.message}`);
+  }
 }
