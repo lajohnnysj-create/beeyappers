@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getEntitlementByUserId } from "@/lib/billing/entitlement";
 import { pageMetadata } from "@/lib/seo";
 import { SiteHeader, SiteFooter } from "@/app/site-nav";
 import { PricingTable } from "./pricing-table";
@@ -8,7 +9,7 @@ import { BleviqWidget } from "@/app/bleviq-widget";
 export const metadata = pageMetadata({
   title: "AI Chatbot for Websites: Pricing and Plans | Bleviq",
   description:
-    "Compare Bleviq pricing for an AI chatbot you train on your website to answer visitor questions 24/7. Simple plans with a 14-day free trial.",
+    "Compare Bleviq pricing for an AI chatbot you train on your website to answer visitor questions 24/7. Start free, no credit card required.",
   path: "/pricing",
 });
 
@@ -24,6 +25,8 @@ export default async function PricingPage({
     data: { user },
   } = await supabase.auth.getUser();
 
+  const entitlement = user ? await getEntitlementByUserId(user.id) : null;
+
   return (
     <div className="min-h-screen bg-slate-50">
       <SiteHeader signedIn={!!user} />
@@ -38,7 +41,11 @@ export default async function PricingPage({
           many replies you need, upgrade or downgrade anytime.
         </p>
 
-        <PricingTable canceled={canceled} />
+        <PricingTable
+          canceled={canceled}
+          currentTier={entitlement?.tier ?? null}
+          hasBilling={entitlement?.hasBilling ?? false}
+        />
         <NeedMore />
       </section>
       </main>

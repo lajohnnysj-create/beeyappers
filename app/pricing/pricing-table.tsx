@@ -54,10 +54,47 @@ function InfoTip({ label }: { label: string }) {
   );
 }
 
-export function PricingTable({ canceled = false }: { canceled?: boolean }) {
+export function PricingTable({
+  canceled = false,
+  currentTier = null,
+  hasBilling = false,
+}: {
+  canceled?: boolean;
+  currentTier?: TierKey | null;
+  hasBilling?: boolean;
+}) {
   const [interval, setInterval] = useState<Interval>("month");
   const [loading, setLoading] = useState<PlanKey | null>(null);
+  const [portalBusy, setPortalBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // currentTier is non-null only when signed in (a signed-in free user is
+  // "free", never null), so this doubles as the signed-in check.
+  const signedIn = currentTier !== null;
+
+  // Send an existing subscriber to the Stripe billing portal, where plan
+  // changes (upgrade, downgrade, cancel to free) are handled.
+  async function openPortal() {
+    setError(null);
+    setPortalBusy(true);
+    try {
+      const res = await fetch("/api/billing/portal", { method: "POST" });
+      if (res.status === 401) {
+        window.location.href = "/login?next=/pricing";
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url) {
+        setError(data.error || "Could not open billing. Try again.");
+        setPortalBusy(false);
+        return;
+      }
+      window.location.href = data.url as string;
+    } catch {
+      setError("Could not open billing. Try again.");
+      setPortalBusy(false);
+    }
+  }
 
   async function subscribe(plan: PlanKey) {
     setError(null);
@@ -152,6 +189,7 @@ export function PricingTable({ canceled = false }: { canceled?: boolean }) {
               ? Math.round((1 - plan.annualMonthly / plan.monthly) * 100)
               : 0;
           const busy = loading === (key as PlanKey);
+          const isCurrent = currentTier === key;
           return (
             <div
               key={key}
@@ -183,34 +221,79 @@ export function PricingTable({ canceled = false }: { canceled?: boolean }) {
                     : "Billed monthly"}
               </p>
 
-              {isFree ? (
-                <Link
-                  href="/login?mode=signup"
-                  className="mt-6 block w-full rounded-lg bg-slate-900 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
-                >
-                  Get started free
-                </Link>
+              {isCurrent ? (
+                <>
+                  <button
+                    type="button"
+                    disabled
+                    aria-disabled="true"
+                    className="mt-6 w-full cursor-not-allowed rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-400"
+                  >
+                    Current plan
+                  </button>
+                  <p className="mt-2 text-center text-xs font-medium text-slate-500">
+                    Your current plan
+                  </p>
+                </>
+              ) : signedIn ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={
+                      isFree || hasBilling
+                        ? openPortal
+                        : () => subscribe(key as PlanKey)
+                    }
+                    disabled={busy || portalBusy}
+                    className={
+                      "mt-6 w-full rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-60 " +
+                      (popular
+                        ? "bg-brand-600 text-white hover:bg-brand-700"
+                        : "bg-slate-900 text-white hover:bg-slate-800")
+                    }
+                  >
+                    {busy || portalBusy ? "Working..." : "Switch plan"}
+                  </button>
+                  <p className="mt-2 text-center text-xs text-slate-500">
+                    {isFree
+                      ? "Downgrade in the billing portal."
+                      : hasBilling
+                        ? "Change your plan in the billing portal."
+                        : "Renews automatically until you cancel."}
+                  </p>
+                </>
+              ) : isFree ? (
+                <>
+                  <Link
+                    href="/login?mode=signup"
+                    className="mt-6 block w-full rounded-lg bg-slate-900 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
+                  >
+                    Get started free
+                  </Link>
+                  <p className="mt-2 text-center text-xs text-slate-500">
+                    No credit card required.
+                  </p>
+                </>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => subscribe(key as PlanKey)}
-                  disabled={busy}
-                  className={
-                    "mt-6 w-full rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-60 " +
-                    (popular
-                      ? "bg-brand-600 text-white hover:bg-brand-700"
-                      : "bg-slate-900 text-white hover:bg-slate-800")
-                  }
-                >
-                  {busy ? "Starting..." : `Subscribe to ${plan.name}`}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => subscribe(key as PlanKey)}
+                    disabled={busy}
+                    className={
+                      "mt-6 w-full rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:opacity-60 " +
+                      (popular
+                        ? "bg-brand-600 text-white hover:bg-brand-700"
+                        : "bg-slate-900 text-white hover:bg-slate-800")
+                    }
+                  >
+                    {busy ? "Starting..." : `Subscribe to ${plan.name}`}
+                  </button>
+                  <p className="mt-2 text-center text-xs text-slate-500">
+                    Renews automatically until you cancel.
+                  </p>
+                </>
               )}
-
-              <p className="mt-2 text-center text-xs text-slate-500">
-                {isFree
-                  ? "No credit card required."
-                  : "Renews automatically until you cancel."}
-              </p>
 
               <ul className="mt-6 space-y-3">
                 {plan.features.map((f) => (
