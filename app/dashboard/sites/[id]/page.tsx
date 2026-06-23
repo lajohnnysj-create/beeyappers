@@ -126,6 +126,7 @@ export default async function SiteWorkspacePage({
           lastCrawledAt={site.last_crawled_at}
           pageCount={pageCount || 0}
           pageCap={entitlement.pageCap}
+          pageCapOverridden={entitlement.pageCapOverridden}
           chunkCount={chunkCount || 0}
           config={mergeConfig(site.widget_config)}
           knowledge={knowledge}

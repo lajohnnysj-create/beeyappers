@@ -28,6 +28,7 @@ export function TrainStatus({
   pageCount,
   canRetrain = true,
   pageCap = MAX_PAGES,
+  pageCapOverridden = false,
 }: {
   siteId: string;
   status: string;
@@ -36,6 +37,7 @@ export function TrainStatus({
   pageCount?: number;
   canRetrain?: boolean;
   pageCap?: number;
+  pageCapOverridden?: boolean;
 }) {
   const router = useRouter();
   const [training, setTraining] = useState(
@@ -141,9 +143,9 @@ export function TrainStatus({
               Pages trained
               <InfoTip
                 text={
-                  pageCap === MAX_PAGES
-                    ? "Trains up to 100 pages on default. Please reach out to sales if you need to increase this limit"
-                    : `Custom: Trains up to ${pageCap} pages.`
+                  pageCapOverridden
+                    ? `Custom: trains up to ${pageCap} pages.`
+                    : `Trains up to ${pageCap} pages on your plan. Reach out to sales if you need to increase this limit.`
                 }
               />
             </dt>

@@ -23,6 +23,7 @@ type Props = {
   lastCrawledAt: string | null;
   pageCount: number;
   pageCap: number;
+  pageCapOverridden: boolean;
   chunkCount: number;
   config: WidgetConfig;
   knowledge: KnowledgeItem[];
@@ -157,6 +158,7 @@ export function Workspace(props: Props) {
             lastCrawledAt={props.lastCrawledAt}
             pageCount={props.pageCount}
             pageCap={props.pageCap}
+            pageCapOverridden={props.pageCapOverridden}
             chunkCount={props.chunkCount}
             knowledge={props.knowledge}
             siteName={props.siteName}
@@ -207,6 +209,7 @@ function TrainPanel({
   lastCrawledAt,
   pageCount,
   pageCap,
+  pageCapOverridden,
   chunkCount,
   knowledge,
   siteName,
@@ -218,6 +221,7 @@ function TrainPanel({
   lastCrawledAt: string | null;
   pageCount: number;
   pageCap: number;
+  pageCapOverridden: boolean;
   chunkCount: number;
   knowledge: KnowledgeItem[];
   siteName: string;
@@ -253,6 +257,7 @@ function TrainPanel({
             domain={domain}
             pageCount={pageCount}
             pageCap={pageCap}
+            pageCapOverridden={pageCapOverridden}
             canRetrain={canRetrain}
           />
         </div>
