@@ -16,6 +16,7 @@ export type Plan = {
   monthly: number; // $/mo on monthly billing (0 = free)
   annualMonthly: number; // $/mo when billed annually
   model: string; // OpenAI model used to answer on this tier
+  pageCap: number; // max pages trained per crawl on this tier
   features: string[];
 };
 
@@ -29,10 +30,11 @@ export const PLANS: Record<TierKey, Plan> = {
     monthly: 0,
     annualMonthly: 0,
     model: "gpt-4o-mini",
+    pageCap: 25,
     features: [
       "75 AI replies",
       "Powered by GPT-4o-mini",
-      "1 trained site up to 100 pages",
+      "1 trained site up to 25 pages",
       "Custom branding, colors & fonts",
     ],
   },
@@ -45,6 +47,7 @@ export const PLANS: Record<TierKey, Plan> = {
     monthly: 20,
     annualMonthly: 12,
     model: "gpt-4.1-mini",
+    pageCap: 100,
     features: [
       "1,000 AI replies",
       "GPT-4-class intelligence",
@@ -62,6 +65,7 @@ export const PLANS: Record<TierKey, Plan> = {
     monthly: 40,
     annualMonthly: 30,
     model: "gpt-4.1-mini",
+    pageCap: 100,
     features: [
       "8,000 AI replies",
       "GPT-4-class intelligence",

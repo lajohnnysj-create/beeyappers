@@ -1,7 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { type PlanKey, type TierKey, PLANS } from "./plans";
-import { MAX_PAGES } from "@/lib/crawl/limits";
 
 export type Entitlement = {
   tier: TierKey; // effective tier: free (the floor), basic, or pro
@@ -65,7 +64,7 @@ export async function getEntitlementByUserId(
     messageCapOverridden: override !== null,
     maxSites: PLANS[tier].maxSites,
     model: PLANS[tier].model,
-    pageCap: pageOverride ?? MAX_PAGES,
+    pageCap: pageOverride ?? PLANS[tier].pageCap,
     pageCapOverridden: pageOverride !== null,
   };
 }
