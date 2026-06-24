@@ -41,9 +41,44 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Sitewide entity graph: tells Google who Bleviq is (Organization) and that
+  // this domain is its site (WebSite), linked by @id. Rendered on every page.
+  // No SearchAction is included because there is no on-site search endpoint,
+  // and no sameAs because there are no public social profiles to point to yet.
+  const siteLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.bleviq.com/#organization",
+        name: "Bleviq",
+        url: "https://www.bleviq.com",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://www.bleviq.com/logo.png",
+        },
+        description:
+          "Bleviq is an AI chat widget that learns your website and answers visitor questions 24/7.",
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.bleviq.com/#website",
+        name: "Bleviq",
+        url: "https://www.bleviq.com",
+        publisher: { "@id": "https://www.bleviq.com/#organization" },
+      },
+    ],
+  };
+
   return (
     <html lang="en">
-      <body className={`${inter.className} ${jakarta.variable} app-shell`}>{children}</body>
+      <body className={`${inter.className} ${jakarta.variable} app-shell`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteLd) }}
+        />
+        {children}
+      </body>
     </html>
   );
 }
