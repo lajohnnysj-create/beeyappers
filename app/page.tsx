@@ -263,7 +263,7 @@ export default async function Home() {
             </h2>
             <p className="mx-auto mt-4 max-w-md text-lg leading-relaxed text-slate-300 sm:mx-0">
               As the world shifts to AI, the moment someone lands on your site they
-              expect a quick answer, not a wait. Bleviq lets you add that AI to your
+              expect a quick answer, not a wait. Bleviq lets you add it to your
               website, easily.
             </p>
           </div>
