@@ -8,6 +8,9 @@ import { getClientIp, hashIp } from "@/lib/security/ip";
 import { countryFromReq, cityFromReq, deviceFromUA, browserFromUA } from "@/lib/analytics/visitor";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { getEntitlementByUserId } from "@/lib/billing/entitlement";
+import { PLANS } from "@/lib/billing/plans";
+import { sendEmail } from "@/lib/email/resend";
+import { renderUsageWarningEmail } from "@/lib/email/usage-warning";
 import { FIELD_LIMITS } from "@/lib/field-limits";
 
 export const runtime = "nodejs";
@@ -32,6 +35,50 @@ function noInfoText(hasSuggestions: boolean): string {
   return hasSuggestions
     ? "I don't have that one in my knowledge yet, but you can ask me about:"
     : "I don't have that information yet.";
+}
+
+const WARN_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // email at most once per 7 days
+
+// Email the owner once they cross 80% of their monthly message cap. Best-effort
+// and deduped to once per 7 days via subscriptions.usage_warned_at. Only called
+// for accounts already near the limit, so the cooldown read stays off the hot
+// path for everyone else. Never throws into the answer flow.
+async function maybeWarnUsage(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+  used: number,
+  entitlement: Awaited<ReturnType<typeof getEntitlementByUserId>>
+): Promise<void> {
+  try {
+    const { data: sub } = await admin
+      .from("subscriptions")
+      .select("usage_warned_at")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const last = sub?.usage_warned_at
+      ? new Date(sub.usage_warned_at).getTime()
+      : 0;
+    if (Date.now() - last < WARN_COOLDOWN_MS) return;
+
+    const { data: owner } = await admin.auth.admin.getUserById(userId);
+    const to = owner?.user?.email;
+    if (!to) return;
+
+    const { subject, html, text, replyTo } = renderUsageWarningEmail({
+      used,
+      cap: entitlement.messageCap,
+      tierName: PLANS[entitlement.tier].name,
+      canUpgrade: entitlement.tier !== "pro",
+    });
+    await sendEmail({ to, subject, html, text, replyTo });
+
+    await admin
+      .from("subscriptions")
+      .update({ usage_warned_at: new Date().toISOString() })
+      .eq("user_id", userId);
+  } catch (err) {
+    console.error("usage warning email failed:", err);
+  }
 }
 
 type SiteRow = {
@@ -220,6 +267,12 @@ export async function POST(req: Request) {
       429,
       headers
     );
+  }
+
+  // 5b. Nudge the owner once they cross 80% of the cap (here we know usage is
+  //     below the cap). Best-effort and deduped to once per 7 days.
+  if ((msgsUsed ?? 0) >= entitlement.messageCap * 0.8) {
+    await maybeWarnUsage(admin, site.user_id, msgsUsed ?? 0, entitlement);
   }
 
   // 6. Monthly token cap (the hard spend backstop).
