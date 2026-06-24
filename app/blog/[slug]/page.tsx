@@ -154,10 +154,22 @@ export default async function BlogPostPage({
     "@type": "BlogPosting",
     headline: post.title,
     description: post.metaDescription,
+    image: `https://www.bleviq.com${postImage(post)}`,
     datePublished: post.date,
     dateModified: post.date,
-    author: { "@type": "Organization", name: post.author },
-    publisher: { "@type": "Organization", name: "Bleviq" },
+    author: {
+      "@type": "Organization",
+      name: post.author,
+      url: "https://www.bleviq.com",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Bleviq",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://www.bleviq.com/logo.png",
+      },
+    },
     mainEntityOfPage: `https://www.bleviq.com/blog/${post.slug}`,
   };
 
