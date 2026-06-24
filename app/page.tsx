@@ -58,8 +58,8 @@ const STEPS = [
     n: "06",
     title: "Voila!",
     body: "The chat bubble is now live on your website!",
-    card: "border-amber-200 bg-gradient-to-br from-amber-50 to-white",
-    badge: "bg-amber-700 shadow-lg shadow-amber-500/30 ring-4 ring-amber-100",
+    card: "border-emerald-200 bg-gradient-to-br from-emerald-50 to-white",
+    badge: "bg-emerald-700 shadow-lg shadow-emerald-500/30 ring-4 ring-emerald-100",
     img: "/card6.webp",
   },
 ];
