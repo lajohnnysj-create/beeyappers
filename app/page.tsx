@@ -9,7 +9,7 @@ import { BleviqWidget } from "@/app/bleviq-widget";
 export const metadata: Metadata = pageMetadata({
   title: "24/7 AI Chatbot that Works While you Sleep | Bleviq",
   description:
-    "Bleviq learns your website and answers visitor questions 24/7. Set it up for free in minutes with one line of code.",
+    "Bleviq easily learns your website and answers visitor questions 24/7. Set it up for free in minutes with one line of code.",
   path: "/",
 });
 
@@ -405,6 +405,14 @@ export default async function Home() {
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/80 via-black/25 to-black/80" />
 
         <div className="mx-auto max-w-6xl px-6 py-20 lg:py-24">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Turn an everyday website into an AI-powered one
+            </h2>
+            <p className="mx-auto mt-3 max-w-md text-slate-300">
+              Bleviq adds the things visitors now expect from a modern site.
+            </p>
+          </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {WORK_FEATURES.map((f) => (
               <div
