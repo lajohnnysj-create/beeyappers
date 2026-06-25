@@ -128,7 +128,7 @@ export function SiteHeader({
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden items-center gap-5 text-sm font-medium text-slate-600 sm:flex sm:gap-6">
+          <nav className="hidden items-center gap-5 text-sm font-medium text-slate-700 sm:flex sm:gap-6">
             <div className="relative" ref={ucRef}>
               <button
                 ref={ucBtnRef}
