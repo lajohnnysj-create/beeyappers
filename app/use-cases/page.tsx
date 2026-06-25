@@ -21,7 +21,7 @@ export default async function UseCasesHub() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <SiteHeader signedIn={!!user} />
+      <SiteHeader signedIn={!!user} overHero />
 
       <main id="main-content" tabIndex={-1} className="focus:outline-none">
         <section className="relative isolate overflow-hidden bg-[#070713]">
@@ -29,7 +29,7 @@ export default async function UseCasesHub() {
             aria-hidden="true"
             className="pointer-events-none absolute left-1/2 top-0 -z-10 h-64 w-[80%] -translate-x-1/2 -translate-y-1/3 rounded-full bg-brand-600/20 blur-3xl"
           />
-          <div className="mx-auto max-w-3xl px-6 py-20 text-center lg:py-24">
+          <div className="mx-auto max-w-3xl px-6 pb-20 pt-28 text-center lg:pb-24 lg:pt-32">
             <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
               One chatbot, every kind of website
             </h1>
