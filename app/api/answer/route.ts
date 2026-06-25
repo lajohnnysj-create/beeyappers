@@ -275,11 +275,21 @@ export async function POST(req: Request) {
     await maybeWarnUsage(admin, site.user_id, msgsUsed ?? 0, entitlement);
   }
 
-  // 6. Monthly token cap (the hard spend backstop).
+  // 6. Monthly token cap (the hard spend backstop). The stored per-site cap is
+  //    a created-at default that is NOT lifted when an account upgrades, so on
+  //    its own it can throttle a paid account below its plan. Floor it to the
+  //    tier's allowance (messageCap x a generous per-reply token budget, the
+  //    same basis set_message_cap_override uses) so a paying customer is never
+  //    capped below their plan. A higher per-site cap (admin override) still wins.
+  const PER_REPLY_TOKEN_BUDGET = 10000; // keep in sync with set_message_cap_override()
+  const tokenCap = Math.max(
+    site.monthly_token_cap,
+    entitlement.messageCap * PER_REPLY_TOKEN_BUDGET
+  );
   const thisMonth = new Date().toISOString().slice(0, 7);
   const periodMonth = (site.period_start || "").slice(0, 7);
   const usedThisPeriod = periodMonth < thisMonth ? 0 : site.tokens_used_period;
-  if (usedThisPeriod >= site.monthly_token_cap) {
+  if (usedThisPeriod >= tokenCap) {
     return json(
       { error: "This assistant has reached its usage limit for now." },
       429,
