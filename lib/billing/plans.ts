@@ -17,6 +17,7 @@ export type Plan = {
   annualMonthly: number; // $/mo when billed annually
   model: string; // OpenAI model used to answer on this tier
   pageCap: number; // max pages trained per crawl on this tier
+  chunkCap: number; // max embedded chunks stored per site on this tier
   features: string[];
 };
 
@@ -31,6 +32,7 @@ export const PLANS: Record<TierKey, Plan> = {
     annualMonthly: 0,
     model: "gpt-4o-mini",
     pageCap: 25,
+    chunkCap: 400,
     features: [
       "75 AI replies",
       "Powered by GPT-4o-mini",
@@ -48,6 +50,7 @@ export const PLANS: Record<TierKey, Plan> = {
     annualMonthly: 12,
     model: "gpt-4.1-mini",
     pageCap: 100,
+    chunkCap: 1000,
     features: [
       "1,000 AI replies",
       "GPT-4-class intelligence",
@@ -66,6 +69,7 @@ export const PLANS: Record<TierKey, Plan> = {
     annualMonthly: 30,
     model: "gpt-4.1-mini",
     pageCap: 100,
+    chunkCap: 1000,
     features: [
       "8,000 AI replies",
       "GPT-4-class intelligence",
