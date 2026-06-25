@@ -13,7 +13,6 @@ import { getEntitlementByUserId } from "@/lib/billing/entitlement";
 export const runtime = "nodejs";
 export const maxDuration = 60; // raise to 300 on Pro for larger sites
 
-const MAX_CHUNKS = 1000;
 const FETCH_CONCURRENCY = 8;
 const INSERT_BATCH = 200;
 const RETRAIN_LIMIT = 10; // re-trains allowed per site per hour
@@ -154,7 +153,8 @@ export async function POST(req: Request) {
 
     const idByUrl = new Map(inserted!.map((r) => [r.url, r.id]));
 
-    // 7. Build chunks across all pages (capped).
+    // 7. Build chunks across all pages, capped to this tier's chunk limit
+    //    (free is lower to bound embedding cost; paid is higher).
     type ChunkWork = { page_id: string; content: string; chunk_index: number };
     const chunkWork: ChunkWork[] = [];
     for (const p of pages) {
@@ -162,7 +162,7 @@ export async function POST(req: Request) {
       if (!pageId) continue;
       const parts = chunkText(p.text);
       parts.forEach((content, idx) => {
-        if (chunkWork.length < MAX_CHUNKS) {
+        if (chunkWork.length < ent.chunkCap) {
           chunkWork.push({ page_id: pageId, content, chunk_index: idx });
         }
       });
