@@ -16,6 +16,7 @@ export type Entitlement = {
   model: string; // OpenAI model used to answer on this tier
   pageCap: number; // crawl page limit (default, or a per-account override)
   pageCapOverridden: boolean; // true when an admin page-cap override is in effect
+  chunkCap: number; // max embedded chunks stored per site on this tier
 };
 
 // Subscription statuses that keep a paid plan's perks active.
@@ -66,5 +67,6 @@ export async function getEntitlementByUserId(
     model: PLANS[tier].model,
     pageCap: pageOverride ?? PLANS[tier].pageCap,
     pageCapOverridden: pageOverride !== null,
+    chunkCap: PLANS[tier].chunkCap,
   };
 }
