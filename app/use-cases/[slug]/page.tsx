@@ -103,7 +103,7 @@ export default async function UseCasePage({
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <SiteHeader signedIn={!!user} />
+      <SiteHeader signedIn={!!user} overHero />
 
       <main id="main-content" tabIndex={-1} className="focus:outline-none">
         {/* Hero */}
@@ -113,7 +113,7 @@ export default async function UseCasePage({
             className="pointer-events-none absolute left-1/2 top-0 -z-10 h-72 w-[80%] -translate-x-1/2 -translate-y-1/3 rounded-full blur-3xl"
             style={{ backgroundColor: uc.accent + "26" }}
           />
-          <div className="mx-auto max-w-3xl px-6 py-20 text-center lg:py-28">
+          <div className="mx-auto max-w-3xl px-6 pb-20 pt-28 text-center lg:pb-28 lg:pt-32">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/85">
               <UCIcon name={uc.icon} className="h-4 w-4" />
               {uc.eyebrow}
