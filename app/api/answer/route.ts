@@ -413,20 +413,9 @@ export async function POST(req: Request) {
       .filter((_, i) => i % 4 === 0)
       .slice(0, 20);
 
-    if (chunks.length === 0) {
-      const suggestions = await suggestAnswerableQuestions(faqQuestions, contentSamples, lang);
-      return json(
-        { answer: noInfoText(suggestions.length > 0), suggestions },
-        200,
-        headers
-      );
-    }
-
-    const context = merged.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n");
-
-    // Lead capture: only let the model offer the form when the owner has it on
-    // and this conversation hasn't already captured a lead. The DB flag is
-    // authoritative; the client hint just covers the gap before it's written.
+    // Lead-capture availability is decided up front so an actionable request
+    // (cancel, reschedule, "where's my order") can reach the model and trigger
+    // the form, instead of being swallowed by the no-context reply below.
     let leadCaptured = leadCapturedHint;
     if (!leadCaptured && clientConvoId) {
       const { data: conv } = await admin
@@ -438,6 +427,20 @@ export async function POST(req: Request) {
       if (conv?.lead_captured_at) leadCaptured = true;
     }
     const canCollectLead = site.collect_leads !== false && !leadCaptured;
+
+    // With no matching content AND no form to offer, send the friendly no-info
+    // reply. When the form IS available we fall through to the model so it can
+    // detect an actionable intent and decide whether to collect.
+    if (chunks.length === 0 && !canCollectLead) {
+      const suggestions = await suggestAnswerableQuestions(faqQuestions, contentSamples, lang);
+      return json(
+        { answer: noInfoText(suggestions.length > 0), suggestions },
+        200,
+        headers
+      );
+    }
+
+    const context = merged.map((c, i) => `[${i + 1}] ${c.content}`).join("\n\n");
 
     // 7. Generate the answer with guardrails.
     const gen = await generateAnswer(
