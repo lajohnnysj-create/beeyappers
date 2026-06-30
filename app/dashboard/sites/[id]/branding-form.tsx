@@ -1088,8 +1088,9 @@ function Preview({ config }: { config: WidgetConfig }) {
 
       <div className="px-4 pb-2.5 pt-1.5" style={{ color: panelIsDark ? "rgba(255,255,255,0.6)" : "#64748b" }}>
         <p className="m-0 text-center text-[10px] leading-snug">
-          You&rsquo;re chatting with an AI. Messages may be stored. By
-          continuing, you agree to our{" "}
+          You&rsquo;re chatting with an AI. Messages may be stored. Please
+          don&rsquo;t share sensitive personal information. By continuing, you
+          agree to our{" "}
           <a
             href="https://www.bleviq.com/ai-terms"
             target="_blank"
