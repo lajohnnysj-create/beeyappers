@@ -111,6 +111,44 @@ export default async function TermsPage() {
         </li>
       </ul>
 
+      <h2>Prohibited data and sensitive information</h2>
+      <p>
+        Bleviq trains an AI assistant on your website&rsquo;s public content to
+        answer visitor questions. It is not designed or intended to collect,
+        transmit, or store sensitive personal information.
+      </p>
+      <p>
+        You agree not to use Bleviq to intentionally collect, and not to
+        configure your assistant to request, any of the following
+        (&ldquo;Prohibited Data&rdquo;): protected health information (PHI) as
+        defined under the U.S. Health Insurance Portability and Accountability
+        Act (HIPAA); payment card numbers or financial account credentials;
+        government-issued identification numbers; biometric data; or other
+        sensitive or special-category personal information.
+      </p>
+      <p>
+        Bleviq is not HIPAA compliant. MRLA Media LLC does not act as a
+        &ldquo;business associate&rdquo; and does not enter into Business
+        Associate Agreements (BAAs). Bleviq is not certified or audited for
+        HIPAA, PCI-DSS, or similar frameworks, and must not be used in any
+        workflow where Prohibited Data is collected or processed.
+      </p>
+      <p>
+        You are solely responsible for the information that you and your website
+        visitors submit through the assistant, and for your own compliance with
+        all laws that apply to that information. If you operate in a regulated
+        field such as healthcare, you are responsible for ensuring your use of
+        Bleviq meets those obligations, including not deploying it where
+        Prohibited Data is reasonably likely to be entered.
+      </p>
+      <p>
+        We display a notice in the chat discouraging visitors from sharing
+        sensitive information, but we cannot prevent a visitor from voluntarily
+        submitting it. To the extent Prohibited Data is submitted through your
+        assistant, you acknowledge that it is submitted contrary to these Terms
+        and that you, not MRLA Media LLC, are responsible for it.
+      </p>
+
       <h2>Your content</h2>
       <p>
         You keep ownership of the website content, FAQs, documents, and other
