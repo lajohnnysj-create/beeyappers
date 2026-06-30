@@ -185,6 +185,16 @@ export default async function PrivacyPage() {
         or incorrect and should not be relied on as professional advice.
       </p>
 
+      <h2>Sensitive information</h2>
+      <p>
+        Bleviq is not intended for the collection of sensitive personal
+        information, including protected health information (PHI). We discourage
+        visitors from submitting health, financial, or other sensitive details
+        through the chat, and we are not responsible for sensitive information
+        that visitors choose to provide. Bleviq is not HIPAA compliant and
+        should not be used to collect or process such data.
+      </p>
+
       <h2>Data retention</h2>
       <p>
         We keep account information and trained content for as long as your
