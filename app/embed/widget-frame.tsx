@@ -534,8 +534,9 @@ function BarLauncher({
           transition: "opacity .22s ease, transform .22s ease",
         }}
       >
-        You&rsquo;re chatting with an AI. Messages may be stored. By continuing,
-        you agree to our{" "}
+        You&rsquo;re chatting with an AI. Messages may be stored. Please
+        don&rsquo;t share sensitive personal information. By continuing, you
+        agree to our{" "}
         <a
           href="https://www.bleviq.com/ai-terms"
           target="_blank"
