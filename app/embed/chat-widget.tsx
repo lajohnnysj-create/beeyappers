@@ -1320,7 +1320,7 @@ export function ChatWidget({
               marginTop: 5,
             }}
           >
-            <span style={{ fontSize: 10 }}>{labels.poweredBy}</span>
+            <span style={{ fontSize: 12 }}>{labels.poweredBy}</span>
             <a
               href="https://bleviq.com"
               target="_blank"
@@ -1332,7 +1332,7 @@ export function ChatWidget({
               <img
                 src={panelIsDark ? "/logowhite-small.png" : "/logoblack-small.png"}
                 alt="Bleviq"
-                style={{ height: 13, width: "auto" }}
+                style={{ height: 16, width: "auto" }}
               />
             </a>
           </span>
