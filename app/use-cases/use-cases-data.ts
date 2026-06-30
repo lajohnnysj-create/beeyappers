@@ -19,6 +19,7 @@ export type UseCase = {
   questions: string[];
   benefits: { title: string; body: string }[];
   faqs: { q: string; a: string }[];
+  disclaimer?: string; // optional compliance/limitation notice (e.g. healthcare)
 };
 
 export const USE_CASES: UseCase[] = [
@@ -226,6 +227,8 @@ export const USE_CASES: UseCase[] = [
     audience: "patients",
     helps: "your practice",
     h1: "AI chatbot for dentists",
+    disclaimer:
+      "Bleviq is not HIPAA compliant and is not intended to collect, store, or process protected health information (PHI). Use it for general questions like services, hours, and insurance, and route anything involving patient health details to your secure, compliant systems.",
     metaTitle: "AI Chatbot for Dentists & Dental Practices | Bleviq",
     metaDescription:
       "Answer patient questions about insurance, hours, and new appointments 24/7 with an AI chatbot trained on your practice website. Free to start.",
@@ -270,7 +273,7 @@ export const USE_CASES: UseCase[] = [
       },
       {
         q: "Is patient information handled carefully?",
-        a: "The chatbot is for general questions, not medical records. Conversations are emailed to you, so avoid collecting sensitive health details through chat.",
+        a: "The chatbot is for general questions, not medical records, and Bleviq is not HIPAA compliant. Conversations are emailed to you, so do not collect protected health information or sensitive health details through chat; route those to your secure systems.",
       },
       {
         q: "Will it work on my practice website?",
@@ -291,6 +294,8 @@ export const USE_CASES: UseCase[] = [
     audience: "patients",
     helps: "your clinic",
     h1: "AI chatbot for healthcare clinics",
+    disclaimer:
+      "Bleviq is not HIPAA compliant and is not intended to collect, store, or process protected health information (PHI). Use it for general questions like services, hours, and directions, and route anything involving patient health details to your secure, compliant systems.",
     metaTitle: "AI Chatbot for Healthcare & Clinics | Bleviq",
     metaDescription:
       "Answer patient questions about services, hours, and appointments 24/7 with an AI chatbot trained on your clinic website. Free to start.",
@@ -331,7 +336,7 @@ export const USE_CASES: UseCase[] = [
       },
       {
         q: "Does it handle sensitive health data?",
-        a: "It is built for general inquiries. Do not use it to collect medical histories or sensitive health details. Route those to your secure systems.",
+        a: "It is built for general inquiries, and Bleviq is not HIPAA compliant. Do not use it to collect medical histories, protected health information, or sensitive health details; route those to your secure systems.",
       },
       {
         q: "Can it help with bookings?",
