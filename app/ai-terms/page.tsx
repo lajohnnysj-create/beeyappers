@@ -188,6 +188,13 @@ export default async function AiTermsPage() {
         an automated assistant and how their messages are handled.
       </p>
 
+      <p>
+        Please do not share sensitive personal information through the chat,
+        including health, financial, or identification details. The assistant is
+        not intended to collect such information, and Bleviq is not HIPAA
+        compliant.
+      </p>
+
       <h2>7. Term and termination</h2>
       <p>
         You may use the AI Features while your account and, where applicable, your
