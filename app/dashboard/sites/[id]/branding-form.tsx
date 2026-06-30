@@ -1104,9 +1104,9 @@ function Preview({ config }: { config: WidgetConfig }) {
         </p>
         {config.showBranding && (
           <span className="mt-1 flex items-center justify-center gap-0.5">
-            <span className="text-[10px]">Powered by</span>
+            <span className="text-[12px]">Powered by</span>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={panelIsDark ? "/logowhite-small.png" : "/logoblack-small.png"} alt="Bleviq" className="h-3 w-auto" />
+            <img src={panelIsDark ? "/logowhite-small.png" : "/logoblack-small.png"} alt="Bleviq" className="h-4 w-auto" />
           </span>
         )}
       </div>
