@@ -292,6 +292,11 @@ export default async function UseCasePage({
                 </details>
               ))}
             </div>
+            {uc.disclaimer && (
+              <p className="mt-8 rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm leading-relaxed text-slate-600">
+                {uc.disclaimer}
+              </p>
+            )}
           </div>
         </section>
 
