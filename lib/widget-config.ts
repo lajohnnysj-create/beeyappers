@@ -83,7 +83,7 @@ export const DEFAULT_CONFIG: WidgetConfig = {
   launcherStyle: "bubble",
   launcherIcon: "default",
   launcherEmoji: "\uD83D\uDCAC",
-  launcherLabel: "",
+  launcherLabel: "Ask a question!",
   panelWidth: 380,
   panelHeight: 560,
   showBranding: true,
