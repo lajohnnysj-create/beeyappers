@@ -260,7 +260,7 @@ export function WidgetFrame({
       ) : config.launcherStyle === "bar" ? (
         <BarLauncher config={config} labels={labels} rtl={rtl} left={left} onOpen={openChat} barMax={barMax} />
       ) : (
-        <BubbleLauncher config={config} left={left} onOpen={() => openChat()} />
+        <BubbleLauncher config={config} left={left} onOpen={() => openChat()} widgetKey={widgetKey} />
       )}
 
       <style>{`@keyframes bvPop{0%{opacity:0;transform:translateY(12px) scale(.94)}100%{opacity:1;transform:translateY(0) scale(1)}}`}</style>
@@ -268,17 +268,56 @@ export function WidgetFrame({
   );
 }
 
+// How long a visitor's label dismissal persists before the teaser can show
+// again. Change this one value to tune the window.
+const LABEL_DISMISS_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const LABEL_DISMISS_KEY = "bleviq:labelDismissed:";
+
 function BubbleLauncher({
   config,
   left,
   onOpen,
+  widgetKey,
 }: {
   config: WidgetConfig;
   left: boolean;
   onOpen: () => void;
+  widgetKey: string;
 }) {
   const [closed, setClosed] = useState(false);
   const [revealed, setRevealed] = useState(false);
+
+  // Persist a dismissal so the label stays hidden for a window (not just the
+  // session). Storage is best-effort: private mode or blocked third-party
+  // storage simply falls back to per-load behavior.
+  useEffect(() => {
+    if (!widgetKey) return;
+    try {
+      const raw = window.localStorage.getItem(LABEL_DISMISS_KEY + widgetKey);
+      if (!raw) return;
+      const ts = parseInt(raw, 10);
+      if (Number.isFinite(ts) && Date.now() - ts < LABEL_DISMISS_TTL_MS) {
+        setClosed(true);
+      } else {
+        window.localStorage.removeItem(LABEL_DISMISS_KEY + widgetKey);
+      }
+    } catch {
+      /* localStorage unavailable */
+    }
+  }, [widgetKey]);
+
+  function dismissLabel() {
+    setClosed(true);
+    try {
+      window.localStorage.setItem(
+        LABEL_DISMISS_KEY + widgetKey,
+        String(Date.now())
+      );
+    } catch {
+      /* ignore */
+    }
+  }
+
   const btn = (
     <button
       onClick={onOpen}
@@ -342,7 +381,7 @@ function BubbleLauncher({
           className="bvLabelX"
           onClick={(e) => {
             e.stopPropagation();
-            setClosed(true);
+            dismissLabel();
           }}
           style={{
             position: "absolute",
