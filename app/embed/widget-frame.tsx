@@ -277,6 +277,8 @@ function BubbleLauncher({
   left: boolean;
   onOpen: () => void;
 }) {
+  const [closed, setClosed] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const btn = (
     <button
       onClick={onOpen}
@@ -308,7 +310,7 @@ function BubbleLauncher({
     </button>
   );
 
-  if (!config.launcherLabel) return btn;
+  if (!config.launcherLabel || closed) return btn;
   return (
     <div
       style={{
@@ -319,7 +321,10 @@ function BubbleLauncher({
       }}
     >
       <span
+        className="bvLabelWrap"
+        onClick={() => setRevealed((v) => !v)}
         style={{
+          position: "relative",
           background: "#fff",
           color: "#0f172a",
           padding: "8px 12px",
@@ -327,11 +332,49 @@ function BubbleLauncher({
           boxShadow: "0 4px 14px rgba(0,0,0,.18)",
           fontSize: 14,
           whiteSpace: "nowrap",
+          cursor: "default",
         }}
       >
         {config.launcherLabel}
+        <button
+          type="button"
+          aria-label="Dismiss"
+          className="bvLabelX"
+          onClick={(e) => {
+            e.stopPropagation();
+            setClosed(true);
+          }}
+          style={{
+            position: "absolute",
+            top: -7,
+            right: -7,
+            width: 18,
+            height: 18,
+            padding: 0,
+            border: "none",
+            borderRadius: "50%",
+            background: "#0f172a",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: revealed ? 1 : 0,
+            transition: "opacity .12s ease",
+            boxShadow: "0 2px 6px rgba(0,0,0,.25)",
+          }}
+        >
+          <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
+            <path
+              d="M1 1l6 6M7 1l-6 6"
+              stroke="#fff"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
       </span>
       {btn}
+      <style>{`.bvLabelWrap:hover .bvLabelX,.bvLabelWrap:focus-within .bvLabelX{opacity:1 !important}`}</style>
     </div>
   );
 }
