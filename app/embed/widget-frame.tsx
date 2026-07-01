@@ -286,24 +286,30 @@ function BubbleLauncher({
 }) {
   const [closed, setClosed] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  // Hold the label back until the dismissal check has run, so a previously
+  // dismissed visitor never sees a flash. Once ready, the label fades in.
+  const [ready, setReady] = useState(false);
 
   // Persist a dismissal so the label stays hidden for a window (not just the
   // session). Storage is best-effort: private mode or blocked third-party
   // storage simply falls back to per-load behavior.
   useEffect(() => {
-    if (!widgetKey) return;
     try {
-      const raw = window.localStorage.getItem(LABEL_DISMISS_KEY + widgetKey);
-      if (!raw) return;
-      const ts = parseInt(raw, 10);
-      if (Number.isFinite(ts) && Date.now() - ts < LABEL_DISMISS_TTL_MS) {
-        setClosed(true);
-      } else {
-        window.localStorage.removeItem(LABEL_DISMISS_KEY + widgetKey);
+      if (widgetKey) {
+        const raw = window.localStorage.getItem(LABEL_DISMISS_KEY + widgetKey);
+        if (raw) {
+          const ts = parseInt(raw, 10);
+          if (Number.isFinite(ts) && Date.now() - ts < LABEL_DISMISS_TTL_MS) {
+            setClosed(true);
+          } else {
+            window.localStorage.removeItem(LABEL_DISMISS_KEY + widgetKey);
+          }
+        }
       }
     } catch {
       /* localStorage unavailable */
     }
+    setReady(true);
   }, [widgetKey]);
 
   function dismissLabel() {
@@ -349,7 +355,7 @@ function BubbleLauncher({
     </button>
   );
 
-  if (!config.launcherLabel || closed) return btn;
+  if (!config.launcherLabel || closed || !ready) return btn;
   return (
     <div
       style={{
@@ -372,6 +378,7 @@ function BubbleLauncher({
           fontSize: 14,
           whiteSpace: "nowrap",
           cursor: "default",
+          animation: "bvLabelIn .18s ease both",
         }}
       >
         {config.launcherLabel}
@@ -413,7 +420,7 @@ function BubbleLauncher({
         </button>
       </span>
       {btn}
-      <style>{`.bvLabelWrap:hover .bvLabelX,.bvLabelWrap:focus-within .bvLabelX{opacity:1 !important}`}</style>
+      <style>{`@keyframes bvLabelIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}.bvLabelWrap:hover .bvLabelX,.bvLabelWrap:focus-within .bvLabelX{opacity:1 !important}`}</style>
     </div>
   );
 }
